@@ -1,4 +1,6 @@
-<img src="https://fime.edu.vn/assets/images/logos/logo-two.png" alt="Our Logo" width="300" style="margin-bottom: 20px" />
+<p align="center">
+  <a href="http://nestjs.com/" target="blank"><img src="https://fime.edu.vn/assets/images/logos/logo-two.png" alt="Our Logo" width="300" style="margin-bottom: 20px" /></a>
+</p>
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/lc-thanh/FIME_Super_App/blob/main/LICENSE)
 [![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
