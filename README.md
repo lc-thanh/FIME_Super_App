@@ -1,7 +1,4 @@
-
-![Logo](https://fime.edu.vn/assets/images/logos/logo-two.png)
-
-
+<img src="https://fime.edu.vn/assets/images/logos/logo-two.png" alt="Our Logo" width="300" style="margin-bottom: 20px" />
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/lc-thanh/FIME_Super_App/blob/main/LICENSE)
 [![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
@@ -19,11 +16,9 @@
 
 FIME Super App is a cutting-edge full-stack application developed as a graduation project. It aims to provide a comprehensive platform for task management and team collaboration, integrating modern technologies for both frontend and backend development.
 
-
 ## Authors
 
 [@lc-thanh](https://github.com/lc-thanh)
-
 
 ## Features
 
@@ -33,7 +28,6 @@ FIME Super App is a cutting-edge full-stack application developed as a graduatio
 - **Member Management:** Administer team members and their roles within the platform.
 - **Portfolio Editing:** Customize and update our portfolio page with ease.
 - **JWT & Google Authentication:** Securely authenticate and authorize users using JWT tokens and Google OAuth.
-
 
 ## Tech Stack
 
@@ -53,13 +47,10 @@ FIME Super App is a cutting-edge full-stack application developed as a graduatio
 
 Coming soon...
 
-
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
 
-
 ## Feedback
 
 If you have any feedback, please reach out to me at: lcthanh.htvn@gmail.com
-
