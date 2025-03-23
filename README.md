@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://fime.edu.vn/" target="_blank"><img src="https://fime.edu.vn/assets/images/logos/logo-two.png" alt="Our Logo" width="300" style="margin-bottom: 20px" /></a>
+  <a href="https://fime.edu.vn/" target="_blank" rel="noopener noreferrer"><img src="https://fime.edu.vn/assets/images/logos/logo-two.png" alt="Our Logo" width="300" style="margin-bottom: 20px" /></a>
 </p>
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](https://github.com/lc-thanh/FIME_Super_App/blob/main/LICENSE)
