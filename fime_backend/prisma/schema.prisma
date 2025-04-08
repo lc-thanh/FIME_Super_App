@@ -31,7 +31,7 @@ enum UserStatus {
 }
 
 model User {
-  id            String        @id @default(cuid())
+  id            String        @id @default(uuid())
   fullname      String
   email         String        @unique
   password      String
@@ -57,7 +57,7 @@ model User {
 }
 
 model UserActions {
-  id        String   @id @default(cuid())
+  id        String   @id @default(uuid())
   userId    String
   action    String
   createdAt DateTime @default(now())
@@ -66,7 +66,7 @@ model UserActions {
 }
 
 model Team {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
   users       User[]
@@ -75,7 +75,7 @@ model Team {
 }
 
 model Position {
-  id          String   @id @default(cuid())
+  id          String   @id @default(uuid())
   name        String
   description String?
   users       User[]
@@ -106,7 +106,7 @@ enum TaskType {
 }
 
 model Task {
-  id             String           @id @default(cuid())
+  id             String           @id @default(uuid())
   name           String
   description    String?
   color          String?
@@ -141,7 +141,7 @@ model UserTask {
 }
 
 model TaskComment {
-  id      String @id @default(cuid())
+  id      String @id @default(uuid())
   content String
   taskId  String
   userId  String
@@ -153,7 +153,7 @@ model TaskComment {
 }
 
 model TaskAttachment {
-  id     String @id @default(cuid())
+  id     String @id @default(uuid())
   url    String
   taskId String
   userId String
@@ -165,7 +165,7 @@ model TaskAttachment {
 }
 
 model TodoList {
-  id      String  @id @default(cuid())
+  id      String  @id @default(uuid())
   content String
   taskId  String
   task    Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)

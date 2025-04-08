@@ -4,6 +4,8 @@ export interface UserFilterType {
   search?: string;
   pageSize?: number;
   page?: number;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 export interface UserPaginatedResponse {

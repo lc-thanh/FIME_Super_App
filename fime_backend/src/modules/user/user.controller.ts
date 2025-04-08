@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Patch,
-  Param,
   Delete,
   Query,
 } from '@nestjs/common';
@@ -15,6 +14,7 @@ import {
   UserFilterType,
   UserPaginatedResponse,
 } from '@/modules/user/dto/user-pagination';
+import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 
 @Controller('users')
 export class UserController {
@@ -33,17 +33,17 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  findOne(@UuidParam() id: string) {
+    return this.userService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  update(@UuidParam() id: string, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(id, updateUserDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  remove(@UuidParam() id: string) {
+    return this.userService.remove(id);
   }
 }
