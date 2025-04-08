@@ -5,6 +5,28 @@ Enum "Role" {
   "MEMBER"
 }
 
+Enum "TaskPriority" {
+  "LOW"
+  "MEDIUM"
+  "HIGH"
+}
+
+Enum "TaskStatus" {
+  "TODO"
+  "IN_PROGRESS"
+  "IN_REVIEW"
+  "DONE"
+}
+
+Enum "TaskType" {
+  "TODO"
+  "PUBLICATION"
+  "EVENT"
+  "MEETING"
+  "TRAINING"
+  "WORKSHOP"
+}
+
 Enum "UserStatus" {
   "ACTIVE"
   "INACTIVE"
@@ -15,52 +37,114 @@ Table "User" {
   "id" text [pk, not null]
   "email" text [unique, not null]
   "status" UserStatus [not null, default: 'INACTIVE']
-  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
-  "updatedAt" timestamp [not null]
-  "emailVerified" timestamp
   "image" text
-  "name" text
   "role" "Role[]" [default: `ARRAY['MEMBER']`]
-}
-
-Table "Account" {
-  "userId" text [not null]
-  "type" text [not null]
-  "provider" text [not null]
-  "providerAccountId" text [not null]
-  "refresh_token" text
-  "access_token" text
-  "expires_at" int4
-  "token_type" text
-  "scope" text
-  "id_token" text
-  "session_state" text
-  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
-  "updatedAt" timestamp [not null]
-
-  Indexes {
-    (provider, providerAccountId) [type: btree, name: "Account_pkey"]
-  }
-}
-
-Table "Session" {
-  "sessionToken" text [unique, not null]
-  "userId" text [not null]
-  "expires" timestamp [not null]
+  "address" text
+  "codeExpiredAt" timestamp
+  "codeId" text
+  "fullname" text [not null]
+  "password" text [not null]
+  "phone" text [unique, not null]
+  "positionId" text
+  "teamId" text
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
   "updatedAt" timestamp [not null]
 }
 
-Table "VerificationToken" {
-  "identifier" text [not null]
-  "token" text [not null]
-  "expires" timestamp [not null]
+Table "UserActions" {
+  "id" text [pk, not null]
+  "userId" text [not null]
+  "action" text [not null]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+}
+
+Table "Team" {
+  "id" text [pk, not null]
+  "name" text [not null]
+  "description" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "Position" {
+  "id" text [pk, not null]
+  "name" text [not null]
+  "description" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "Task" {
+  "id" text [pk, not null]
+  "name" text [not null]
+  "description" text
+  "color" text
+  "type" TaskType [not null, default: 'TODO']
+  "status" TaskStatus [not null, default: 'TODO']
+  "priority" TaskPriority [not null, default: 'MEDIUM']
+  "startDate" timestamp [not null]
+  "deadline" timestamp [not null]
+  "userId" text
+  "isDeleted" bool [not null, default: false]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "UserTask" {
+  "position" int4 [not null, default: 0]
+  "taskId" text [not null]
+  "userId" text [not null]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
 
   Indexes {
-    (identifier, token) [type: btree, name: "VerificationToken_pkey"]
+    (taskId, userId) [type: btree, name: "UserTask_pkey"]
   }
 }
 
-Ref "Account_userId_fkey":"User"."id" < "Account"."userId" [update: cascade, delete: cascade]
+Table "TaskComment" {
+  "id" text [pk, not null]
+  "content" text [not null]
+  "taskId" text [not null]
+  "userId" text [not null]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
 
-Ref "Session_userId_fkey":"User"."id" < "Session"."userId" [update: cascade, delete: cascade]
+Table "TaskAttachment" {
+  "id" text [pk, not null]
+  "url" text [not null]
+  "taskId" text [not null]
+  "userId" text [not null]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "TodoList" {
+  "id" text [pk, not null]
+  "content" text [not null]
+  "taskId" text [not null]
+  "isDone" bool [not null, default: false]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Ref "TaskAttachment_taskId_fkey":"Task"."id" < "TaskAttachment"."taskId" [update: cascade, delete: cascade]
+
+Ref "TaskAttachment_userId_fkey":"User"."id" < "TaskAttachment"."userId" [update: cascade, delete: cascade]
+
+Ref "TaskComment_taskId_fkey":"Task"."id" < "TaskComment"."taskId" [update: cascade, delete: cascade]
+
+Ref "TaskComment_userId_fkey":"User"."id" < "TaskComment"."userId" [update: cascade, delete: cascade]
+
+Ref "TodoList_taskId_fkey":"Task"."id" < "TodoList"."taskId" [update: cascade, delete: cascade]
+
+Ref "User_positionId_fkey":"Position"."id" < "User"."positionId" [update: cascade, delete: set null]
+
+Ref "User_teamId_fkey":"Team"."id" < "User"."teamId" [update: cascade, delete: set null]
+
+Ref "UserActions_userId_fkey":"User"."id" < "UserActions"."userId" [update: cascade, delete: cascade]
+
+Ref "UserTask_taskId_fkey":"Task"."id" < "UserTask"."taskId" [update: cascade, delete: cascade]
+
+Ref "UserTask_userId_fkey":"User"."id" < "UserTask"."userId" [update: cascade, delete: cascade]

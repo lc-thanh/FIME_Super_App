@@ -31,55 +31,146 @@ enum UserStatus {
 }
 
 model User {
-  id            String     @id @default(cuid())
-  name          String?
-  email         String     @unique
-  emailVerified DateTime?
+  id            String        @id @default(cuid())
+  fullname      String
+  email         String        @unique
+  password      String
+  phone         String        @unique
+  address       String?
   image         String?
-  role          Role[]     @default([MEMBER])
-  status        UserStatus @default(INACTIVE)
-  accounts      Account[]
-  sessions      Session[]
+  positionId    String?
+  position      Position?     @relation(fields: [positionId], references: [id], onDelete: SetNull)
+  teamId        String?
+  team          Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  role          Role[]        @default([MEMBER])
+  status        UserStatus    @default(INACTIVE)
+  codeId        String?
+  codeExpiredAt DateTime?
+  userActions   UserActions[]
+
+  userTasks      UserTask[]
+  TaskComment    TaskComment[]
+  TaskAttachment TaskAttachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model Account {
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String?
-  access_token      String?
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String?
-  session_state     String?
-
+model UserActions {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@id([provider, providerAccountId])
 }
 
-model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Position {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+enum TaskStatus {
+  TODO // Chưa làm
+  IN_PROGRESS // Đang làm
+  IN_REVIEW // Đang xem xét
+  DONE // Đã hoàn thành
+}
+
+enum TaskPriority {
+  LOW // Thấp
+  MEDIUM // Trung bình
+  HIGH // Cao
+}
+
+enum TaskType {
+  TODO // Công việc
+  PUBLICATION // Ấn phẩm
+  EVENT // Sự kiện
+  MEETING // Cuộc họp
+  TRAINING // Đào tạo
+  WORKSHOP
+}
+
+model Task {
+  id             String           @id @default(cuid())
+  name           String
+  description    String?
+  color          String?
+  type           TaskType         @default(TODO)
+  status         TaskStatus       @default(TODO)
+  priority       TaskPriority     @default(MEDIUM)
+  startDate      DateTime
+  deadline       DateTime
+  todoLists      TodoList[]
+  userId         String?
+  userTasks      UserTask[]
+  TaskComment    TaskComment[]
+  TaskAttachment TaskAttachment[]
+
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserTask {
+  taskId String
+  userId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  position Int @default(0) @db.SmallInt // Vị trí của thẻ Task trong cột, bắt đầu từ 0
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([taskId, userId])
+}
+
+model TaskComment {
+  id      String @id @default(cuid())
+  content String
+  taskId  String
+  userId  String
+  task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-model VerificationToken {
-  identifier String
-  token      String
-  expires    DateTime
+model TaskAttachment {
+  id     String @id @default(cuid())
+  url    String
+  taskId String
+  userId String
+  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@id([identifier, token])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TodoList {
+  id      String  @id @default(cuid())
+  content String
+  taskId  String
+  task    Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  isDone  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
