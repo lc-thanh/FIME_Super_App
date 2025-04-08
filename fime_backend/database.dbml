@@ -1,0 +1,66 @@
+Enum "Role" {
+  "ADMIN"
+  "MANAGER"
+  "TREASURER"
+  "MEMBER"
+}
+
+Enum "UserStatus" {
+  "ACTIVE"
+  "INACTIVE"
+  "BANNED"
+}
+
+Table "User" {
+  "id" text [pk, not null]
+  "email" text [unique, not null]
+  "status" UserStatus [not null, default: 'INACTIVE']
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+  "emailVerified" timestamp
+  "image" text
+  "name" text
+  "role" "Role[]" [default: `ARRAY['MEMBER']`]
+}
+
+Table "Account" {
+  "userId" text [not null]
+  "type" text [not null]
+  "provider" text [not null]
+  "providerAccountId" text [not null]
+  "refresh_token" text
+  "access_token" text
+  "expires_at" int4
+  "token_type" text
+  "scope" text
+  "id_token" text
+  "session_state" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+
+  Indexes {
+    (provider, providerAccountId) [type: btree, name: "Account_pkey"]
+  }
+}
+
+Table "Session" {
+  "sessionToken" text [unique, not null]
+  "userId" text [not null]
+  "expires" timestamp [not null]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "VerificationToken" {
+  "identifier" text [not null]
+  "token" text [not null]
+  "expires" timestamp [not null]
+
+  Indexes {
+    (identifier, token) [type: btree, name: "VerificationToken_pkey"]
+  }
+}
+
+Ref "Account_userId_fkey":"User"."id" < "Account"."userId" [update: cascade, delete: cascade]
+
+Ref "Session_userId_fkey":"User"."id" < "Session"."userId" [update: cascade, delete: cascade]
