@@ -3,6 +3,7 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -95,13 +96,18 @@ export class UserService {
     };
   }
 
-  async findOne(id: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: { id },
+  async findOne(searchString: string, field: string[]) {
+    const validFields = ['id', 'email', 'phone'];
+    field.forEach((f) => {
+      if (!validFields.includes(f)) {
+        throw new InternalServerErrorException('Trường tìm kiếm không hợp lệ!');
+      }
     });
-    if (!user) {
-      throw new NotFoundException('Người dùng không tồn tại!');
-    }
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        OR: field.map((f) => ({ [f]: searchString })),
+      },
+    });
 
     return user;
   }

@@ -6,6 +6,7 @@ import {
   Patch,
   Delete,
   Query,
+  NotFoundException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -33,8 +34,12 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@UuidParam() id: string) {
-    return this.userService.findOne(id);
+  async findOne(@UuidParam() id: string) {
+    const user = await this.userService.findOne(id, ['id']);
+    if (!user) {
+      throw new NotFoundException('Không tồn tại người dùng với ID đã cho!');
+    }
+    return user;
   }
 
   @Patch(':id')
