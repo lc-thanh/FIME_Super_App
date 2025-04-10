@@ -1,4 +1,4 @@
-import { hash, compare } from 'bcrypt';
+import bcrypt from 'bcrypt';
 
 // saltRounds is the cost factor for hashing, which determines how computationally expensive the hashing process is.
 // A higher number means more security but also more time to hash.
@@ -8,7 +8,7 @@ export const hashPasswordHelper = async (
   plainPassword: string,
 ): Promise<string | undefined> => {
   try {
-    return await hash(plainPassword, saltRounds);
+    return await bcrypt.hash(plainPassword, saltRounds);
   } catch (error) {
     console.error('Error hashing password:', error);
   }
@@ -19,7 +19,7 @@ export const comparePasswordHelper = async (
   hashedPassword: string,
 ): Promise<boolean> => {
   try {
-    return await compare(plainPassword, hashedPassword);
+    return await bcrypt.compare(plainPassword, hashedPassword);
   } catch (error) {
     console.error('Error comparing password:', error);
     return false;

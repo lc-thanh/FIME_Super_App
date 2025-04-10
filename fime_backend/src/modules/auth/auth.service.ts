@@ -3,6 +3,7 @@ import { UserService } from '@/modules/user/user.service';
 import { comparePasswordHelper } from '@/helpers/util';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
+import { SignUpDto } from '@/modules/auth/dto/signUp.dto';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +28,14 @@ export class AuthService {
   async login(user: User) {
     const payload = { username: user.email, sub: user.id };
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      message: 'Đăng nhập thành công!',
+      data: {
+        access_token: await this.jwtService.signAsync(payload),
+      },
     };
+  }
+
+  async register(body: SignUpDto) {
+    return this.usersService.handleRegister(body);
   }
 }
