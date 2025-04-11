@@ -3,14 +3,18 @@ import {
   HttpException,
   HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { hashPasswordHelper } from '@/helpers/util';
 import { PrismaService } from '@/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, UserStatus } from '@prisma/client';
 import { UserFilterType, UserPaginatedResponse } from './dto/user-pagination';
+import { SignUpDto } from '@/modules/auth/dto/signUp.dto';
+import { v4 as uuidv4 } from 'uuid';
+import dayjs from 'dayjs';
 
 @Injectable()
 export class UserService {
@@ -95,13 +99,18 @@ export class UserService {
     };
   }
 
-  async findOne(id: string) {
-    const user = await this.prismaService.user.findUnique({
-      where: { id },
+  async findOne(searchString: string, field: string[]) {
+    const validFields = ['id', 'email', 'phone'];
+    field.forEach((f) => {
+      if (!validFields.includes(f)) {
+        throw new InternalServerErrorException('Trường tìm kiếm không hợp lệ!');
+      }
     });
-    if (!user) {
-      throw new NotFoundException('Người dùng không tồn tại!');
-    }
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        OR: field.map((f) => ({ [f]: searchString })),
+      },
+    });
 
     return user;
   }
@@ -141,6 +150,37 @@ export class UserService {
     return {
       message: 'Xóa người dùng thành công!',
       data: deletedUser,
+    };
+  }
+
+  async handleRegister(signUpDto: SignUpDto) {
+    if (await this.isEmailExist(signUpDto.email)) {
+      throw new BadRequestException('Đã tồn tại email này!');
+    }
+    if (await this.isPhoneExist(signUpDto.phone)) {
+      throw new BadRequestException('Đã tồn tại số điện thoại này!');
+    }
+
+    const hashedPassword = await hashPasswordHelper(signUpDto.password);
+    if (!hashedPassword) {
+      throw new HttpException(
+        'Có lỗi xảy ra trong quá trình mã hóa mật khẩu!',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    const newUser = await this.prismaService.user.create({
+      data: {
+        ...signUpDto,
+        password: hashedPassword,
+        status: UserStatus.BANNED,
+        codeId: uuidv4(),
+        codeExpiredAt: dayjs().add(30, 'minute').toDate(),
+      },
+    });
+    return {
+      message: 'Đăng ký thành công!',
+      data: newUser,
     };
   }
 }
