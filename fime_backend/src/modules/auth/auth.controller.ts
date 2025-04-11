@@ -5,6 +5,10 @@ import { Request as RequestType } from 'express';
 import { LocalAuthGuard } from '@/modules/auth/passport/local-auth.guard';
 import { User } from '@prisma/client';
 import { Public } from '@/common/decorators/public-route.decorator';
+<<<<<<< HEAD
+=======
+import { SignUpDto } from '@/modules/auth/dto/signUp.dto';
+>>>>>>> eb9605a9f14a6dd60281e7650aface645dabfeef
 import { MailerService } from '@nestjs-modules/mailer';
 
 @Controller('auth')
