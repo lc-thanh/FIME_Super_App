@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import { AudioWaveform } from "lucide-react";
 
 import {
   SidebarMenu,
@@ -9,11 +8,11 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
-import Image from "next/image";
+import ThemeLogo from "@/components/theme-logo";
 
 export function TeamSwitcher() {
   return (
-    <SidebarMenu>
+    <SidebarMenu className="pt-2">
       <SidebarMenuItem>
         <Link href="/dashboard">
           <SidebarMenuButton
@@ -21,12 +20,9 @@ export function TeamSwitcher() {
             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
           >
             <div className="flex aspect-square size-8 items-center justify-center rounded-lg">
-              {/* <AudioWaveform className="size-4" /> */}
-              <Image
-                src={"/LOGO_FIME2.png"}
-                alt="FIME"
-                width={32}
-                height={32}
+              <ThemeLogo
+                darkLogo="/LOGO_FIME_dark.png"
+                lightLogo="/LOGO_FIME_light.png"
               />
             </div>
             <div className="grid flex-1 text-left text-sm leading-tight">

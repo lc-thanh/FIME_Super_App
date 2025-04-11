@@ -194,7 +194,7 @@ function ActionSearchBar() {
   }, []);
 
   return (
-    <div className="w-full max-w-xl mx-auto">
+    <div className="w-full max-w-[190px]">
       <Dialog open={isOpen} onOpenChange={handleDialogChange}>
         <DialogTrigger asChild>
           <Button
