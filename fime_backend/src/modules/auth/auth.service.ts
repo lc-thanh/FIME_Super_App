@@ -3,7 +3,6 @@ import { UserService } from '@/modules/user/user.service';
 import { comparePasswordHelper } from '@/helpers/util';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '@prisma/client';
-import { SignUpDto } from '@/modules/auth/dto/signUp.dto';
 
 @Injectable()
 export class AuthService {
@@ -35,7 +34,7 @@ export class AuthService {
     };
   }
 
-  async register(body: SignUpDto) {
-    return this.usersService.handleRegister(body);
-  }
+  // async register(body: SignUpDto) {
+  //   return this.usersService.handleRegister(body);
+  // }
 }
