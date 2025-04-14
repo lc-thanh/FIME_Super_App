@@ -4,6 +4,7 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// Lệnh chuyển từ PostgreSQL sang DBML (để tạo sơ đồ ERD)
 // db2dbml postgres 'postgresql://admin:root@localhost:5432/fime_db?' -o database.dbml
 
 generator client {
@@ -19,8 +20,8 @@ datasource db {
 enum Role {
   ADMIN // Quyền hạn cao nhất
   MANAGER // Điều phối công việc trong đội
-  TREASURER // Thủ quỹ, quản lý quỹ đội
   MEMBER // Thành viên
+  FORMER_MEMBER // Cựu thành viên (không còn hoạt động trong đội nhưng vẫn có quyền truy cập vào các tài liệu cũ)
 }
 
 // Enum cho trạng thái User
@@ -49,8 +50,8 @@ model User {
   userActions   UserActions[]
 
   userTasks      UserTask[]
-  TaskComment    TaskComment[]
-  TaskAttachment TaskAttachment[]
+  taskComment    TaskComment[]
+  taskAttachment TaskAttachment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -66,22 +67,27 @@ model UserActions {
 }
 
 model Team {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  users       User[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String        @id @default(uuid())
+  name         String
+  description  String?
+  users        User[]
+  teamSegments TeamSegment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Position {
-  id          String   @id @default(uuid())
+  id          String  @id @default(uuid())
   name        String
   description String?
   users       User[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+// TASK SECTION
 
 enum TaskStatus {
   TODO // Chưa làm
@@ -98,6 +104,7 @@ enum TaskPriority {
 
 enum TaskType {
   TODO // Công việc
+  MONTHLY_SEGMENTS // Chuyên mục hàng tháng
   PUBLICATION // Ấn phẩm
   EVENT // Sự kiện
   MEETING // Cuộc họp
@@ -106,24 +113,28 @@ enum TaskType {
 }
 
 model Task {
-  id             String           @id @default(uuid())
-  name           String
-  description    String?
-  color          String?
-  type           TaskType         @default(TODO)
-  status         TaskStatus       @default(TODO)
-  priority       TaskPriority     @default(MEDIUM)
-  startDate      DateTime
-  deadline       DateTime
-  todoLists      TodoList[]
-  userId         String?
-  userTasks      UserTask[]
-  TaskComment    TaskComment[]
-  TaskAttachment TaskAttachment[]
+  id               String           @id @default(uuid())
+  name             String
+  description      String?
+  color            String?
+  type             TaskType         @default(TODO)
+  status           TaskStatus       @default(TODO)
+  priority         TaskPriority     @default(MEDIUM)
+  startDate        DateTime
+  deadline         DateTime
+  todoLists        TodoList[]
+  userTasks        UserTask[]
+  taskComment      TaskComment[]
+  taskAttachment   TaskAttachment[]
+  workspaceId      String
+  workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  monthlySegment   MonthlySegment?  @relation(fields: [monthlySegmentId], references: [id], onDelete: SetNull)
+  monthlySegmentId String?
 
-  isDeleted Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model UserTask {
@@ -170,6 +181,88 @@ model TodoList {
   taskId  String
   task    Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
   isDone  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Workspace {
+  id    String @id @default(uuid())
+  name  String
+  tasks Task[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MonthlySegment {
+  id          String        @id @default(uuid())
+  name        String
+  description String?
+  frequency   Int           @default(1) // Tần suất xuất hiện hàng tháng
+  tasks       Task[]
+  teamSegment TeamSegment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Để lưu số lượng người tham gia trong từng đội cho từng chuyên mục
+model TeamSegment {
+  Team               Team           @relation(fields: [teamId], references: [id])
+  teamId             String
+  MonthlySegment     MonthlySegment @relation(fields: [monthlySegmentId], references: [id])
+  monthlySegmentId   String
+  number_of_assignee Int? // Số lượng người tham gia trong đội
+
+  @@id([teamId, monthlySegmentId])
+}
+
+// END TASK SECTION
+
+// FIME LANDING PAGE SECTION
+
+model LatestPublication {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  embed_code  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model NewestProducts {
+  id          String   @id @default(uuid())
+  title       String
+  date        DateTime
+  description String?
+  image       String?
+  link        String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Memories {
+  id         String  @id @default(uuid())
+  title      String
+  mini_title String?
+  image      String?
+  link       String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// END FIME LANDING PAGE SECTION
+
+model Announcement {
+  id          String  @id @default(uuid())
+  title       String
+  description String?
+  image       String?
+  link        String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

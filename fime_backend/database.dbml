@@ -20,6 +20,7 @@ Enum "TaskStatus" {
 
 Enum "TaskType" {
   "TODO"
+  "MONTHLY_SEGMENTS"
   "PUBLICATION"
   "EVENT"
   "MEETING"
@@ -35,18 +36,18 @@ Enum "UserStatus" {
 
 Table "User" {
   "id" text [pk, not null]
-  "email" text [unique, not null]
-  "status" UserStatus [not null, default: 'INACTIVE']
-  "image" text
-  "role" "Role[]" [default: `ARRAY['MEMBER']`]
-  "address" text
-  "codeExpiredAt" timestamp
-  "codeId" text
   "fullname" text [not null]
+  "email" text [unique, not null]
   "password" text [not null]
   "phone" text [unique, not null]
+  "address" text
+  "image" text
   "positionId" text
   "teamId" text
+  "role" "Role[]" [default: `ARRAY['MEMBER']`]
+  "status" UserStatus [not null, default: 'INACTIVE']
+  "codeId" text
+  "codeExpiredAt" timestamp
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
   "updatedAt" timestamp [not null]
 }
@@ -84,16 +85,18 @@ Table "Task" {
   "priority" TaskPriority [not null, default: 'MEDIUM']
   "startDate" timestamp [not null]
   "deadline" timestamp [not null]
-  "userId" text
+  "workspaceId" text [not null]
+  "monthlySegmentId" text
   "isDeleted" bool [not null, default: false]
+  "deletedAt" timestamp
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
   "updatedAt" timestamp [not null]
 }
 
 Table "UserTask" {
-  "position" int4 [not null, default: 0]
   "taskId" text [not null]
   "userId" text [not null]
+  "position" int2 [not null, default: 0]
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
   "updatedAt" timestamp [not null]
 
@@ -129,6 +132,76 @@ Table "TodoList" {
   "updatedAt" timestamp [not null]
 }
 
+Table "Workspace" {
+  "id" text [pk, not null]
+  "name" text [not null]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "MonthlySegment" {
+  "id" text [pk, not null]
+  "name" text [not null]
+  "description" text
+  "frequency" int4 [not null, default: 1]
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "TeamSegment" {
+  "teamId" text [not null]
+  "monthlySegmentId" text [not null]
+  "number_of_assignee" int4
+
+  Indexes {
+    (teamId, monthlySegmentId) [type: btree, name: "TeamSegment_pkey"]
+  }
+}
+
+Table "LatestPublication" {
+  "id" text [pk, not null]
+  "title" text [not null]
+  "description" text
+  "embed_code" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "NewestProducts" {
+  "id" text [pk, not null]
+  "title" text [not null]
+  "date" timestamp [not null]
+  "description" text
+  "image" text
+  "link" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "Memories" {
+  "id" text [pk, not null]
+  "title" text [not null]
+  "mini_title" text
+  "image" text
+  "link" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "Announcement" {
+  "id" text [pk, not null]
+  "title" text [not null]
+  "description" text
+  "image" text
+  "link" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Ref "Task_monthlySegmentId_fkey":"MonthlySegment"."id" < "Task"."monthlySegmentId" [update: cascade, delete: set null]
+
+Ref "Task_workspaceId_fkey":"Workspace"."id" < "Task"."workspaceId" [update: cascade, delete: cascade]
+
 Ref "TaskAttachment_taskId_fkey":"Task"."id" < "TaskAttachment"."taskId" [update: cascade, delete: cascade]
 
 Ref "TaskAttachment_userId_fkey":"User"."id" < "TaskAttachment"."userId" [update: cascade, delete: cascade]
@@ -136,6 +209,10 @@ Ref "TaskAttachment_userId_fkey":"User"."id" < "TaskAttachment"."userId" [update
 Ref "TaskComment_taskId_fkey":"Task"."id" < "TaskComment"."taskId" [update: cascade, delete: cascade]
 
 Ref "TaskComment_userId_fkey":"User"."id" < "TaskComment"."userId" [update: cascade, delete: cascade]
+
+Ref "TeamSegment_monthlySegmentId_fkey":"MonthlySegment"."id" < "TeamSegment"."monthlySegmentId" [update: cascade, delete: restrict]
+
+Ref "TeamSegment_teamId_fkey":"Team"."id" < "TeamSegment"."teamId" [update: cascade, delete: restrict]
 
 Ref "TodoList_taskId_fkey":"Task"."id" < "TodoList"."taskId" [update: cascade, delete: cascade]
 
