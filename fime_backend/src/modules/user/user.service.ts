@@ -99,16 +99,16 @@ export class UserService {
     };
   }
 
-  async findOne(searchString: string, field: string[]) {
+  async findOne(searchString: string, fields: string[]) {
     const validFields = ['id', 'email', 'phone'];
-    field.forEach((f) => {
+    fields.forEach((f) => {
       if (!validFields.includes(f)) {
         throw new InternalServerErrorException('Trường tìm kiếm không hợp lệ!');
       }
     });
     const user = await this.prismaService.user.findFirst({
       where: {
-        OR: field.map((f) => ({ [f]: searchString })),
+        OR: fields.map((f) => ({ [f]: searchString })),
       },
     });
 

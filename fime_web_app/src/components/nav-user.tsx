@@ -25,6 +25,9 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { signOut } from "next-auth/react";
+import { clientTokens } from "@/lib/http";
+import authApiRequests from "@/requests/auth.request";
 
 export function NavUser({
   user,
@@ -36,6 +39,10 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const fetchLogout = async () => {
+    await authApiRequests.logout(clientTokens.refresh_token);
+    signOut();
+  };
 
   return (
     <SidebarMenu>
@@ -98,7 +105,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={async () => await fetchLogout()}>
               <LogOut />
               Log out
             </DropdownMenuItem>

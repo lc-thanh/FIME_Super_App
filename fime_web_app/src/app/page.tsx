@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { FimeTitle } from "@/components/ui/fime-title";
+import { FimeTitle } from "@/components/fime-title";
 
 export default function Home() {
   return (

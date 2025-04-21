@@ -10,7 +10,7 @@ export function FimeTitle({ children, className }: FimeTitleProps) {
   return (
     <div
       className={cn(
-        "w-fit bg-clip-text text-transparent bg-gradient-to-br from-30% from-fimeOrange to-fimeYellow to-80%",
+        "w-fit bg-clip-text text-transparent bg-gradient-to-br from-30% from-fimeOrange dark:from-fimeOrangeLighter to-fimeYellow to-80% dark:to-fimeYellowLighter",
         className
       )}
     >
