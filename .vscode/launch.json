@@ -16,6 +16,18 @@
       "protocol": "auto",
       "port": 9229,
       "autoAttachChildProcesses": true
+    },
+    {
+      "name": "Next.js: debug Fullstack",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm debug",
+      "cwd": "${workspaceFolder}\\fime_web_app",
+      "serverReadyAction": {
+        "action": "debugWithChrome",
+        "pattern": "- Local:.+(https?://.+)",
+        "uriFormat": "%s"
+      }
     }
   ]
 }

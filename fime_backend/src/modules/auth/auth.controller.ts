@@ -1,31 +1,57 @@
-import { Controller, Get, Post, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { Request as RequestType } from 'express';
-import { LocalAuthGuard } from '@/modules/auth/passport/local-auth.guard';
-import { User } from '@prisma/client';
 import { Public } from '@/common/decorators/public-route.decorator';
 import { MailerService } from '@nestjs-modules/mailer';
+import { RefreshsTokenDto } from '@/modules/auth/dto/refresh-tokens.dto';
+import { TokensService } from '@/modules/auth/tokens.service';
+import { SignInDto } from '@/modules/auth/dto/signIn.dto';
+import { TokensStorageService } from '@/modules/auth/tokensStorage.service';
+import { SignOutDto } from '@/modules/auth/dto/signOut.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
+    private readonly tokensService: TokensService,
     private readonly mailerService: MailerService,
+    private readonly tokensStorageService: TokensStorageService,
   ) {}
 
   @Post('login')
   @Public()
-  @UseGuards(LocalAuthGuard)
-  handleLogin(@Request() req: RequestType) {
-    return this.authService.login(req.user as User);
+  handleLogin(@Body() body: SignInDto) {
+    return this.authService.login(body);
   }
 
+  @Post('logout')
+  @Public()
+  async handleLogout(@Body() body: SignOutDto) {
+    return this.tokensService.invalidateToken(body.refresh_token);
+  }
+
+  @Post('refresh-token')
+  @Public()
+  async refreshToken(@Body() body: RefreshsTokenDto) {
+    const data = await this.tokensService.refreshToken(body);
+    return {
+      message: 'Làm mới token thành công!',
+      data,
+    };
+  }
+
+  // Get jwt payload
   @Get('profile')
-  // @UseGuards(JwtAuthGuard)
   getProfile(@Request() req: RequestType) {
     return req.user;
   }
+
+  // @Post('invalidate')
+  // invalidateToken(@Request() req: RequestType) {
+  //   const userId = (req.user as any).sub as string;
+  //   return this.tokensStorageService.invalidateUserKeys(userId);
+  // }
 
   // @Post('register')
   // @Public()
