@@ -4,7 +4,7 @@ import {
   LockedAccountError,
 } from "@/lib/errors";
 import { EntityError, HttpError } from "@/lib/http";
-import authApiRequests from "@/requests/auth.request";
+import AuthApiRequests from "@/requests/auth.request";
 import { randomUUID } from "crypto";
 import NextAuth, { User } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
@@ -22,7 +22,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const deviceId = randomUUID();
 
-          const result = await authApiRequests.login(
+          const result = await AuthApiRequests.login(
             {
               username: credentials?.username as string,
               password: credentials?.password as string,

@@ -23,6 +23,8 @@ const buttonVariants = cva(
           "bg-gradient-to-br from-fimeOrange from-30% to-fimeYellow to-90% text-white hover:opacity-90 shadow transition-all duration-200",
         "animated-gradient":
           "bg-gradient-to-r from-fimeOrange via-fimeYellow to-fimeOrange bg-[length:200%_auto] text-white transition-all duration-500 shadow hover:bg-[position:right_center]",
+        "fime-outline":
+          "shadow-sm border border-orange-500 text-orange-500 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-accent dark:text-orange-400 dark:hover:text-orange-500",
       },
       size: {
         default: "h-9 px-4 py-2",

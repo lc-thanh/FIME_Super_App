@@ -4,6 +4,9 @@ import { refreshTokenFromClient } from "@/actions";
 import { clientTokens } from "@/lib/http";
 import { useEffect, useCallback } from "react";
 
+const TIME_INTERVAL = 1000 * 60 * 5; // Check every 5 minutes
+const TOKEN_REFRESH_BUFFER = 1000 * 60 * 10; // 10 minutes
+
 export default function TokenRefresher() {
   const refreshTokenFunc = useCallback(async () => {
     const res = await refreshTokenFromClient();
@@ -18,11 +21,11 @@ export default function TokenRefresher() {
     const interval = setInterval(async () => {
       if (
         !!clientTokens.expires_at &&
-        clientTokens.expires_at - Date.now() < 1000 * 10
+        clientTokens.expires_at - Date.now() < TOKEN_REFRESH_BUFFER
       ) {
         await refreshTokenFunc();
       }
-    }, 1000 * 5);
+    }, TIME_INTERVAL);
     return () => clearInterval(interval);
   }, [refreshTokenFunc]);
 

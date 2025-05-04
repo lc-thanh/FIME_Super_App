@@ -2,7 +2,7 @@ import envConfig from "@/config";
 import http from "@/lib/http";
 import { LoginBodyType, LoginResType } from "@/schemaValidations/auth.schema";
 
-const authApiRequests = {
+const AuthApiRequests = {
   login: (body: LoginBodyType, deviceId: string) =>
     http.post<LoginResType>(
       "/auth/login",
@@ -40,4 +40,4 @@ const authApiRequests = {
   },
 };
 
-export default authApiRequests;
+export default AuthApiRequests;

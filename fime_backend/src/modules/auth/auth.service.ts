@@ -71,7 +71,7 @@ export class AuthService {
         },
         access_token,
         refresh_token,
-        expires_at: Date.now() + 1000 * jwtConstants.ACCESS_TOKEN_EXPIRES_IN, // 1 day
+        expires_at: Date.now() + 1000 * jwtConstants.ACCESS_TOKEN_EXPIRES_IN,
       },
     };
   }

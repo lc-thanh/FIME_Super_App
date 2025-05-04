@@ -22,6 +22,8 @@ import {
   AudioLines,
 } from "lucide-react";
 import useDebounce from "@/hooks/use-debounce";
+import { useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 interface Action {
   id: string;
@@ -87,6 +89,8 @@ function ActionSearchBar() {
   const [selectedAction, setSelectedAction] = useState<Action | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const debouncedQuery = useDebounce(query, 200);
+
+  const { isMobile } = useSidebar();
 
   useEffect(() => {
     if (!isFocused) {
@@ -211,7 +215,12 @@ function ActionSearchBar() {
           </Button>
         </DialogTrigger>
 
-        <DialogContent className="sm:max-w-md p-0 gap-0 border-gray-200 dark:border-gray-800">
+        <DialogContent
+          className={cn(
+            "position-relative sm:max-w-md p-0 gap-0 border-gray-200 dark:border-gray-800",
+            isMobile && "top-[25vh]"
+          )}
+        >
           <DialogTitle className="hidden">Thanh tìm kiếm chính</DialogTitle>
           <div className="w-full max-w-full sticky top-0 bg-background z-10 p-4 pb-3 rounded-lg border-b border-gray-100 dark:border-gray-800">
             <label
@@ -303,12 +312,14 @@ function ActionSearchBar() {
                       </motion.li>
                     ))}
                   </motion.ul>
-                  <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800">
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Bấm Ctrl+K để mở bảng tìm kiếm</span>
-                      <span>Bấm ESC để thoát</span>
+                  {!isMobile && (
+                    <div className="px-4 py-2 border-t border-gray-100 dark:border-gray-800">
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>Bấm Ctrl+K để mở bảng tìm kiếm</span>
+                        <span>Bấm ESC để thoát</span>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>

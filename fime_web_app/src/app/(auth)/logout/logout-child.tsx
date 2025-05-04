@@ -1,6 +1,6 @@
 "use client";
 
-import authApiRequests from "@/requests/auth.request";
+import AuthApiRequests from "@/requests/auth.request";
 import { signOut as signOutClient } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -11,7 +11,7 @@ export const LogoutChild = () => {
 
   useState(async () => {
     if (!refresh_token) return;
-    await authApiRequests.logout(refresh_token || "");
+    await AuthApiRequests.logout(refresh_token || "");
   });
 
   useEffect(() => {
