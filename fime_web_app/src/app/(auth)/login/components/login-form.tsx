@@ -75,7 +75,7 @@ export function LoginForm({
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden dark:bg-zinc-900">
         <CardContent className="grid p-0 md:grid-cols-2">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 md:p-8">
@@ -101,7 +101,7 @@ export function LoginForm({
                       <FormControl>
                         <Input placeholder="0987654321" {...field} />
                       </FormControl>
-                      <FormMessage className="text-red-500" />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />

@@ -43,15 +43,20 @@ model User {
   position      Position?     @relation(fields: [positionId], references: [id], onDelete: SetNull)
   teamId        String?
   team          Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  Gen           Gen?          @relation(fields: [genId], references: [id], onDelete: SetNull)
+  genId         String?
   role          Role[]        @default([MEMBER])
   status        UserStatus    @default(INACTIVE)
   codeId        String?
   codeExpiredAt DateTime?
   userActions   UserActions[]
 
-  userTasks      UserTask[]
+  tasks          Task[]
+  todoLists      TodoList[]
   taskComment    TaskComment[]
   taskAttachment TaskAttachment[]
+  taskActivities TaskActivity[]
+  workspaces     Workspace[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -78,6 +83,16 @@ model Team {
 }
 
 model Position {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  users       User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Gen {
   id          String  @id @default(uuid())
   name        String
   description String?
@@ -114,8 +129,9 @@ enum TaskType {
 
 model Task {
   id               String           @id @default(uuid())
-  name             String
-  description      String?
+  title            String
+  note             Json?
+  position         Float
   color            String?
   type             TaskType         @default(TODO)
   status           TaskStatus       @default(TODO)
@@ -123,9 +139,10 @@ model Task {
   startDate        DateTime
   deadline         DateTime
   todoLists        TodoList[]
-  userTasks        UserTask[]
-  taskComment      TaskComment[]
-  taskAttachment   TaskAttachment[]
+  users            User[]
+  taskComments     TaskComment[]
+  taskAttachments  TaskAttachment[]
+  taskActivities   TaskActivity[]
   workspaceId      String
   workspace        Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   monthlySegment   MonthlySegment?  @relation(fields: [monthlySegmentId], references: [id], onDelete: SetNull)
@@ -137,18 +154,18 @@ model Task {
   updatedAt DateTime  @updatedAt
 }
 
-model UserTask {
+model TodoList {
+  id        String   @id @default(uuid())
+  order     Int      @default(0) @db.SmallInt
+  content   String
+  startDate DateTime
+  deadline  DateTime
+
+  Task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId String
-  userId String
-  task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User   User[]
 
-  position Int @default(0) @db.SmallInt // Vị trí của thẻ Task trong cột, bắt đầu từ 0
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@id([taskId, userId])
+  @@index([taskId])
 }
 
 model TaskComment {
@@ -165,6 +182,7 @@ model TaskComment {
 
 model TaskAttachment {
   id     String @id @default(uuid())
+  title  String
   url    String
   taskId String
   userId String
@@ -175,12 +193,13 @@ model TaskAttachment {
   updatedAt DateTime @updatedAt
 }
 
-model TodoList {
-  id      String  @id @default(uuid())
+model TaskActivity {
+  id      String @id @default(uuid())
   content String
   taskId  String
-  task    Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  isDone  Boolean @default(false)
+  userId  String
+  task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -190,6 +209,7 @@ model Workspace {
   id    String @id @default(uuid())
   name  String
   tasks Task[]
+  users User[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

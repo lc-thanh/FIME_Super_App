@@ -2,12 +2,12 @@
 import envConfig from "@/config";
 import { signOut as signOutClient } from "next-auth/react";
 import { auth } from "@/auth";
-import { redirect, RedirectType } from "next/navigation";
-import authApiRequests from "@/requests/auth.request";
+import AuthApiRequests from "@/requests/auth.request";
 
 type CustomOptions = Omit<RequestInit, "method"> & {
   isPublic?: boolean | undefined; // Nếu là true thì không cần phải truyền access_token vào header
   baseUrl?: string | undefined;
+  notAutoLogout?: boolean | undefined; // Nếu là true thì không tự động logout khi nhận 401 statusCode
 };
 
 class ClientTokens {
@@ -152,16 +152,16 @@ const request = async <Response>(
           payload: EntityErrorPayload;
         }
       );
-    } else if (res.status === 401) {
+    } else if (res.status === 401 && !options?.notAutoLogout) {
       if (typeof window !== "undefined") {
-        await authApiRequests.logout(clientTokens.refresh_token);
+        await AuthApiRequests.logout(clientTokens.refresh_token);
         signOutClient();
       } else {
-        const session = await auth();
-        redirect(
-          "/logout?token=" + session?.user.refresh_token,
-          RedirectType.push
-        );
+        // const session = await auth();
+        // redirect(
+        //   "/logout?token=" + session?.user.refresh_token,
+        //   RedirectType.push
+        // );
       }
     } else {
       throw new HttpError(data);

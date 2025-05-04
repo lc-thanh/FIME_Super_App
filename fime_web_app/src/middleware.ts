@@ -5,8 +5,9 @@ import { NextMiddleware, NextRequest, NextResponse } from "next/server";
 export const SIGNIN_SUB_URL = "/login";
 export const SIGNOUT_SUB_URL = "/logout";
 export const ADMIN_SUB_URL = "/dashboard";
+export const TASK_SUB_URL = "/task";
 export const SESSION_TIMEOUT = 60 * 60 * 24 * 30; // 30 days
-export const TOKEN_REFRESH_BUFFER_SECONDS = 10;
+export const TOKEN_REFRESH_BUFFER = 1000 * 60 * 15;
 export const SESSION_SECURE = process.env.AUTH_URL?.startsWith("https://");
 export const SESSION_COOKIE = SESSION_SECURE
   ? "__Secure-authjs.session-token"
@@ -15,9 +16,7 @@ export const SESSION_COOKIE = SESSION_SECURE
 let isRefreshing = false;
 
 export function shouldUpdateToken(token: JWT): boolean {
-  return (
-    Date.now() >= token?.user.expires_at - TOKEN_REFRESH_BUFFER_SECONDS * 1000
-  );
+  return Date.now() >= token?.user.expires_at - TOKEN_REFRESH_BUFFER;
 }
 
 export async function refreshAccessToken(token: JWT): Promise<JWT> {
@@ -100,7 +99,7 @@ export function updateCookie(
 
 export const middleware: NextMiddleware = async (req: NextRequest) => {
   const token = (await getToken({
-    secret: process.env.AUTH_SECRET,
+    secret: process.env.AUTH_SECRET as string,
     req,
   })) as JWT;
 
@@ -110,7 +109,10 @@ export const middleware: NextMiddleware = async (req: NextRequest) => {
   if (!isAuthenticated) {
     if (req.nextUrl.pathname === SIGNIN_SUB_URL) return NextResponse.next();
     let newUrl = `${SIGNIN_SUB_URL}`;
-    if (req.nextUrl.pathname.startsWith(ADMIN_SUB_URL)) {
+    if (
+      req.nextUrl.pathname.startsWith(ADMIN_SUB_URL) ||
+      req.nextUrl.pathname.startsWith(TASK_SUB_URL)
+    ) {
       newUrl = `${SIGNIN_SUB_URL}?redirectFrom=${req.nextUrl.pathname}`;
     }
     return NextResponse.redirect(new URL(newUrl, req.nextUrl.origin));
@@ -153,5 +155,10 @@ export const middleware: NextMiddleware = async (req: NextRequest) => {
 };
 
 export const config = {
-  matcher: ["/login/:path*", "/dashboard/:path*", "/logout/:path*"],
+  matcher: [
+    "/login/:path*",
+    "/dashboard/:path*",
+    "/task/:path*",
+    "/logout/:path*",
+  ],
 };

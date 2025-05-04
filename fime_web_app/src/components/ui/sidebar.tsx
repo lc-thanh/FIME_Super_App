@@ -24,13 +24,14 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { usePathname } from "next/navigation";
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state";
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
 const SIDEBAR_WIDTH = "16rem";
 const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
-const SIDEBAR_KEYBOARD_SHORTCUT = "b";
+const SIDEBAR_KEYBOARD_SHORTCUT = "q";
 
 type SidebarContextProps = {
   state: "expanded" | "collapsed";
@@ -74,6 +75,8 @@ const SidebarProvider = React.forwardRef<
     ref
   ) => {
     const isMobile = useIsMobile();
+    const pathname = usePathname();
+    const alwaysOpenMobile = pathname.startsWith("/task");
     const [openMobile, setOpenMobile] = React.useState(false);
 
     // This is the internal state of the sidebar.
@@ -89,10 +92,12 @@ const SidebarProvider = React.forwardRef<
           _setOpen(openState);
         }
 
-        // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+        if (!alwaysOpenMobile) {
+          // This sets the cookie to keep the sidebar state.
+          document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+        }
       },
-      [setOpenProp, open]
+      [open, setOpenProp, alwaysOpenMobile]
     );
 
     // Helper to toggle the sidebar.
@@ -181,7 +186,10 @@ const Sidebar = React.forwardRef<
     },
     ref
   ) => {
-    const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
+    const { isMobile, state, open, setOpen, openMobile, setOpenMobile } =
+      useSidebar();
+    const pathname = usePathname();
+    const alwaysOpenMobile = pathname.startsWith("/task");
 
     if (collapsible === "none") {
       return (
@@ -198,9 +206,13 @@ const Sidebar = React.forwardRef<
       );
     }
 
-    if (isMobile) {
+    if (alwaysOpenMobile || isMobile) {
       return (
-        <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
+        <Sheet
+          open={isMobile ? openMobile : open}
+          onOpenChange={isMobile ? setOpenMobile : setOpen}
+          {...props}
+        >
           <SheetContent
             data-sidebar="sidebar"
             data-mobile="true"

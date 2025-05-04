@@ -8,6 +8,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from '@/modules/auth/passport/jwt-auth.guard';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { TaskModule } from './modules/task/task.module';
+import { WorkspaceModule } from './modules/workspace/workspace.module';
+import { TaskBoardGateway } from './gateways/task-board/task-board.gateway';
 
 @Module({
   imports: [
@@ -41,6 +44,8 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
       }),
       inject: [ConfigService],
     }),
+    TaskModule,
+    WorkspaceModule,
   ],
   controllers: [AppController],
   providers: [
