@@ -134,6 +134,7 @@ export const middleware: NextMiddleware = async (req: NextRequest) => {
     }
   } else {
     response = NextResponse.next();
+    // response.headers.set("x-next-url", req.nextUrl.pathname);
   }
 
   if (shouldUpdateToken(token)) {

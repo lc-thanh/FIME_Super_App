@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { SquareTerminal } from "lucide-react";
+import { PanelsTopLeft, Users } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -20,27 +20,40 @@ import { NavProjects } from "@/components/nav-projects";
 const data = {
   navMain: [
     {
-      title: "Playground",
+      title: "Quản lý nhân sự",
       url: "#",
-      icon: SquareTerminal,
-      isActive: true,
+      icon: Users,
       items: [
         {
-          title: "Tasks",
-          url: "/dashboard/task",
-        },
-        {
-          title: "Users",
-          url: "/dashboard/user",
+          title: "Thành viên",
+          url: "/dashboard/users",
         },
         {
           title: "Settings",
           url: "#",
         },
+        {
+          title: "Others",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Chỉnh sửa Website",
+      url: "#",
+      icon: PanelsTopLeft,
+      items: [
+        {
+          title: "Ấn phẩm mới nhất",
+          url: "/dashboard/latest-publication",
+        },
+        {
+          title: "Sản phẩm gần đây",
+          url: "#",
+        },
       ],
     },
   ],
-  projects: [],
 } as SidebarData;
 
 export function AppSidebar({
