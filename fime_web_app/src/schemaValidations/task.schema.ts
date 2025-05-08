@@ -5,13 +5,15 @@ export const UserTask = User.pick({
   id: true,
   fullname: true,
   email: true,
+  positionName: true,
+  teamName: true,
   image: true,
 })
   .extend({})
   .strict();
 export type UserTaskType = z.infer<typeof UserTask>;
 
-export const TaskType = z.enum([
+export const TypeOfTask = z.enum([
   "TODO",
   "MONTHLY_SEGMENTS",
   "PUBLICATION",
@@ -20,7 +22,7 @@ export const TaskType = z.enum([
   "TRAINING",
   "WORKSHOP",
 ]);
-export type TaskTypeType = z.infer<typeof TaskType>;
+export type TypeOfTaskType = z.infer<typeof TypeOfTask>;
 
 export const TaskStatus = z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"]);
 export type TaskStatusType = z.infer<typeof TaskStatus>;
@@ -30,7 +32,8 @@ export type TaskPriorityType = z.infer<typeof TaskPriority>;
 
 export const TodoItem = z
   .object({
-    id: z.number().min(0),
+    id: z.string().uuid().optional(),
+    order: z.number().min(0),
     content: z.string(),
     isDone: z.boolean(),
   })
@@ -72,7 +75,7 @@ export const Task = z
     title: z.string(),
     note: z.string().optional(),
     position: z.number(),
-    type: TaskType,
+    type: TypeOfTask,
     status: TaskStatus,
     priority: TaskPriority,
     startDate: z.date(),
@@ -96,6 +99,9 @@ export const TaskCard = Task.pick({
   status: true,
   priority: true,
   users: true,
+  startDate: true,
+  deadline: true,
+  type: true,
 })
   .extend({})
   .strict();

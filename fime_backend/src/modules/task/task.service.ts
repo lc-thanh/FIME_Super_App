@@ -46,7 +46,16 @@ export class TaskService {
         workspaceId,
       },
       include: {
-        users: true,
+        users: {
+          include: {
+            position: {
+              select: { name: true },
+            },
+            team: {
+              select: { name: true },
+            },
+          },
+        },
       },
       orderBy: {
         position: 'asc',
@@ -69,11 +78,16 @@ export class TaskService {
         position: task.position,
         status: task.status,
         priority: task.priority,
+        startDate: task.startDate,
+        deadline: task.deadline,
+        type: task.type,
         users: task.users.map((user) => ({
           id: user.id,
-          email: user.email,
           fullname: user.fullname,
+          email: user.email,
           image: user.image,
+          positionName: user.position?.name,
+          teamName: user.team?.name,
         })),
       };
 
@@ -83,12 +97,7 @@ export class TaskService {
       }
     });
 
-    return {
-      message: 'Lấy danh sách task cá nhân thành công!',
-      data: {
-        columns,
-      },
-    };
+    return columns;
   }
 
   async calcTaskNewPosition({

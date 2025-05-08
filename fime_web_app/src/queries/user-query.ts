@@ -1,9 +1,11 @@
 import { UserApiRequests } from "@/requests/user.request";
 import { queryOptions } from "@tanstack/react-query";
 
+export const USER_QUERY_KEY = "user";
+
 export const userQueryOptions = (searchParams: string) =>
   queryOptions({
-    queryKey: ["user", searchParams],
+    queryKey: [USER_QUERY_KEY, searchParams],
     queryFn: async ({ queryKey }) => {
       const [, searchParams] = queryKey;
       try {

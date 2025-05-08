@@ -25,11 +25,16 @@ export class TaskController {
   }
 
   @Get('my-task-cards/:workspaceId')
-  getPersonalTasks(
+  async getPersonalTasks(
     @UuidParam('workspaceId') workspaceId: string,
     @User() user: IAccessTokenPayload,
   ) {
-    return this.taskService.getTaskCards(user.sub, workspaceId);
+    return {
+      message: 'Lấy danh sách task cá nhân thành công!',
+      data: {
+        columns: await this.taskService.getTaskCards(user.sub, workspaceId),
+      },
+    };
   }
 
   @Post('move-card')
@@ -42,9 +47,12 @@ export class TaskController {
     return this.taskService.findAll();
   }
 
-  @Post(':id')
-  findOne(@UuidParam('id') id: string, @Body() body: { workspaceId?: string }) {
-    return this.taskService.findOne(id, ['id'], body?.workspaceId);
+  @Get(':id')
+  async findOne(@UuidParam('id') id: string) {
+    return {
+      message: 'Lấy thông tin task thành công',
+      data: await this.taskService.findOne(id, ['id']),
+    };
   }
 
   @Patch(':id')

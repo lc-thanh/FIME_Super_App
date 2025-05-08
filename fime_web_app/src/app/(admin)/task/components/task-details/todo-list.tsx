@@ -24,8 +24,18 @@ const saveTodosToAPI = async (
 export default function TodoList() {
   // Initialize with two example todos
   const [todos, setTodos] = useState<TodoItemType[]>([
-    { id: 0, content: "Ví dụ: Chuẩn bị source", isDone: true },
-    { id: 1, content: "Ví dụ: Chỉnh màu", isDone: false },
+    {
+      id: "c40e6dcf-e019-46b8-9c5e-12b79e2f36e9",
+      order: 0,
+      content: "Ví dụ: Chuẩn bị source",
+      isDone: true,
+    },
+    {
+      id: "357f53d2-ab24-4ded-a1bf-61e401d04b89",
+      order: 1,
+      content: "Ví dụ: Chỉnh màu",
+      isDone: false,
+    },
   ]);
   // Keep track of original todos for cancellation
   const [originalTodos, setOriginalTodos] = useState<TodoItemType[]>(todos);
@@ -52,11 +62,11 @@ export default function TodoList() {
   // Add a new todo
   const addTodo = () => {
     const maxId = todos.reduce(
-      (max, todo) => (todo.id > max ? todo.id : max),
+      (max, todo) => (todo.order > max ? todo.order : max),
       0
     );
     const newTodo: TodoItemType = {
-      id: maxId + 1,
+      order: maxId + 1,
       content: "",
       isDone: false,
     };
@@ -64,24 +74,24 @@ export default function TodoList() {
   };
 
   // Toggle todo completion
-  const toggleTodo = (id: number) => {
+  const toggleTodo = (order: number) => {
     setTodos(
       todos.map((todo) =>
-        todo.id === id ? { ...todo, isDone: !todo.isDone } : todo
+        todo.order === order ? { ...todo, isDone: !todo.isDone } : todo
       )
     );
   };
 
   // Update todo text
-  const updateTodoText = (id: number, content: string) => {
+  const updateTodoText = (order: number, content: string) => {
     setTodos(
-      todos.map((todo) => (todo.id === id ? { ...todo, content } : todo))
+      todos.map((todo) => (todo.order === order ? { ...todo, content } : todo))
     );
   };
 
   // Delete a todo
-  const deleteTodo = (id: number) => {
-    setTodos(todos.filter((todo) => todo.id !== id));
+  const deleteTodo = (order: number) => {
+    setTodos(todos.filter((todo) => todo.order !== order));
   };
 
   // Save todos to API
@@ -114,18 +124,21 @@ export default function TodoList() {
       </div>
 
       {todos.map((todo) => (
-        <div key={todo.id} className="flex items-center space-x-2 p-1 border-b">
+        <div
+          key={todo.order}
+          className="flex items-center space-x-2 p-1 border-b"
+        >
           <Checkbox
-            id={`todo-${todo.id}`}
+            id={`todo-${todo.order}`}
             checked={todo.isDone}
-            onCheckedChange={() => toggleTodo(todo.id)}
+            onCheckedChange={() => toggleTodo(todo.order)}
             className={cn("h-4 w-4 border-2")}
           />
           <div className="flex-1">
             <Input
               value={todo.content}
               onChange={(e) => {
-                updateTodoText(todo.id, e.target.value);
+                updateTodoText(todo.order, e.target.value);
               }}
               className={cn(
                 "border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base",
@@ -138,7 +151,7 @@ export default function TodoList() {
             type="button"
             variant="ghost"
             size="icon"
-            onClick={() => deleteTodo(todo.id)}
+            onClick={() => deleteTodo(todo.order)}
             className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50"
             aria-label="Delete todo"
           >

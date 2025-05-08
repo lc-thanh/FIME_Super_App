@@ -7,7 +7,7 @@ import {
   moveCard,
 } from "@caldwell619/react-kanban";
 
-import { renderCard } from "@/app/(admin)/task/components/card";
+import { renderCard } from "@/app/(admin)/task/components/task-card/card";
 import { renderColumnHeader } from "@/app/(admin)/task/components/column-header";
 import "@/app/(admin)/task/components/style.css";
 import {
@@ -21,7 +21,10 @@ import {
   useQueryClient,
   useSuspenseQuery,
 } from "@tanstack/react-query";
-import { taskQueryOptions } from "@/queries/task-query";
+import {
+  TASK_CARDS_QUERY_KEY,
+  taskCardsQueryOptions,
+} from "@/queries/task-query";
 import { MoveCardData, TaskApiRequests } from "@/requests/task.request";
 import { toast } from "sonner";
 import { useSocketEvent } from "@/hooks/use-socket-event";
@@ -41,7 +44,7 @@ interface MovedCard {
 export const TaskBoard = ({ workspaceId }: { workspaceId: string }) => {
   const socket = useSocket();
   const queryClient = useQueryClient();
-  const { data } = useSuspenseQuery(taskQueryOptions(workspaceId));
+  const { data } = useSuspenseQuery(taskCardsQueryOptions(workspaceId));
   const [controlledBoard, setBoard] = useState<MyBoard>(data);
   const [movedCard, setMovedCard] = useState<MovedCard | null>(null);
   const [socketId, setSocketId] = useState<string | undefined>("");
@@ -51,7 +54,9 @@ export const TaskBoard = ({ workspaceId }: { workspaceId: string }) => {
   });
 
   useSocketEvent("board-updated", () => {
-    queryClient.invalidateQueries({ queryKey: ["task", workspaceId] });
+    queryClient.invalidateQueries({
+      queryKey: [TASK_CARDS_QUERY_KEY, workspaceId],
+    });
   });
 
   useEmitOnConnect("join-workspace", workspaceId);
@@ -67,7 +72,9 @@ export const TaskBoard = ({ workspaceId }: { workspaceId: string }) => {
     onError: (error) => {
       console.error(">>> move card error", error);
       toast.error("Có lỗi xảy ra!");
-      queryClient.invalidateQueries({ queryKey: ["task", workspaceId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_CARDS_QUERY_KEY, workspaceId],
+      });
       setBoard(data);
     },
   });

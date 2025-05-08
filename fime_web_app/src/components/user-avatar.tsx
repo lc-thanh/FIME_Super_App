@@ -1,11 +1,20 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import envConfig from "@/config";
 
-function getFirstLetterOfLastName(fullName: string) {
-  if (!fullName) return "";
-  const words = fullName.trim().split(" ");
-  const lastWord = words[words.length - 1];
-  return lastWord.charAt(0).toUpperCase();
+// function getFirstLetterOfLastName(fullName: string) {
+//   if (!fullName) return "";
+//   const words = fullName.trim().split(" ");
+//   const lastWord = words[words.length - 1];
+//   return lastWord.charAt(0).toUpperCase();
+// }
+
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase()
+    .substring(0, 2);
 }
 
 export const UserAvatar = ({
@@ -27,7 +36,7 @@ export const UserAvatar = ({
         alt={`${fullname}'s avatar`}
       />
       <AvatarFallback className="bg-fimeOrangeLighter text-white">
-        {getFirstLetterOfLastName(fullname)}
+        {getInitials(fullname)}
       </AvatarFallback>
     </Avatar>
   );

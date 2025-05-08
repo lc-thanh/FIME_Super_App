@@ -158,6 +158,7 @@ model TodoList {
   id        String   @id @default(uuid())
   order     Int      @default(0) @db.SmallInt
   content   String
+  isDone    Boolean  @default(false)
   startDate DateTime
   deadline  DateTime
 
