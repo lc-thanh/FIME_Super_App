@@ -1,8 +1,8 @@
 Enum "Role" {
   "ADMIN"
   "MANAGER"
-  "TREASURER"
   "MEMBER"
+  "FORMER_MEMBER"
 }
 
 Enum "TaskPriority" {
@@ -34,6 +34,17 @@ Enum "UserStatus" {
   "BANNED"
 }
 
+Table "_prisma_migrations" {
+  "id" varchar(36) [pk, not null]
+  "checksum" varchar(64) [not null]
+  "finished_at" timestamptz
+  "migration_name" varchar(255) [not null]
+  "logs" text
+  "rolled_back_at" timestamptz
+  "started_at" timestamptz [not null, default: `now()`]
+  "applied_steps_count" int4 [not null, default: 0]
+}
+
 Table "User" {
   "id" text [pk, not null]
   "fullname" text [not null]
@@ -44,6 +55,7 @@ Table "User" {
   "image" text
   "positionId" text
   "teamId" text
+  "genId" text
   "role" "Role[]" [default: `ARRAY['MEMBER']`]
   "status" UserStatus [not null, default: 'INACTIVE']
   "codeId" text
@@ -75,10 +87,19 @@ Table "Position" {
   "updatedAt" timestamp [not null]
 }
 
-Table "Task" {
+Table "Gen" {
   "id" text [pk, not null]
   "name" text [not null]
   "description" text
+  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
+  "updatedAt" timestamp [not null]
+}
+
+Table "Task" {
+  "id" text [pk, not null]
+  "title" text [not null]
+  "note" jsonb
+  "position" float8 [not null]
   "color" text
   "type" TaskType [not null, default: 'TODO']
   "status" TaskStatus [not null, default: 'TODO']
@@ -93,15 +114,16 @@ Table "Task" {
   "updatedAt" timestamp [not null]
 }
 
-Table "UserTask" {
+Table "TodoList" {
+  "id" text [pk, not null]
+  "order" int2 [not null, default: 0]
+  "content" text [not null]
+  "startDate" timestamp [not null]
+  "deadline" timestamp [not null]
   "taskId" text [not null]
-  "userId" text [not null]
-  "position" int2 [not null, default: 0]
-  "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
-  "updatedAt" timestamp [not null]
 
   Indexes {
-    (taskId, userId) [type: btree, name: "UserTask_pkey"]
+    taskId [type: btree, name: "TodoList_taskId_idx"]
   }
 }
 
@@ -116,6 +138,7 @@ Table "TaskComment" {
 
 Table "TaskAttachment" {
   "id" text [pk, not null]
+  "title" text [not null]
   "url" text [not null]
   "taskId" text [not null]
   "userId" text [not null]
@@ -123,11 +146,11 @@ Table "TaskAttachment" {
   "updatedAt" timestamp [not null]
 }
 
-Table "TodoList" {
+Table "TaskActivity" {
   "id" text [pk, not null]
   "content" text [not null]
   "taskId" text [not null]
-  "isDone" bool [not null, default: false]
+  "userId" text [not null]
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
   "updatedAt" timestamp [not null]
 }
@@ -198,9 +221,43 @@ Table "Announcement" {
   "updatedAt" timestamp [not null]
 }
 
+Table "_UserToWorkspace" {
+  "A" text [not null]
+  "B" text [not null]
+
+  Indexes {
+    (A, B) [type: btree, name: "_UserToWorkspace_AB_pkey"]
+    B [type: btree, name: "_UserToWorkspace_B_index"]
+  }
+}
+
+Table "_TaskToUser" {
+  "A" text [not null]
+  "B" text [not null]
+
+  Indexes {
+    (A, B) [type: btree, name: "_TaskToUser_AB_pkey"]
+    B [type: btree, name: "_TaskToUser_B_index"]
+  }
+}
+
+Table "_TodoListToUser" {
+  "A" text [not null]
+  "B" text [not null]
+
+  Indexes {
+    (A, B) [type: btree, name: "_TodoListToUser_AB_pkey"]
+    B [type: btree, name: "_TodoListToUser_B_index"]
+  }
+}
+
 Ref "Task_monthlySegmentId_fkey":"MonthlySegment"."id" < "Task"."monthlySegmentId" [update: cascade, delete: set null]
 
 Ref "Task_workspaceId_fkey":"Workspace"."id" < "Task"."workspaceId" [update: cascade, delete: cascade]
+
+Ref "TaskActivity_taskId_fkey":"Task"."id" < "TaskActivity"."taskId" [update: cascade, delete: cascade]
+
+Ref "TaskActivity_userId_fkey":"User"."id" < "TaskActivity"."userId" [update: cascade, delete: cascade]
 
 Ref "TaskAttachment_taskId_fkey":"Task"."id" < "TaskAttachment"."taskId" [update: cascade, delete: cascade]
 
@@ -216,12 +273,22 @@ Ref "TeamSegment_teamId_fkey":"Team"."id" < "TeamSegment"."teamId" [update: casc
 
 Ref "TodoList_taskId_fkey":"Task"."id" < "TodoList"."taskId" [update: cascade, delete: cascade]
 
+Ref "User_genId_fkey":"Gen"."id" < "User"."genId" [update: cascade, delete: set null]
+
 Ref "User_positionId_fkey":"Position"."id" < "User"."positionId" [update: cascade, delete: set null]
 
 Ref "User_teamId_fkey":"Team"."id" < "User"."teamId" [update: cascade, delete: set null]
 
 Ref "UserActions_userId_fkey":"User"."id" < "UserActions"."userId" [update: cascade, delete: cascade]
 
-Ref "UserTask_taskId_fkey":"Task"."id" < "UserTask"."taskId" [update: cascade, delete: cascade]
+Ref "_TaskToUser_A_fkey":"Task"."id" < "_TaskToUser"."A" [update: cascade, delete: cascade]
 
-Ref "UserTask_userId_fkey":"User"."id" < "UserTask"."userId" [update: cascade, delete: cascade]
+Ref "_TaskToUser_B_fkey":"User"."id" < "_TaskToUser"."B" [update: cascade, delete: cascade]
+
+Ref "_TodoListToUser_A_fkey":"TodoList"."id" < "_TodoListToUser"."A" [update: cascade, delete: cascade]
+
+Ref "_TodoListToUser_B_fkey":"User"."id" < "_TodoListToUser"."B" [update: cascade, delete: cascade]
+
+Ref "_UserToWorkspace_A_fkey":"User"."id" < "_UserToWorkspace"."A" [update: cascade, delete: cascade]
+
+Ref "_UserToWorkspace_B_fkey":"Workspace"."id" < "_UserToWorkspace"."B" [update: cascade, delete: cascade]

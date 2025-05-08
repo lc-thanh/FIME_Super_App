@@ -7,6 +7,8 @@ import {
   Delete,
   Query,
   NotFoundException,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,14 +18,30 @@ import {
   UserPaginatedResponse,
 } from '@/modules/user/dto/user-pagination';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  imageFileFilter,
+  userAvatarLimits,
+  userAvatarsStorage,
+} from '@/configs/multer.config';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: userAvatarsStorage,
+      fileFilter: imageFileFilter,
+      limits: userAvatarLimits,
+    }),
+  )
+  create(
+    @Body() createUserDto: CreateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.userService.create(createUserDto, file?.filename);
   }
 
   @Get()
@@ -51,4 +69,24 @@ export class UserController {
   remove(@UuidParam() id: string) {
     return this.userService.remove(id);
   }
+
+  // OPTIONAL!!
+  // Nếu cần thiết lập một route để lấy file bảo mật hơn (không phải public)
+  // @Get('avatar/:filename')
+  // getAvatar(@Param('filename') filename: string, @Res() res: Response) {
+  //   const filePath = join(
+  //     process.cwd(),
+  //     'public',
+  //     'users',
+  //     'avatars',
+  //     filename,
+  //   );
+
+  //   // Kiểm tra xem file có tồn tại không (optional, bạn có thể bổ sung)
+  //   res.sendFile(filePath, (err) => {
+  //     if (err) {
+  //       res.status(404).json({ message: 'File not found!' });
+  //     }
+  //   });
+  // }
 }

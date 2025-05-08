@@ -10,7 +10,10 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { TaskModule } from './modules/task/task.module';
 import { WorkspaceModule } from './modules/workspace/workspace.module';
-import { TaskBoardGateway } from './gateways/task-board/task-board.gateway';
+import { PositionModule } from './modules/position/position.module';
+import { TeamModule } from './modules/team/team.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -44,8 +47,14 @@ import { TaskBoardGateway } from './gateways/task-board/task-board.gateway';
       }),
       inject: [ConfigService],
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'public'), // Đường dẫn đến thư mục public
+      serveRoot: '/public', // URL sẽ được truy cập tại /public
+    }),
     TaskModule,
     WorkspaceModule,
+    PositionModule,
+    TeamModule,
   ],
   controllers: [AppController],
   providers: [

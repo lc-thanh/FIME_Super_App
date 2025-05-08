@@ -44,8 +44,8 @@ export function NavMain({
           <Collapsible
             key={item.title}
             asChild
-            defaultOpen={item.items?.some(
-              (subItem) => pathname === subItem.url
+            defaultOpen={item.items?.some((subItem) =>
+              pathname.includes(subItem.url)
             )}
             className="group/collapsible"
           >
@@ -53,8 +53,8 @@ export function NavMain({
               <CollapsibleTrigger asChild>
                 <SidebarMenuButton
                   tooltip={item.title}
-                  isActive={item.items?.some(
-                    (subItem) => pathname === subItem.url
+                  isActive={item.items?.some((subItem) =>
+                    pathname.includes(subItem.url)
                   )}
                   variant="fimeGradient"
                 >

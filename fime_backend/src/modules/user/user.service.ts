@@ -5,6 +5,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,10 +16,14 @@ import { UserFilterType, UserPaginatedResponse } from './dto/user-pagination';
 import { SignUpDto } from '@/modules/auth/dto/signUp.dto';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async isEmailExist(email: string): Promise<boolean> {
     return this.prismaService.user
@@ -32,15 +37,21 @@ export class UserService {
       .then((user) => !!user);
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto, image?: string) {
     if (await this.isEmailExist(createUserDto.email)) {
-      throw new BadRequestException('Đã tồn tại email này!');
+      throw new UnprocessableEntityException([
+        { field: 'email', error: 'Đã tồn tại email này!' },
+      ]);
     }
     if (await this.isPhoneExist(createUserDto.phone)) {
-      throw new BadRequestException('Đã tồn tại số điện thoại này!');
+      throw new UnprocessableEntityException([
+        { field: 'phone', error: 'Đã tồn tại số điện thoại này!' },
+      ]);
     }
 
-    const hashedPassword = await hashPasswordHelper(createUserDto.password);
+    const hashedPassword = await hashPasswordHelper(
+      this.configService.get<string>('DEFAULT_PASSWORD') || '123456',
+    );
     if (!hashedPassword) {
       throw new HttpException(
         'Có lỗi xảy ra trong quá trình mã hóa mật khẩu!',
@@ -51,6 +62,7 @@ export class UserService {
     const newUser = await this.prismaService.user.create({
       data: {
         ...createUserDto,
+        image,
         password: hashedPassword,
       },
     });
@@ -65,8 +77,8 @@ export class UserService {
     const pageSize = Number(params.pageSize) || 10;
     const page = Number(params.page) || 1;
     const skip = pageSize * (page - 1);
-    const sortBy = params.sortBy || 'createdAt';
-    const sortOrder = params.sortOrder || 'desc';
+    const sortBy = params.sortBy || 'status';
+    const sortOrder = params.sortOrder || 'asc';
     const validSortByFields = ['fullname', 'email', 'phone', 'createdAt'];
 
     const where = {
@@ -82,14 +94,33 @@ export class UserService {
       skip,
       take: pageSize,
       orderBy: {
-        [validSortByFields.includes(sortBy) ? sortBy : 'createdAt']:
+        [validSortByFields.includes(sortBy) ? sortBy : 'status']:
           sortOrder === 'asc' ? 'asc' : 'desc',
+      },
+      include: {
+        position: true,
+        team: true,
+        gen: true,
       },
     });
     const total = await this.prismaService.user.count({ where });
 
     return {
-      data: users,
+      data: users.map((user) => ({
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        phone: user.phone,
+        address: user.address,
+        image: user.image,
+        positionName: user.position?.name || null,
+        teamName: user.team?.name || null,
+        genName: user.gen?.name || null,
+        role: user.role,
+        status: user.status,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      })),
       page,
       pageSize,
       total,

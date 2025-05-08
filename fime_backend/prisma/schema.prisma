@@ -43,7 +43,7 @@ model User {
   position      Position?     @relation(fields: [positionId], references: [id], onDelete: SetNull)
   teamId        String?
   team          Team?         @relation(fields: [teamId], references: [id], onDelete: SetNull)
-  Gen           Gen?          @relation(fields: [genId], references: [id], onDelete: SetNull)
+  gen           Gen?          @relation(fields: [genId], references: [id], onDelete: SetNull)
   genId         String?
   role          Role[]        @default([MEMBER])
   status        UserStatus    @default(INACTIVE)
