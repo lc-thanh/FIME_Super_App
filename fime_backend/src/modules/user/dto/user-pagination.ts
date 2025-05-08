@@ -1,4 +1,4 @@
-import { User } from '@prisma/client';
+import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 
 export interface UserFilterType {
   search?: string;
@@ -9,7 +9,7 @@ export interface UserFilterType {
 }
 
 export interface UserPaginatedResponse {
-  data: User[];
+  data: UserViewDto[];
   page: number;
   pageSize: number;
   total: number;

@@ -14,7 +14,7 @@ export const Header = () => {
       <div className="flex flex-row w-full justify-content-start items-center gap-2">
         <SidebarTrigger />
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <span>{pathname}</span>
+        {/* <span>{pathname}</span> */}
       </div>
       <div className="flex flex-row gap-2">
         <ActionSearchBar />
