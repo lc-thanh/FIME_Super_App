@@ -20,7 +20,7 @@ export const renderColumnHeader: ControlledBoardProps<TaskCardType>["renderColum
         )}
       >
         <p>{title}</p>
-        <Badge>{cards.length}</Badge>
+        <Badge variant="fimeGradient">{cards.length}</Badge>
       </Box>
     );
   };

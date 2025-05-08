@@ -5,8 +5,9 @@ import { ModeToggle } from "@/components/mode-toggle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getQueryClient } from "@/lib/get-query-client";
-import { taskQueryOptions } from "@/queries/task-query";
+import { taskCardsQueryOptions } from "@/queries/task-query";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
+import TaskDialog from "@/app/(admin)/task/components/task-details/task-dialog";
 
 export default async function TaskPage({
   params,
@@ -15,10 +16,12 @@ export default async function TaskPage({
 }) {
   const { workspaceId } = await params;
   const queryClient = getQueryClient();
-  void queryClient.prefetchQuery(taskQueryOptions(workspaceId));
+  void queryClient.prefetchQuery(taskCardsQueryOptions(workspaceId));
 
   return (
     <div className="flex w-full flex-col gap-4 w-ful align-middle">
+      <TaskDialog />
+
       <header className="flex py-4 bg-fimeOrangeLighter dark:bg-orange-900 flex-row w-full justify-content-evenly pe-4 h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
         <div className="flex flex-row w-full justify-content-start items-center gap-2 px-4">
           <SidebarTrigger className="text-white" />

@@ -142,7 +142,7 @@ export function UserTable() {
                   </Link>
 
                   <UserDeleteButton
-                    id={user.id}
+                    // id={user.id}
                     callback={() => {
                       console.log("delete user", user.id);
                     }}

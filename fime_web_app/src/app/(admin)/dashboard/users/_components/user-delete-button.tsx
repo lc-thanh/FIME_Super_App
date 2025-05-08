@@ -17,10 +17,10 @@ import React from "react";
 import { toast } from "sonner";
 
 export default function UserDeleteButton({
-  id,
+  // id,
   callback,
 }: {
-  id: string;
+  // id: string;
   callback: () => void;
 }) {
   const [open, setOpen] = React.useState(false);

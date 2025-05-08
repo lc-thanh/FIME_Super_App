@@ -32,19 +32,19 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-y-auto`}
       >
-        <BoundStoreProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-          >
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <BoundStoreProvider>
             <QueryProviders>
               <SocketProvider>{children}</SocketProvider>
             </QueryProviders>
-            <Toaster richColors />
-          </ThemeProvider>
-        </BoundStoreProvider>
+          </BoundStoreProvider>
+          <Toaster richColors />
+        </ThemeProvider>
       </body>
     </html>
   );

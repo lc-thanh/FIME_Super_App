@@ -4,10 +4,9 @@ import ActionSearchBar from "@/components/action-search-bar";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import { usePathname } from "next/navigation";
 
 export const Header = () => {
-  const pathname = usePathname();
+  // const pathname = usePathname();
 
   return (
     <header className="flex sticky top-0 h-14 shrink-0 items-center gap-2 border-b px-4 z-50 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">

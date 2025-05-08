@@ -39,6 +39,7 @@ import { RoleSelector } from "@/components/role-selector";
 import { teamSelectors } from "@/queries/team-query";
 import { UserApiRequests } from "@/requests/user.request";
 import { toast } from "sonner";
+import { USER_QUERY_KEY } from "@/queries/user-query";
 
 export default function CreateUserForm() {
   const [imageUpload, setImageUpload] = useState<File | null>(null);
@@ -68,7 +69,7 @@ export default function CreateUserForm() {
     },
     onSuccess: () => {
       toast.success("Thêm thành viên mới thành công!");
-      queryClient.invalidateQueries({ queryKey: ["user"] });
+      queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY] });
       router.push("/dashboard/users");
     },
     onError: (error) => {
