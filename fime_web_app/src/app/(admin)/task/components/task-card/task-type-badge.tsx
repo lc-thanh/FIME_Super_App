@@ -1,9 +1,4 @@
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { TypeOfTaskType } from "@/schemaValidations/task.schema";
 
@@ -39,18 +34,18 @@ export const TaskTypeBadge = ({
   }[taskType];
 
   return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Badge
-          variant="outline"
-          className={cn("text-xs font-medium h-fit py-1", typeClass, className)}
-        >
-          {typeText}
-        </Badge>
-      </TooltipTrigger>
-      <TooltipContent side="top">
-        <p>Loại: {typeText}</p>
-      </TooltipContent>
-    </Tooltip>
+    // <Tooltip>
+    //   <TooltipTrigger asChild>
+    <Badge
+      variant="outline"
+      className={cn("text-xs font-medium h-fit py-1", typeClass, className)}
+    >
+      {typeText}
+    </Badge>
+    //   </TooltipTrigger>
+    //   <TooltipContent side="top">
+    //     <p>Loại: {typeText}</p>
+    //   </TooltipContent>
+    // </Tooltip>
   );
 };

@@ -29,7 +29,6 @@ import { MoveCardData, TaskApiRequests } from "@/requests/task.request";
 import { toast } from "sonner";
 import { useSocketEvent } from "@/hooks/use-socket-event";
 import { useEmitOnConnect } from "@/hooks/use-emit-on-connect";
-import { useSocket } from "@/providers/socket-provider";
 
 interface MyBoard {
   columns: ColumnType[];
@@ -42,16 +41,16 @@ interface MovedCard {
 }
 
 export const TaskBoard = ({ workspaceId }: { workspaceId: string }) => {
-  const socket = useSocket();
+  // const socket = useSocket();
   const queryClient = useQueryClient();
   const { data } = useSuspenseQuery(taskCardsQueryOptions(workspaceId));
   const [controlledBoard, setBoard] = useState<MyBoard>(data);
   const [movedCard, setMovedCard] = useState<MovedCard | null>(null);
-  const [socketId, setSocketId] = useState<string | undefined>("");
+  // const [socketId, setSocketId] = useState<string | undefined>(undefined);
 
-  useSocketEvent("connect", () => {
-    setSocketId(socket.id);
-  });
+  // useSocketEvent("connect", () => {
+  //   setSocketId(socket.id);
+  // });
 
   useSocketEvent("board-updated", () => {
     queryClient.invalidateQueries({
@@ -66,7 +65,7 @@ export const TaskBoard = ({ workspaceId }: { workspaceId: string }) => {
       return TaskApiRequests.moveCard({
         ...data,
         workspaceId,
-        socketId: socketId || "",
+        // socketId: socketId,
       });
     },
     onError: (error) => {
