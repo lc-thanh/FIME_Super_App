@@ -34,7 +34,7 @@ const data = {
         },
         {
           title: "Quản lý Chức vụ",
-          url: "#",
+          url: "/dashboard/positions",
         },
       ],
     },

@@ -16,22 +16,22 @@ import { useForm } from "react-hook-form";
 import { handleApiError } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { TEAM_QUERY_KEY } from "@/queries/team-query";
 import { toast } from "sonner";
-import {
-  CreateTeamBody,
-  CreateTeamBodyType,
-} from "@/schemaValidations/team.schema";
-import { TeamApiRequests } from "@/requests/team.request";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  CreatePositionBody,
+  CreatePositionBodyType,
+} from "@/schemaValidations/position.schema";
+import { POSITION_QUERY_KEY } from "@/queries/position-query";
+import { PositionApiRequests } from "@/requests/position.request";
 
-export default function CreateTeamForm() {
+export default function CreatePositionForm() {
   const router = useRouter();
 
   const queryClient = useQueryClient();
 
-  const form = useForm<CreateTeamBodyType>({
-    resolver: zodResolver(CreateTeamBody),
+  const form = useForm<CreatePositionBodyType>({
+    resolver: zodResolver(CreatePositionBody),
     defaultValues: {
       name: "",
       description: "",
@@ -39,13 +39,13 @@ export default function CreateTeamForm() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: CreateTeamBodyType) => {
-      return await TeamApiRequests.create(values);
+    mutationFn: async (values: CreatePositionBodyType) => {
+      return await PositionApiRequests.create(values);
     },
     onSuccess: () => {
-      toast.success("Tạo Ban mới thành công!");
-      queryClient.invalidateQueries({ queryKey: [TEAM_QUERY_KEY] });
-      router.push("/dashboard/teams");
+      toast.success("Tạo chức vụ mới thành công!");
+      queryClient.invalidateQueries({ queryKey: [POSITION_QUERY_KEY] });
+      router.push("/dashboard/positions");
     },
     onError: (error) => {
       handleApiError({
@@ -56,7 +56,7 @@ export default function CreateTeamForm() {
     },
   });
 
-  async function onSubmit(values: CreateTeamBodyType) {
+  async function onSubmit(values: CreatePositionBodyType) {
     mutation.mutate({
       ...values,
     });
@@ -77,10 +77,10 @@ export default function CreateTeamForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Tên ban <span className="text-destructive">*</span>
+                  Tên chức vụ <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Nhập tên ban" {...field} />
+                  <Input placeholder="Nhập tên chức vụ" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

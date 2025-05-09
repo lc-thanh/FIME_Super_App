@@ -6,23 +6,33 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PositionService } from './position.service';
 import { CreatePositionDto } from './dto/create-position.dto';
 import { UpdatePositionDto } from './dto/update-position.dto';
+import {
+  PositionFilterType,
+  PositionPaginatedResponse,
+} from '@/modules/position/dto/position-pagination';
 
 @Controller('positions')
 export class PositionController {
   constructor(private readonly positionService: PositionService) {}
 
   @Post()
-  create(@Body() createPositionDto: CreatePositionDto) {
-    return this.positionService.create(createPositionDto);
+  async create(@Body() createPositionDto: CreatePositionDto) {
+    return {
+      message: 'Tạo ban mới thành công!',
+      data: await this.positionService.create(createPositionDto),
+    };
   }
 
   @Get()
-  findAll() {
-    return this.positionService.findAll();
+  async findAll(
+    @Query() params: PositionFilterType,
+  ): Promise<PositionPaginatedResponse> {
+    return this.positionService.findAll(params);
   }
 
   @Get('selectors')

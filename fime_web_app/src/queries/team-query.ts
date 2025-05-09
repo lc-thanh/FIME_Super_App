@@ -2,7 +2,7 @@ import { TeamApiRequests } from "@/requests/team.request";
 import { queryOptions } from "@tanstack/react-query";
 
 export const TEAM_SELECTORS_QUERY_KEY = "teamSelectors";
-export const TEAM_QUERY_KEY = "teams";
+export const TEAM_QUERY_KEY = "team";
 
 export const teamQueryOptions = (searchParams: string) =>
   queryOptions({
