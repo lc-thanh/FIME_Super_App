@@ -9,9 +9,9 @@ import { TaskCardType } from "@/schemaValidations/task.schema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { TaskAssignees } from "@/app/(admin)/task/components/task-card/task-assignees";
 import { PriorityBadge } from "@/app/(admin)/task/components/task-card/priority-badge";
-import dayjs from "dayjs";
-import { cn } from "@/lib/utils";
 import { TaskTypeBadge } from "@/app/(admin)/task/components/task-card/task-type-badge";
+import { DateOfCard } from "@/app/(admin)/task/components/task-card/date-of-card";
+import { cn } from "@/lib/utils";
 
 export const FimeCard: FC<TaskCardType> = ({
   id,
@@ -20,6 +20,7 @@ export const FimeCard: FC<TaskCardType> = ({
   priority,
   startDate,
   deadline,
+  status,
   type,
 }) => {
   const searchParams = useSearchParams();
@@ -34,7 +35,10 @@ export const FimeCard: FC<TaskCardType> = ({
 
   return (
     <Card
-      className="w-[300px] shadow-md rounded-lg m-1"
+      className={cn(
+        "w-[300px] shadow-md rounded-lg m-1",
+        status === "DONE" && "opacity-40"
+      )}
       onClick={() => openTask(id)}
     >
       <CardContent className="p-4 flex flex-col gap-4">
@@ -48,17 +52,11 @@ export const FimeCard: FC<TaskCardType> = ({
           </Box>
           <Box className="flex flex-row items-center justify-between">
             <Box>
-              <span
-                className={cn(
-                  "text-xs text-muted-foreground",
-                  dayjs(deadline).isBefore(dayjs(), "day")
-                    ? "text-red-500 dark:text-red-400"
-                    : ""
-                )}
-              >
-                {dayjs(startDate).format("DD/MM/YYYY")} -{" "}
-                {dayjs(deadline).format("DD/MM/YYYY")}
-              </span>
+              <DateOfCard
+                startDate={startDate}
+                deadline={deadline}
+                status={status}
+              />
             </Box>
             <div className="flex flex-row items-center justify-between gap-2">
               {/* {prLink ? (

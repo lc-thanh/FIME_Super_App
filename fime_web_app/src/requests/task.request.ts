@@ -26,6 +26,11 @@ export const TaskApiRequests = {
     ),
 
   moveCard: async (
-    data: MoveCardData & { workspaceId: string; socketId: string }
-  ) => http.post<{ message: string }>("tasks/move-card", data),
+    data: MoveCardData & { workspaceId: string; socketId?: string }
+  ) => {
+    // const delay = (ms: number) =>
+    //   new Promise((resolve) => setTimeout(resolve, ms));
+    // await delay(2000);
+    return http.post<{ message: string }>("tasks/move-card", data);
+  },
 };

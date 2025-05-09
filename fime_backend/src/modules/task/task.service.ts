@@ -255,7 +255,7 @@ export class TaskService {
     // để tự động cập nhật lại task board bằng socket.io
     this.taskBoardGateway.server
       .to(`workspace-${workspaceId}`)
-      .except(data.socketId || '')
+      // .except(data.socketId || '')
       .emit('board-updated');
 
     return {
