@@ -18,6 +18,22 @@
 
 FIME Super App is a cutting-edge full-stack application developed as a graduation project. It aims to provide a comprehensive platform for task management and team collaboration, integrating modern technologies for both frontend and backend development.
 
+## Version Compatibility
+
+To ensure smooth installation and consistent performance, please make sure your development environment matches the following versions:
+
+- **Node.js**: `22.9.0`
+- **npm**: `11.2.0`
+- **pnpm**: `9.12.0`
+
+You can verify your versions by running:
+
+```bash
+node -v
+npm -v
+pnpm -v
+```
+
 ## Authors
 
 [@lc-thanh](https://github.com/lc-thanh)
