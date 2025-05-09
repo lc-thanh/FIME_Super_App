@@ -36,7 +36,7 @@ import {
 } from "@tanstack/react-query";
 import { positionSelectors } from "@/queries/position-query";
 import { RoleSelector } from "@/components/role-selector";
-import { teamSelectors } from "@/queries/team-query";
+import { teamSelectorsQueryOptions } from "@/queries/team-query";
 import { UserApiRequests } from "@/requests/user.request";
 import { toast } from "sonner";
 import { USER_QUERY_KEY } from "@/queries/user-query";
@@ -47,7 +47,7 @@ export default function CreateUserForm() {
 
   const queryClient = useQueryClient();
   const { data: positions } = useSuspenseQuery(positionSelectors());
-  const { data: teams } = useSuspenseQuery(teamSelectors());
+  const { data: teams } = useSuspenseQuery(teamSelectorsQueryOptions());
 
   const form = useForm<CreateUserBodyType>({
     resolver: zodResolver(CreateUserBody),

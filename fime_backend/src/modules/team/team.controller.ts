@@ -6,23 +6,31 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { TeamService } from './team.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
+import {
+  TeamFilterType,
+  TeamPaginatedResponse,
+} from '@/modules/team/dto/team-pagination';
 
 @Controller('teams')
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
   @Post()
-  create(@Body() createTeamDto: CreateTeamDto) {
-    return this.teamService.create(createTeamDto);
+  async create(@Body() createTeamDto: CreateTeamDto) {
+    return {
+      message: 'Tạo ban mới thành công!',
+      data: await this.teamService.create(createTeamDto),
+    };
   }
 
   @Get()
-  findAll() {
-    return this.teamService.findAll();
+  findAll(@Query() params: TeamFilterType): Promise<TeamPaginatedResponse> {
+    return this.teamService.findAll(params);
   }
 
   @Get('selectors')

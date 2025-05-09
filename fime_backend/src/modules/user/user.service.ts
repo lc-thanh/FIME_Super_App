@@ -12,7 +12,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { hashPasswordHelper } from '@/helpers/util';
 import { PrismaService } from '@/prisma.service';
 import { Prisma, UserStatus } from '@prisma/client';
-import { UserFilterType, UserPaginatedResponse } from './dto/user-pagination';
+import {
+  defaultSortBy,
+  defaultSortOrder,
+  UserFilterType,
+  UserPaginatedResponse,
+  validSortByFields,
+} from '@/modules/user/dto/user-pagination';
 import { SignUpDto } from '@/modules/auth/dto/signUp.dto';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
@@ -66,10 +72,7 @@ export class UserService {
         password: hashedPassword,
       },
     });
-    return {
-      message: 'Tạo người dùng mới thành công!',
-      data: newUser,
-    };
+    return newUser;
   }
 
   async findAll(params: UserFilterType): Promise<UserPaginatedResponse> {
@@ -77,9 +80,11 @@ export class UserService {
     const pageSize = Number(params.pageSize) || 10;
     const page = Number(params.page) || 1;
     const skip = pageSize * (page - 1);
-    const sortBy = params.sortBy || 'status';
-    const sortOrder = params.sortOrder || 'asc';
-    const validSortByFields = ['fullname', 'email', 'phone', 'createdAt'];
+    const sortBy = params.sortBy || defaultSortBy;
+    const sortOrder: Prisma.SortOrder =
+      params.sortOrder === 'asc' || params.sortOrder === 'desc'
+        ? params.sortOrder
+        : defaultSortOrder;
 
     const where = {
       OR: [
@@ -94,8 +99,8 @@ export class UserService {
       skip,
       take: pageSize,
       orderBy: {
-        [validSortByFields.includes(sortBy) ? sortBy : 'status']:
-          sortOrder === 'asc' ? 'asc' : 'desc',
+        [validSortByFields.includes(sortBy) ? sortBy : defaultSortBy]:
+          sortOrder,
       },
       include: {
         position: true,

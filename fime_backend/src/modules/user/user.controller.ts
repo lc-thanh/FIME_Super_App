@@ -37,11 +37,14 @@ export class UserController {
       limits: userAvatarLimits,
     }),
   )
-  create(
+  async create(
     @Body() createUserDto: CreateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.create(createUserDto, file?.filename);
+    return {
+      message: 'Tạo người dùng mới thành công!',
+      data: await this.userService.create(createUserDto, file?.filename),
+    };
   }
 
   @Get()
