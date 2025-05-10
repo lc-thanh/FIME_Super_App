@@ -19,7 +19,7 @@ import TableSearch from "@/components/data-table/table-search";
 import SortableTableHead from "@/components/data-table/sortable-table-head";
 import UserDeleteButton from "@/app/(admin)/dashboard/users/_components/user-delete-button";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { userQueryOptions } from "@/queries/user-query";
+import { usersQueryOptions } from "@/queries/user-query";
 import { UserType } from "@/schemaValidations/user.schema";
 import { FimeOutlineButton } from "@/components/fime-outline-button";
 import { StatusBadge } from "@/components/status-badge";
@@ -30,7 +30,7 @@ export function UserTable() {
   const searchParams = useSearchParams();
 
   const { data: usersPaginated, isError } = useSuspenseQuery(
-    userQueryOptions(searchParams.toString())
+    usersQueryOptions(searchParams.toString())
   );
 
   if (isError) {
@@ -135,7 +135,7 @@ export function UserTable() {
               </TableCell>
               <TableCell>
                 <div className="flex flex-row h-full justify-center">
-                  <Link href={`/dashboard/book/edit/${user.id}`}>
+                  <Link href={`/dashboard/users/edit/${user.id}`}>
                     <Button variant="ghost" size="icon">
                       <FilePenLine size={20} className="text-blue-500" />
                     </Button>

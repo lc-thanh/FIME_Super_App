@@ -22,11 +22,11 @@ import { ImageUp, Loader2, Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { handleApiError } from "@/lib/utils";
+import { getImageUrl, handleApiError } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import {
-  CreateUserBody,
-  CreateUserBodyType,
+  UpdateUserBody,
+  UpdateUserBodyType,
   UserRole,
 } from "@/schemaValidations/user.schema";
 import {
@@ -39,36 +39,45 @@ import { RoleSelector } from "@/components/role-selector";
 import { teamSelectorsQueryOptions } from "@/queries/team-query";
 import { UserApiRequests } from "@/requests/user.request";
 import { toast } from "sonner";
-import { USERS_QUERY_KEY } from "@/queries/user-query";
+import {
+  USER_QUERY_KEY,
+  userQueryOptions,
+  USERS_QUERY_KEY,
+} from "@/queries/user-query";
 
-export default function CreateUserForm() {
+export default function UpdateUserForm({ userId }: { userId: string }) {
   const [imageUpload, setImageUpload] = useState<File | null>(null);
+  const [isImageChanged, setIsImageChanged] = useState(false);
   const router = useRouter();
 
   const queryClient = useQueryClient();
+  queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY, userId] });
+  const { data: user } = useSuspenseQuery(userQueryOptions(userId));
   const { data: positions } = useSuspenseQuery(positionSelectors());
   const { data: teams } = useSuspenseQuery(teamSelectorsQueryOptions());
 
-  const form = useForm<CreateUserBodyType>({
-    resolver: zodResolver(CreateUserBody),
+  const form = useForm<UpdateUserBodyType>({
+    resolver: zodResolver(UpdateUserBody),
     defaultValues: {
-      fullname: "",
-      email: "",
-      phone: "",
-      address: "",
-      positionId: undefined,
-      teamId: undefined,
-      genId: undefined,
-      role: ["MEMBER"],
+      fullname: user.fullname,
+      email: user.email,
+      phone: user.phone,
+      address: user.address || "",
+      positionId: user.positionId || undefined,
+      teamId: user.teamId || undefined,
+      genId: user.genId || undefined,
+      role: user.role,
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: CreateUserBodyType) => {
-      return await UserApiRequests.create(values);
+    mutationFn: async (
+      values: UpdateUserBodyType & { isImageChanged: boolean }
+    ) => {
+      return await UserApiRequests.update(userId, values);
     },
     onSuccess: () => {
-      toast.success("Thêm thành viên mới thành công!");
+      toast.success("Cập nhật thành viên thành công!");
       queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] });
       router.push("/dashboard/users");
     },
@@ -81,10 +90,10 @@ export default function CreateUserForm() {
     },
   });
 
-  async function onSubmit(values: CreateUserBodyType) {
+  async function onSubmit(values: UpdateUserBodyType) {
     mutation.mutate({
       ...values,
-      image: imageUpload,
+      isImageChanged,
     });
   }
 
@@ -101,9 +110,11 @@ export default function CreateUserForm() {
             <FormLabel>Ảnh đại diện</FormLabel>
             <Image
               src={
-                imageUpload
-                  ? URL.createObjectURL(imageUpload)
-                  : "/user/null.png"
+                isImageChanged
+                  ? imageUpload
+                    ? URL.createObjectURL(imageUpload)
+                    : "/user/null.png"
+                  : getImageUrl(user.image) || "/user/null.png"
               }
               width={150}
               height={0}
@@ -117,6 +128,7 @@ export default function CreateUserForm() {
                 onClick={() => {
                   setImageUpload(null);
                   form.setValue("image", undefined);
+                  setIsImageChanged(true);
                 }}
               >
                 <Trash2 />
@@ -141,6 +153,7 @@ export default function CreateUserForm() {
                             if (file) {
                               onChange(file);
                               setImageUpload(file);
+                              setIsImageChanged(true);
                             }
                           };
                           input.click();

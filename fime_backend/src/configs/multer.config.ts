@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
+import { BadRequestException } from '@nestjs/common';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 
@@ -17,7 +18,7 @@ export const imageFileFilter = (req, file, callback) => {
   // Chỉ cho phép .jpg, .jpeg, .png, .webp
   if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
     return callback(
-      new Error('Chỉ hỗ trợ ảnh .jpg, .jpeg, .png, .webp'),
+      new BadRequestException('Chỉ hỗ trợ ảnh .jpg, .jpeg, .png, .webp'),
       false,
     );
   }

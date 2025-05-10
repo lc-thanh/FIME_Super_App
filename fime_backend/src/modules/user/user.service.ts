@@ -23,9 +23,18 @@ import { SignUpDto } from '@/modules/auth/dto/signUp.dto';
 import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import { ConfigService } from '@nestjs/config';
+import { extname, join } from 'path';
+import fs from 'fs/promises';
 
 @Injectable()
 export class UserService {
+  private avatarsUploadDirectory = join(
+    process.cwd(),
+    'public',
+    'users',
+    'avatars',
+  );
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
@@ -43,7 +52,10 @@ export class UserService {
       .then((user) => !!user);
   }
 
-  async create(createUserDto: CreateUserDto, image?: string) {
+  async create(
+    createUserDto: CreateUserDto,
+    imageToUpload?: Express.Multer.File,
+  ) {
     if (await this.isEmailExist(createUserDto.email)) {
       throw new UnprocessableEntityException([
         { field: 'email', error: 'Đã tồn tại email này!' },
@@ -65,13 +77,24 @@ export class UserService {
       );
     }
 
+    let imageName = '';
+    if (imageToUpload) {
+      imageName = await this.uploadAvatar(imageToUpload);
+      if (!imageName) {
+        throw new InternalServerErrorException(
+          'Có lỗi xảy ra trong quá trình tải lên ảnh đại diện!',
+        );
+      }
+    }
+
     const newUser = await this.prismaService.user.create({
       data: {
         ...createUserDto,
-        image,
+        image: imageName || null,
         password: hashedPassword,
       },
     });
+
     return newUser;
   }
 
@@ -118,8 +141,11 @@ export class UserService {
         phone: user.phone,
         address: user.address,
         image: user.image,
+        positionId: user.positionId,
         positionName: user.position?.name || null,
+        teamId: user.teamId,
         teamName: user.team?.name || null,
+        genId: user.genId,
         genName: user.gen?.name || null,
         role: user.role,
         status: user.status,
@@ -142,16 +168,26 @@ export class UserService {
         throw new InternalServerErrorException('Trường tìm kiếm không hợp lệ!');
       }
     });
+
     const user = await this.prismaService.user.findFirst({
       where: {
         OR: fields.map((f) => ({ [f]: searchString })),
+      },
+      include: {
+        position: true,
+        team: true,
+        gen: true,
       },
     });
 
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    imageToUpload?: Express.Multer.File,
+  ) {
     const user = await this.prismaService.user.findUnique({
       where: { id },
     });
@@ -159,14 +195,53 @@ export class UserService {
       throw new NotFoundException('Người dùng không tồn tại!');
     }
 
-    if (updateUserDto.email && (await this.isEmailExist(updateUserDto.email)))
-      throw new BadRequestException('Đã tồn tại email này!');
-    if (updateUserDto.phone && (await this.isPhoneExist(updateUserDto.phone)))
-      throw new BadRequestException('Đã tồn tại số điện thoại này!');
+    if (
+      updateUserDto.email !== user.email &&
+      (await this.isEmailExist(updateUserDto.email))
+    )
+      throw new UnprocessableEntityException([
+        { field: 'email', error: 'Đã tồn tại email này!' },
+      ]);
+    if (
+      updateUserDto.phone !== user.phone &&
+      (await this.isPhoneExist(updateUserDto.phone))
+    )
+      throw new UnprocessableEntityException([
+        { field: 'email', error: 'Đã tồn tại số điện thoại này!' },
+      ]);
+
+    let imageName = '';
+    if (updateUserDto.isImageChanged || imageToUpload) {
+      if (user.image) {
+        await this.deleteAvatar(user.image);
+      }
+      if (imageToUpload) {
+        imageName = await this.uploadAvatar(imageToUpload);
+        if (!imageName) {
+          throw new InternalServerErrorException(
+            'Có lỗi xảy ra trong quá trình tải lên ảnh đại diện!',
+          );
+        }
+      }
+    }
 
     const userUpdate = await this.prismaService.user.update({
       where: { id },
-      data: updateUserDto,
+      data: {
+        fullname: updateUserDto.fullname,
+        email: updateUserDto.email,
+        phone: updateUserDto.phone,
+        address: updateUserDto.address || null,
+        positionId: updateUserDto.positionId || null,
+        teamId: updateUserDto.teamId || null,
+        genId: updateUserDto.genId || null,
+        role: updateUserDto.role,
+        image: imageName
+          ? imageName
+          : updateUserDto.isImageChanged
+            ? null
+            : undefined,
+      },
     });
     return {
       message: 'Cập nhật người dùng thành công!',
@@ -183,6 +258,8 @@ export class UserService {
     }
 
     const deletedUser = await this.prismaService.user.delete({ where: { id } });
+    if (user.image) await this.deleteAvatar(user.image);
+
     return {
       message: 'Xóa người dùng thành công!',
       data: deletedUser,
@@ -218,5 +295,48 @@ export class UserService {
       message: 'Đăng ký thành công!',
       data: newUser,
     };
+  }
+
+  async uploadAvatar(file: Express.Multer.File, condition?: boolean) {
+    if (condition === false) {
+      throw new BadRequestException('Không đủ điều kiện để upload file!');
+    }
+
+    if (!file) {
+      throw new BadRequestException('Không tìm thấy file để upload!');
+    }
+
+    // Tạo tên file ngẫu nhiên
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const fileExt = extname(file.originalname);
+    const fileName = `user-${uniqueSuffix}${fileExt}`;
+
+    // Đường dẫn lưu file
+    const filePath = join(this.avatarsUploadDirectory, fileName);
+
+    // Tạo thư mục nếu chưa tồn tại
+    await fs.mkdir(this.avatarsUploadDirectory, { recursive: true });
+
+    // Lưu file vào thư mục
+    await fs.writeFile(filePath, file.buffer);
+
+    // Trả về đường dẫn để truy cập
+    return fileName;
+  }
+
+  async deleteAvatar(filename: string) {
+    // Đường dẫn tuyệt đối đến file
+    const filePath = join(this.avatarsUploadDirectory, filename);
+
+    try {
+      // Kiểm tra xem file có tồn tại không
+      await fs.stat(filePath);
+      // Xóa file
+      await fs.unlink(filePath);
+      return true;
+    } catch (error) {
+      // Nếu không tồn tại hoặc lỗi khác
+      return false;
+    }
   }
 }

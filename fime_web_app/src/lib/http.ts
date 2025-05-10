@@ -90,7 +90,7 @@ export class EntityError extends HttpError {
 }
 
 const request = async <Response>(
-  method: "GET" | "POST" | "PUT" | "DELETE",
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
   url: string,
   options?: CustomOptions | undefined
 ) => {
@@ -184,6 +184,13 @@ const http = {
     options?: Omit<CustomOptions, "body"> | undefined
   ) {
     return request<Response>("POST", url, { ...options, body });
+  },
+  patch<Response>(
+    url: string,
+    body: any,
+    options?: Omit<CustomOptions, "body"> | undefined
+  ) {
+    return request<Response>("PATCH", url, { ...options, body });
   },
   put<Response>(
     url: string,

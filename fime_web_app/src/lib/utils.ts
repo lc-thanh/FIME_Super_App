@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import envConfig from "@/config";
 import { EntityError } from "@/lib/http";
 import { clsx, type ClassValue } from "clsx";
 import { UseFormSetError } from "react-hook-form";
@@ -37,9 +38,15 @@ export const handleApiError = ({
       duration: duration ?? 5000,
     });
   } else {
-    toast.error(toastMessage, {
-      duration: duration ?? 5000,
-    });
+    if (error.payload.message) {
+      toast.error(error.payload.message, {
+        duration: duration ?? 5000,
+      });
+    } else {
+      toast.error(toastMessage, {
+        duration: duration ?? 5000,
+      });
+    }
   }
 };
 
@@ -117,3 +124,8 @@ export function objectToFormData<T extends Record<string, any>>(
   });
   return formData;
 }
+
+export const getImageUrl = (filename?: string) => {
+  if (!filename) return undefined;
+  return `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/users/avatars/${filename}`;
+};
