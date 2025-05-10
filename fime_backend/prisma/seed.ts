@@ -100,6 +100,7 @@ const seedUsers = async () => {
       fullname: 'LC Thành',
       password: (await hashPasswordHelper('123456')) as string,
       phone: '0987654321',
+      image: 'user-1746865309099-238469757.jpg',
       genId: gen_8.id,
       teamId: team_ky_thuat.id,
       positionId: position_thanh_vien.id,
@@ -125,13 +126,13 @@ const seedUsers = async () => {
     },
   });
 
-  const cc_cuong = await prisma.user.upsert({
-    where: { email: 'cuong.cc@gmail.com' },
+  const pd_tan = await prisma.user.upsert({
+    where: { email: 'tan.pd@gmail.com' },
     update: {},
     create: {
       id: 'e882771d-ee75-48fe-9385-f3989b583cf3',
-      email: 'cuong.cc@gmail.com',
-      fullname: 'CC Cường',
+      email: 'tan.pd@gmail.com',
+      fullname: 'PD Tân',
       password: (await hashPasswordHelper('123456')) as string,
       phone: '0987654322',
       genId: gen_10.id,
@@ -142,13 +143,14 @@ const seedUsers = async () => {
     },
   });
 
-  console.log({ lc_thanh, ld_quoc, cc_cuong });
+  console.log({ lc_thanh, ld_quoc, cc_cuong: pd_tan });
 };
 
 const seedTasks = async () => {
   const task1_TODO = await prisma.task.create({
     data: {
-      title: 'Chỉnh ảnh',
+      title:
+        'Chỉnh ảnh lorem ipsum dolor sit amet consectetur adipisicing elit',
       position: 1000,
       type: TaskType.TODO,
       status: TaskStatus.TODO,
@@ -237,7 +239,7 @@ const seedTasks = async () => {
 
   await prisma.user.update({
     where: {
-      email: 'cuong.cc@gmail.com',
+      email: 'tan.pd@gmail.com',
     },
     data: {
       tasks: {

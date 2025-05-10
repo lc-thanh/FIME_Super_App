@@ -1,5 +1,17 @@
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 
+export const defaultSortBy = 'status';
+
+export const validSortByFields = [
+  'fullname',
+  'email',
+  'phone',
+  'status',
+  'createdAt',
+];
+
+export const defaultSortOrder = 'desc';
+
 export interface UserFilterType {
   search?: string;
   pageSize?: number;

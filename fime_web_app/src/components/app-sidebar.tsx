@@ -29,12 +29,16 @@ const data = {
           url: "/dashboard/users",
         },
         {
-          title: "Settings",
-          url: "#",
+          title: "Quản lý Ban",
+          url: "/dashboard/teams",
         },
         {
-          title: "Others",
-          url: "#",
+          title: "Quản lý Chức vụ",
+          url: "/dashboard/positions",
+        },
+        {
+          title: "Quản lý Gen",
+          url: "/dashboard/gens",
         },
       ],
     },

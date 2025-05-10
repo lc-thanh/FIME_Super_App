@@ -32,10 +32,10 @@ export default function UserDeleteButton({
     try {
       setOpen(false);
       // window.location.reload();
-      toast.success("Xóa sách thành công!");
+      toast.success("Xóa thành viên thành công!");
       callback();
     } catch (error) {
-      handleApiError({ error, toastMessage: "Có lỗi xảy ra khi xóa sách!" });
+      handleApiError({ error, toastMessage: "Có lỗi xảy ra!" });
     } finally {
       setLoading(false);
     }
@@ -50,7 +50,7 @@ export default function UserDeleteButton({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Bạn có muốn xóa sách này?</AlertDialogTitle>
+          <AlertDialogTitle>Bạn có muốn xóa thành viên này?</AlertDialogTitle>
           <AlertDialogDescription>
             Hành động này không thể hoàn tác, bạn có chắc chắn muốn xóa?
           </AlertDialogDescription>

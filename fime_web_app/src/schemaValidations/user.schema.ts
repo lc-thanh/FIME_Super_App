@@ -14,8 +14,11 @@ export const User = z.object({
   phone: z.string(),
   address: z.string().optional(),
   image: z.string().optional(),
+  positionId: z.string().uuid().optional(),
   positionName: z.string().optional(),
+  teamId: z.string().uuid().optional(),
   teamName: z.string().optional(),
+  genId: z.string().uuid().optional(),
   genName: z.string().optional(),
   role: z.array(UserRole),
   status: UserStatus,
@@ -82,3 +85,6 @@ export const CreateUserBody = z
   })
   .strict();
 export type CreateUserBodyType = z.infer<typeof CreateUserBody>;
+
+export const UpdateUserBody = CreateUserBody;
+export type UpdateUserBodyType = z.infer<typeof UpdateUserBody>;

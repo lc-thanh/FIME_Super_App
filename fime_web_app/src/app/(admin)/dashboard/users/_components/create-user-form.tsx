@@ -36,10 +36,11 @@ import {
 } from "@tanstack/react-query";
 import { positionSelectors } from "@/queries/position-query";
 import { RoleSelector } from "@/components/role-selector";
-import { teamSelectors } from "@/queries/team-query";
+import { teamSelectorsQueryOptions } from "@/queries/team-query";
 import { UserApiRequests } from "@/requests/user.request";
 import { toast } from "sonner";
-import { USER_QUERY_KEY } from "@/queries/user-query";
+import { USERS_QUERY_KEY } from "@/queries/user-query";
+import { genSelectorsQueryOptions } from "@/queries/gen-query";
 
 export default function CreateUserForm() {
   const [imageUpload, setImageUpload] = useState<File | null>(null);
@@ -47,7 +48,8 @@ export default function CreateUserForm() {
 
   const queryClient = useQueryClient();
   const { data: positions } = useSuspenseQuery(positionSelectors());
-  const { data: teams } = useSuspenseQuery(teamSelectors());
+  const { data: teams } = useSuspenseQuery(teamSelectorsQueryOptions());
+  const { data: gens } = useSuspenseQuery(genSelectorsQueryOptions());
 
   const form = useForm<CreateUserBodyType>({
     resolver: zodResolver(CreateUserBody),
@@ -69,7 +71,7 @@ export default function CreateUserForm() {
     },
     onSuccess: () => {
       toast.success("Thêm thành viên mới thành công!");
-      queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] });
       router.push("/dashboard/users");
     },
     onError: (error) => {
@@ -299,9 +301,9 @@ export default function CreateUserForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {positions.map((position) => (
-                      <SelectItem key={position.id} value={position.id}>
-                        {position.name}
+                    {gens.map((gen) => (
+                      <SelectItem key={gen.id} value={gen.id}>
+                        {gen.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

@@ -3,26 +3,34 @@ import {
   Get,
   Post,
   Body,
-  Patch,
-  Param,
   Delete,
+  Query,
+  Put,
 } from '@nestjs/common';
 import { TeamService } from './team.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
+import {
+  TeamFilterType,
+  TeamPaginatedResponse,
+} from '@/modules/team/dto/team-pagination';
+import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 
 @Controller('teams')
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
   @Post()
-  create(@Body() createTeamDto: CreateTeamDto) {
-    return this.teamService.create(createTeamDto);
+  async create(@Body() createTeamDto: CreateTeamDto) {
+    return {
+      message: 'Tạo ban mới thành công!',
+      data: await this.teamService.create(createTeamDto),
+    };
   }
 
   @Get()
-  findAll() {
-    return this.teamService.findAll();
+  findAll(@Query() params: TeamFilterType): Promise<TeamPaginatedResponse> {
+    return this.teamService.findAll(params);
   }
 
   @Get('selectors')
@@ -31,17 +39,29 @@ export class TeamController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.teamService.findOne(+id);
+  async findOne(@UuidParam('id') id: string) {
+    return {
+      message: 'Lấy thông tin ban thành công!',
+      data: await this.teamService.findOne(id),
+    };
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTeamDto: UpdateTeamDto) {
-    return this.teamService.update(+id, updateTeamDto);
+  @Put(':id')
+  async update(
+    @UuidParam('id') id: string,
+    @Body() updateTeamDto: UpdateTeamDto,
+  ) {
+    return {
+      message: 'Cập nhật thông tin ban thành công!',
+      data: await this.teamService.update(id, updateTeamDto),
+    };
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.teamService.remove(+id);
+  async remove(@UuidParam('id') id: string) {
+    return {
+      message: 'Xóa ban thành công!',
+      data: await this.teamService.remove(id),
+    };
   }
 }

@@ -7,8 +7,11 @@ export class UserViewDto {
   phone: string;
   address: string | null;
   image: string | null;
+  positionId: string | null;
   positionName: string | null;
+  teamId: string | null;
   teamName: string | null;
+  genId: string | null;
   genName: string | null;
   role: Role[];
   status: UserStatus;

@@ -3,12 +3,12 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Delete,
   Query,
   NotFoundException,
   UseInterceptors,
   UploadedFile,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -24,24 +24,22 @@ import {
   userAvatarLimits,
   userAvatarsStorage,
 } from '@/configs/multer.config';
+import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @UseInterceptors(
-    FileInterceptor('image', {
-      storage: userAvatarsStorage,
-      fileFilter: imageFileFilter,
-      limits: userAvatarLimits,
-    }),
-  )
-  create(
+  @UseInterceptors(FileInterceptor('image'))
+  async create(
     @Body() createUserDto: CreateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.create(createUserDto, file?.filename);
+    return {
+      message: 'Tạo người dùng mới thành công!',
+      data: await this.userService.create(createUserDto, file),
+    };
   }
 
   @Get()
@@ -52,17 +50,35 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@UuidParam() id: string) {
+  async findOne(
+    @UuidParam() id: string,
+  ): Promise<{ message: string; data: UserViewDto }> {
     const user = await this.userService.findOne(id, ['id']);
     if (!user) {
       throw new NotFoundException('Không tồn tại người dùng với ID đã cho!');
     }
-    return user;
+    return {
+      message: 'Lấy thông tin người dùng thành công!',
+      data: {
+        ...user,
+        teamName: user.team?.name || null,
+        positionName: user.position?.name || null,
+        genName: user.gen?.name || null,
+      },
+    };
   }
 
-  @Patch(':id')
-  update(@UuidParam() id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto);
+  @Put(':id')
+  @UseInterceptors(FileInterceptor('image'))
+  async update(
+    @UuidParam() id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return {
+      message: 'Cập nhật người dùng thành công!',
+      data: await this.userService.update(id, updateUserDto, file),
+    };
   }
 
   @Delete(':id')

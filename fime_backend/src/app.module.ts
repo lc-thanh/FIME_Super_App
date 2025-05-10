@@ -14,6 +14,7 @@ import { PositionModule } from './modules/position/position.module';
 import { TeamModule } from './modules/team/team.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { GenModule } from './modules/gen/gen.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { join } from 'path';
     WorkspaceModule,
     PositionModule,
     TeamModule,
+    GenModule,
   ],
   controllers: [AppController],
   providers: [

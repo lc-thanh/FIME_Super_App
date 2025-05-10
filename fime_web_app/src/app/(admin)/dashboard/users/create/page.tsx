@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export default function CreateUserkPage() {
+export default function CreateUserPage() {
   return (
     <div className="px-1 w-full flex-row gap-2">
       <FimeTitle>
