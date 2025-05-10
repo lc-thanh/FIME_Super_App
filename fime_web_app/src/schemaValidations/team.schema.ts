@@ -34,3 +34,6 @@ export const CreateTeamBody = z
   })
   .strict();
 export type CreateTeamBodyType = z.infer<typeof CreateTeamBody>;
+
+export const UpdateTeamBody = CreateTeamBody;
+export type UpdateTeamBodyType = z.infer<typeof UpdateTeamBody>;

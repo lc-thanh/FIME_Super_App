@@ -12,34 +12,33 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { handleApiError } from "@/lib/utils";
+import { GENS_QUERY_KEY } from "@/queries/gen-query";
+import { GenApiRequests } from "@/requests/gen.request";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, Trash2 } from "lucide-react";
 import React from "react";
 import { toast } from "sonner";
 
-export default function UserDeleteButton({
-  // id,
-  callback,
-}: {
-  // id: string;
-  callback: () => void;
-}) {
+export default function GenDeleteButton({ genId }: { genId: string }) {
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
+  const queryClient = useQueryClient();
 
-  const handleDelete = async () => {
-    // Call API to delete book
-    setLoading(true);
-    try {
+  const mutation = useMutation({
+    mutationFn: async () => {
+      return await GenApiRequests.delete(genId);
+    },
+    onSuccess: () => {
+      toast.success("Xóa Gen thành công!");
       setOpen(false);
-      // window.location.reload();
-      toast.success("Xóa thành viên thành công!");
-      callback();
-    } catch (error) {
-      handleApiError({ error, toastMessage: "Có lỗi xảy ra!" });
-    } finally {
-      setLoading(false);
-    }
-  };
+      queryClient.invalidateQueries({ queryKey: [GENS_QUERY_KEY] });
+    },
+    onError: (error) => {
+      handleApiError({
+        error,
+        toastMessage: "Có lỗi xảy ra!",
+      });
+    },
+  });
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -50,7 +49,7 @@ export default function UserDeleteButton({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Bạn có muốn xóa thành viên này?</AlertDialogTitle>
+          <AlertDialogTitle>Bạn có muốn xóa Gen này?</AlertDialogTitle>
           <AlertDialogDescription>
             Hành động này không thể hoàn tác, bạn có chắc chắn muốn xóa?
           </AlertDialogDescription>
@@ -59,12 +58,12 @@ export default function UserDeleteButton({
           <AlertDialogCancel>Hủy</AlertDialogCancel>
           <Button
             onClick={() => {
-              handleDelete();
+              mutation.mutate();
             }}
             className="bg-red-500 text-red-50 hover:bg-red-600"
-            disabled={loading}
+            disabled={mutation.isPending}
           >
-            {loading && <Loader2 className="animate-spin" />}
+            {mutation.isPending && <Loader2 className="animate-spin" />}
             Xóa
           </Button>
         </AlertDialogFooter>

@@ -1,32 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { CreateTeamDto } from './dto/create-team.dto';
-import { UpdateTeamDto } from './dto/update-team.dto';
+import { CreateGenDto } from './dto/create-gen.dto';
+import { UpdateGenDto } from './dto/update-gen.dto';
 import { PrismaService } from '@/prisma.service';
 import {
   defaultSortBy,
   defaultSortOrder,
-  TeamFilterType,
-  TeamPaginatedResponse,
+  GenFilterType,
+  GenPaginatedResponse,
   validSortByFields,
-} from '@/modules/team/dto/team-pagination';
+} from '@/modules/gen/dto/gen-pagination';
 import { Prisma } from '@prisma/client';
 
 @Injectable()
-export class TeamService {
+export class GenService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createTeamDto: CreateTeamDto) {
-    const newTeam = await this.prismaService.team.create({
+  async create(createGenDto: CreateGenDto) {
+    const newGen = await this.prismaService.gen.create({
       data: {
-        name: createTeamDto.name,
-        description: createTeamDto.description,
+        name: createGenDto.name,
+        description: createGenDto.description,
       },
     });
-
-    return newTeam;
+    return newGen;
   }
 
-  async findAll(params: TeamFilterType): Promise<TeamPaginatedResponse> {
+  async findAll(params: GenFilterType): Promise<GenPaginatedResponse> {
     const search = params.search || '';
     const pageSize = Number(params.pageSize) || 10;
     const page = Number(params.page) || 1;
@@ -52,7 +51,7 @@ export class TeamService {
         : { [sortBy]: sortOrder }
       : { [defaultSortBy]: sortOrder };
 
-    const teams = await this.prismaService.team.findMany({
+    const gens = await this.prismaService.gen.findMany({
       where,
       skip,
       take: pageSize,
@@ -65,16 +64,16 @@ export class TeamService {
         },
       },
     });
-    const total = await this.prismaService.team.count({ where });
+    const total = await this.prismaService.gen.count({ where });
 
     return {
-      data: teams.map((team) => ({
-        id: team.id,
-        name: team.name,
-        description: team.description,
-        usersCount: team._count.users,
-        createdAt: team.createdAt,
-        updatedAt: team.updatedAt,
+      data: gens.map((gen) => ({
+        id: gen.id,
+        name: gen.name,
+        description: gen.description,
+        usersCount: gen._count.users,
+        createdAt: gen.createdAt,
+        updatedAt: gen.updatedAt,
       })),
       page,
       pageSize,
@@ -86,7 +85,7 @@ export class TeamService {
   }
 
   findAllSelectors() {
-    return this.prismaService.team.findMany({
+    return this.prismaService.gen.findMany({
       select: {
         id: true,
         name: true,
@@ -95,27 +94,28 @@ export class TeamService {
   }
 
   async findOne(id: string) {
-    const team = this.prismaService.team.findUnique({
+    const gen = await this.prismaService.gen.findUnique({
       where: { id },
     });
-    return team;
+    return gen;
   }
 
-  async update(id: string, updateTeamDto: UpdateTeamDto) {
-    const team = await this.prismaService.team.update({
+  async update(id: string, updateGenDto: UpdateGenDto) {
+    const gen = await this.prismaService.gen.update({
       where: { id },
       data: {
-        name: updateTeamDto.name,
-        description: updateTeamDto.description || null,
+        name: updateGenDto.name,
+        description: updateGenDto.description || null,
       },
     });
-    return team;
+    return gen;
   }
 
   async remove(id: string) {
-    const team = await this.prismaService.team.delete({
+    const gen = await this.prismaService.gen.delete({
       where: { id },
     });
-    return team;
+
+    return gen;
   }
 }

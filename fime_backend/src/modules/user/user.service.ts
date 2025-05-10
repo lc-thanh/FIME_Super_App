@@ -243,10 +243,7 @@ export class UserService {
             : undefined,
       },
     });
-    return {
-      message: 'Cập nhật người dùng thành công!',
-      data: userUpdate,
-    };
+    return userUpdate;
   }
 
   async remove(id: string) {

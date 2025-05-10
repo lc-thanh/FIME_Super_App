@@ -96,15 +96,28 @@ export class PositionService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} position`;
+  async findOne(id: string) {
+    const position = await this.prismaService.position.findUnique({
+      where: { id },
+    });
+    return position;
   }
 
-  update(id: number, updatePositionDto: UpdatePositionDto) {
-    return `This action updates a #${id} position`;
+  async update(id: string, updatePositionDto: UpdatePositionDto) {
+    const position = await this.prismaService.position.update({
+      where: { id },
+      data: {
+        name: updatePositionDto.name,
+        description: updatePositionDto.description || null,
+      },
+    });
+    return position;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} position`;
+  async remove(id: string) {
+    const position = await this.prismaService.position.delete({
+      where: { id },
+    });
+    return position;
   }
 }

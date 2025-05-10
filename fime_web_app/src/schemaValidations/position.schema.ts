@@ -36,3 +36,6 @@ export const CreatePositionBody = z
   })
   .strict();
 export type CreatePositionBodyType = z.infer<typeof CreatePositionBody>;
+
+export const UpdatePositionBody = CreatePositionBody;
+export type UpdatePositionBodyType = z.infer<typeof UpdatePositionBody>;

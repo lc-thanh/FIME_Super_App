@@ -16,18 +16,18 @@ import Link from "next/link";
 import Pagination from "@/components/data-table/my-pagination";
 import TableSearch from "@/components/data-table/table-search";
 import SortableTableHead from "@/components/data-table/sortable-table-head";
-import UserDeleteButton from "@/app/(admin)/dashboard/users/_components/user-delete-button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { FimeOutlineButton } from "@/components/fime-outline-button";
 import dayjs from "dayjs";
-import { positionQueryOptions } from "@/queries/position-query";
+import { positionsQueryOptions } from "@/queries/position-query";
 import { PositionType } from "@/schemaValidations/position.schema";
+import PositionDeleteButton from "@/app/(admin)/dashboard/positions/_components/position-delete-button";
 
 export function PositionTable() {
   const searchParams = useSearchParams();
 
   const { data: positionsPaginated, isError } = useSuspenseQuery(
-    positionQueryOptions(searchParams.toString())
+    positionsQueryOptions(searchParams.toString())
   );
 
   if (isError) {
@@ -85,18 +85,13 @@ export function PositionTable() {
                 </TableCell>
                 <TableCell>
                   <div className="flex flex-row h-full justify-center">
-                    <Link href={`/dashboard/book/edit/${position.id}`}>
+                    <Link href={`/dashboard/positions/edit/${position.id}`}>
                       <Button variant="ghost" size="icon">
                         <FilePenLine size={20} className="text-blue-500" />
                       </Button>
                     </Link>
 
-                    <UserDeleteButton
-                      // id={user.id}
-                      callback={() => {
-                        console.log("delete user", position.id);
-                      }}
-                    />
+                    <PositionDeleteButton positionId={position.id} />
                   </div>
                 </TableCell>
               </TableRow>

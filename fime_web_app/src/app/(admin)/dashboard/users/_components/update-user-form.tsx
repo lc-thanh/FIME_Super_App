@@ -44,6 +44,7 @@ import {
   userQueryOptions,
   USERS_QUERY_KEY,
 } from "@/queries/user-query";
+import { genSelectorsQueryOptions } from "@/queries/gen-query";
 
 export default function UpdateUserForm({ userId }: { userId: string }) {
   const [imageUpload, setImageUpload] = useState<File | null>(null);
@@ -55,6 +56,7 @@ export default function UpdateUserForm({ userId }: { userId: string }) {
   const { data: user } = useSuspenseQuery(userQueryOptions(userId));
   const { data: positions } = useSuspenseQuery(positionSelectors());
   const { data: teams } = useSuspenseQuery(teamSelectorsQueryOptions());
+  const { data: gens } = useSuspenseQuery(genSelectorsQueryOptions());
 
   const form = useForm<UpdateUserBodyType>({
     resolver: zodResolver(UpdateUserBody),
@@ -312,9 +314,9 @@ export default function UpdateUserForm({ userId }: { userId: string }) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {positions.map((position) => (
-                      <SelectItem key={position.id} value={position.id}>
-                        {position.name}
+                    {gens.map((gen) => (
+                      <SelectItem key={gen.id} value={gen.id}>
+                        {gen.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

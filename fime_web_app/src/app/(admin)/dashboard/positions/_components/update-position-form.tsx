@@ -15,35 +15,49 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { handleApiError } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CreatePositionBody,
-  CreatePositionBodyType,
+  UpdatePositionBody,
+  UpdatePositionBodyType,
 } from "@/schemaValidations/position.schema";
-import { POSITIONS_QUERY_KEY } from "@/queries/position-query";
+import {
+  POSITION_QUERY_KEY,
+  positionQueryOptions,
+  POSITIONS_QUERY_KEY,
+} from "@/queries/position-query";
 import { PositionApiRequests } from "@/requests/position.request";
 
-export default function CreatePositionForm() {
+export default function UpdatePositionForm({
+  positionId,
+}: {
+  positionId: string;
+}) {
   const router = useRouter();
 
   const queryClient = useQueryClient();
+  queryClient.invalidateQueries({ queryKey: [POSITION_QUERY_KEY, positionId] });
+  const { data: position } = useSuspenseQuery(positionQueryOptions(positionId));
 
-  const form = useForm<CreatePositionBodyType>({
-    resolver: zodResolver(CreatePositionBody),
+  const form = useForm<UpdatePositionBodyType>({
+    resolver: zodResolver(UpdatePositionBody),
     defaultValues: {
-      name: "",
-      description: "",
+      name: position.name,
+      description: position.description || "",
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: CreatePositionBodyType) => {
-      return await PositionApiRequests.create(values);
+    mutationFn: async (values: UpdatePositionBodyType) => {
+      return await PositionApiRequests.update(positionId, values);
     },
     onSuccess: () => {
-      toast.success("Tạo chức vụ mới thành công!");
+      toast.success("Cập nhật chức vụ thành công!");
       queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY] });
       router.push("/dashboard/positions");
     },
@@ -56,7 +70,7 @@ export default function CreatePositionForm() {
     },
   });
 
-  async function onSubmit(values: CreatePositionBodyType) {
+  async function onSubmit(values: UpdatePositionBodyType) {
     mutation.mutate({
       ...values,
     });

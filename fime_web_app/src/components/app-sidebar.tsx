@@ -36,6 +36,10 @@ const data = {
           title: "Quản lý Chức vụ",
           url: "/dashboard/positions",
         },
+        {
+          title: "Quản lý Gen",
+          url: "/dashboard/gens",
+        },
       ],
     },
     {

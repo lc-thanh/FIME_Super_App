@@ -16,7 +16,7 @@ import { useForm } from "react-hook-form";
 import { handleApiError } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { TEAM_QUERY_KEY } from "@/queries/team-query";
+import { TEAMS_QUERY_KEY } from "@/queries/team-query";
 import { toast } from "sonner";
 import {
   CreateTeamBody,
@@ -44,7 +44,7 @@ export default function CreateTeamForm() {
     },
     onSuccess: () => {
       toast.success("Tạo Ban mới thành công!");
-      queryClient.invalidateQueries({ queryKey: [TEAM_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [TEAMS_QUERY_KEY] });
       router.push("/dashboard/teams");
     },
     onError: (error) => {

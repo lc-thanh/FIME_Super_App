@@ -70,12 +70,15 @@ export class UserController {
 
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))
-  update(
+  async update(
     @UuidParam() id: string,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.userService.update(id, updateUserDto, file);
+    return {
+      message: 'Cập nhật người dùng thành công!',
+      data: await this.userService.update(id, updateUserDto, file),
+    };
   }
 
   @Delete(':id')

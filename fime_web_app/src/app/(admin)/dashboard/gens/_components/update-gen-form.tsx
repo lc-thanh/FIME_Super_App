@@ -15,37 +15,47 @@ import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { handleApiError } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useMutation,
+  useQueryClient,
+  useSuspenseQuery,
+} from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CreatePositionBody,
-  CreatePositionBodyType,
-} from "@/schemaValidations/position.schema";
-import { POSITIONS_QUERY_KEY } from "@/queries/position-query";
-import { PositionApiRequests } from "@/requests/position.request";
+  GEN_QUERY_KEY,
+  genQueryOptions,
+  GENS_QUERY_KEY,
+} from "@/queries/gen-query";
+import {
+  UpdateGenBody,
+  UpdateGenBodyType,
+} from "@/schemaValidations/gen.schema";
+import { GenApiRequests } from "@/requests/gen.request";
 
-export default function CreatePositionForm() {
+export default function UpdateGenForm({ genId }: { genId: string }) {
   const router = useRouter();
 
   const queryClient = useQueryClient();
+  queryClient.invalidateQueries({ queryKey: [GEN_QUERY_KEY, genId] });
+  const { data: gen } = useSuspenseQuery(genQueryOptions(genId));
 
-  const form = useForm<CreatePositionBodyType>({
-    resolver: zodResolver(CreatePositionBody),
+  const form = useForm<UpdateGenBodyType>({
+    resolver: zodResolver(UpdateGenBody),
     defaultValues: {
-      name: "",
-      description: "",
+      name: gen.name,
+      description: gen.description || "",
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: CreatePositionBodyType) => {
-      return await PositionApiRequests.create(values);
+    mutationFn: async (values: UpdateGenBodyType) => {
+      return await GenApiRequests.update(genId, values);
     },
     onSuccess: () => {
-      toast.success("Tạo chức vụ mới thành công!");
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY] });
-      router.push("/dashboard/positions");
+      toast.success("Cập nhật Gen thành công!");
+      queryClient.invalidateQueries({ queryKey: [GENS_QUERY_KEY] });
+      router.push("/dashboard/gens");
     },
     onError: (error) => {
       handleApiError({
@@ -56,7 +66,7 @@ export default function CreatePositionForm() {
     },
   });
 
-  async function onSubmit(values: CreatePositionBodyType) {
+  async function onSubmit(values: UpdateGenBodyType) {
     mutation.mutate({
       ...values,
     });
@@ -77,10 +87,10 @@ export default function CreatePositionForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Tên chức vụ <span className="text-destructive">*</span>
+                  Tên Gen <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Nhập tên chức vụ" {...field} />
+                  <Input placeholder="Nhập tên Gen" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

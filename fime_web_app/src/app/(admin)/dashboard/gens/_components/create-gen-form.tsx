@@ -19,19 +19,19 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  CreatePositionBody,
-  CreatePositionBodyType,
-} from "@/schemaValidations/position.schema";
-import { POSITIONS_QUERY_KEY } from "@/queries/position-query";
-import { PositionApiRequests } from "@/requests/position.request";
+  CreateGenBody,
+  CreateGenBodyType,
+} from "@/schemaValidations/gen.schema";
+import { GenApiRequests } from "@/requests/gen.request";
+import { GENS_QUERY_KEY } from "@/queries/gen-query";
 
-export default function CreatePositionForm() {
+export default function CreateGenForm() {
   const router = useRouter();
 
   const queryClient = useQueryClient();
 
-  const form = useForm<CreatePositionBodyType>({
-    resolver: zodResolver(CreatePositionBody),
+  const form = useForm<CreateGenBodyType>({
+    resolver: zodResolver(CreateGenBody),
     defaultValues: {
       name: "",
       description: "",
@@ -39,13 +39,13 @@ export default function CreatePositionForm() {
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: CreatePositionBodyType) => {
-      return await PositionApiRequests.create(values);
+    mutationFn: async (values: CreateGenBodyType) => {
+      return await GenApiRequests.create(values);
     },
     onSuccess: () => {
-      toast.success("Tạo chức vụ mới thành công!");
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY] });
-      router.push("/dashboard/positions");
+      toast.success("Tạo Gen mới thành công!");
+      queryClient.invalidateQueries({ queryKey: [GENS_QUERY_KEY] });
+      router.push("/dashboard/gens");
     },
     onError: (error) => {
       handleApiError({
@@ -56,7 +56,7 @@ export default function CreatePositionForm() {
     },
   });
 
-  async function onSubmit(values: CreatePositionBodyType) {
+  async function onSubmit(values: CreateGenBodyType) {
     mutation.mutate({
       ...values,
     });
@@ -77,10 +77,10 @@ export default function CreatePositionForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  Tên chức vụ <span className="text-destructive">*</span>
+                  Tên Gen <span className="text-destructive">*</span>
                 </FormLabel>
                 <FormControl>
-                  <Input placeholder="Nhập tên chức vụ" {...field} />
+                  <Input placeholder="Nhập tên Gen" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

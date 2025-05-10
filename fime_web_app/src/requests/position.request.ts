@@ -3,6 +3,7 @@ import {
   CreatePositionBodyType,
   PositionPaginatedResponse,
   PositionType,
+  UpdatePositionBodyType,
 } from "@/schemaValidations/position.schema";
 
 export const PositionApiRequests = {
@@ -16,5 +17,19 @@ export const PositionApiRequests = {
     );
   },
 
+  findOne: async (positionId: string) => {
+    return http.get<{ message: string; data: PositionType }>(
+      `/positions/${positionId}`
+    );
+  },
+
   create: async (body: CreatePositionBodyType) => http.post("/positions", body),
+
+  update: async (positionId: string, body: UpdatePositionBodyType) => {
+    return http.put(`/positions/${positionId}`, body);
+  },
+
+  delete: async (positionId: string) => {
+    return http.delete(`/positions/${positionId}`, {});
+  },
 };

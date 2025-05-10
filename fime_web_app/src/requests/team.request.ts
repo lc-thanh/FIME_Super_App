@@ -3,6 +3,7 @@ import {
   CreateTeamBodyType,
   TeamPaginatedResponseType,
   TeamType,
+  UpdateTeamBodyType,
 } from "@/schemaValidations/team.schema";
 
 export const TeamApiRequests = {
@@ -14,5 +15,17 @@ export const TeamApiRequests = {
     return http.get<Pick<TeamType, "id" | "name">[]>(`/teams/selectors`);
   },
 
+  findOne: async (teamId: string) => {
+    return http.get<{ message: string; data: TeamType }>(`/teams/${teamId}`);
+  },
+
   create: async (body: CreateTeamBodyType) => http.post("/teams", body),
+
+  update: async (teamId: string, body: UpdateTeamBodyType) => {
+    return http.put(`/teams/${teamId}`, body);
+  },
+
+  delete: async (teamId: string) => {
+    return http.delete(`/teams/${teamId}`, {});
+  },
 };
