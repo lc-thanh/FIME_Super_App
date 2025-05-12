@@ -2,7 +2,6 @@ import { TaskApiRequests } from "@/requests/task.request";
 import { queryOptions } from "@tanstack/react-query";
 
 export const TASK_QUERY_KEY = "task";
-export const TASK_CARDS_QUERY_KEY = "taskCards";
 
 export const taskQueryOptions = (taskId: string | null) =>
   queryOptions({
@@ -23,6 +22,8 @@ export const taskQueryOptions = (taskId: string | null) =>
     },
   });
 
+export const TASK_CARDS_QUERY_KEY = "taskCards";
+
 export const taskCardsQueryOptions = (workspaceId: string) =>
   queryOptions({
     queryKey: [TASK_CARDS_QUERY_KEY, workspaceId],
@@ -34,6 +35,22 @@ export const taskCardsQueryOptions = (workspaceId: string) =>
       } catch (error) {
         console.log("Error fetching task cards:", error);
         throw error; // nhớ throw để react-query biết lỗi
+      }
+    },
+  });
+
+export const SCHEDULE_QUERY_KEY = "schedule";
+
+export const scheduleQueryOptions = () =>
+  queryOptions({
+    queryKey: [SCHEDULE_QUERY_KEY],
+    queryFn: async () => {
+      try {
+        const res = await TaskApiRequests.getSchedule();
+        return res.payload.data;
+      } catch (error) {
+        console.log("Error fetching schedule:", error);
+        throw error;
       }
     },
   });

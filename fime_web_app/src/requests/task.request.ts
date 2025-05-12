@@ -1,3 +1,4 @@
+import { type Event } from "@/app/(admin)/dashboard/schedule/_components/event-calendar";
 import http from "@/lib/http";
 import {
   ColumnType,
@@ -84,4 +85,7 @@ export const TaskApiRequests = {
 
   softDelete: async (taskId: string) =>
     http.delete<{ message: string }>(`tasks/soft-delete/${taskId}`, {}),
+
+  getSchedule: async () =>
+    http.get<{ message: string; data: Event[] }>(`/tasks/schedule/`),
 };

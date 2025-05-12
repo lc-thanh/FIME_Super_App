@@ -29,6 +29,13 @@ export type TypeOfTaskType = z.infer<typeof TypeOfTask>;
 export const TaskStatus = z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"]);
 export type TaskStatusType = z.infer<typeof TaskStatus>;
 
+export const TaskStatusText = {
+  TODO: "Chưa làm",
+  IN_PROGRESS: "Đang làm",
+  IN_REVIEW: "Chờ duyệt",
+  DONE: "Hoàn thành",
+};
+
 export const TaskPriority = z.enum(["LOW", "MEDIUM", "HIGH"]);
 export type TaskPriorityType = z.infer<typeof TaskPriority>;
 

@@ -8,7 +8,11 @@ interface SidebarData {
     title: string;
     url: string;
     icon?: LucideIcon;
-    isActive?: boolean;
+  }[];
+  dashboard: {
+    title: string;
+    url: string;
+    icon?: LucideIcon;
     items?: {
       title: string;
       url: string;

@@ -439,6 +439,109 @@ export class TaskService {
     return updatedTask;
   }
 
+  async getSchedule(userId: string) {
+    const tasks = await this.prismaService.task.findMany({
+      where: {
+        users: {
+          some: {
+            id: userId,
+          },
+        },
+        status: {
+          not: TaskStatus.DONE,
+        },
+        startDate: {
+          not: null,
+        },
+        deadline: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        startDate: true,
+        deadline: true,
+        status: true,
+        type: true,
+        priority: true,
+        workspaceId: true,
+        users: {
+          select: {
+            id: true,
+            fullname: true,
+          },
+        },
+        todoLists: {
+          select: {
+            isDone: true,
+          },
+        },
+      },
+    });
+
+    const todos = await this.prismaService.todoList.findMany({
+      where: {
+        User: {
+          some: {
+            id: userId,
+          },
+        },
+        isDone: false,
+        startDate: {
+          not: null,
+        },
+        deadline: {
+          not: null,
+        },
+      },
+      select: {
+        id: true,
+        content: true,
+        startDate: true,
+        deadline: true,
+        User: {
+          select: {
+            id: true,
+            fullname: true,
+          },
+        },
+        Task: {
+          select: {
+            id: true,
+            title: true,
+            status: true,
+            type: true,
+            priority: true,
+            workspaceId: true,
+          },
+        },
+      },
+    });
+
+    const todoTaskIds = new Set(todos.map((todo) => todo.Task.id));
+    const filteredTasks = tasks.filter((task) => !todoTaskIds.has(task.id));
+
+    return [
+      ...filteredTasks,
+      ...todos.map((todo) => ({
+        id: todo.id,
+        taskId: todo.Task.id,
+        workspaceId: todo.Task.workspaceId,
+        title: `${todo.content} (${todo.Task.title})`,
+        startDate: todo.startDate,
+        deadline: todo.deadline,
+        status: todo.Task.status,
+        type: todo.Task.type,
+        priority: todo.Task.priority,
+        users: todo.User.map((user) => ({
+          id: user.id,
+          fullname: user.fullname,
+        })),
+      })),
+    ];
+  }
+
   findAll() {
     return `This action returns all task`;
   }
