@@ -116,6 +116,14 @@ export class TaskController {
     };
   }
 
+  @Get('schedule')
+  async getSchedule(@User() user: IAccessTokenPayload) {
+    return {
+      message: 'Lấy lịch làm việc thành công',
+      data: await this.taskService.getSchedule(user.sub),
+    };
+  }
+
   @Get()
   findAll() {
     return this.taskService.findAll();

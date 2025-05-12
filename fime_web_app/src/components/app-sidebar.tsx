@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { PanelsTopLeft, Users } from "lucide-react";
+import { Calendar, LayoutPanelLeft, PanelsTopLeft, Users } from "lucide-react";
 
-import { NavMain } from "@/components/nav-main";
+import { DashboardNav } from "@/components/dashboard-nav";
 import { NavUser } from "@/components/nav-user";
 import { TeamSwitcher } from "@/components/team-switcher";
 import {
@@ -15,10 +15,23 @@ import {
 } from "@/components/ui/sidebar";
 import { User } from "next-auth";
 import { NavProjects } from "@/components/nav-projects";
+import { NavMain } from "@/components/nav-main";
 
 // This is sample data.
 const data = {
   navMain: [
+    {
+      title: "Trang chủ",
+      url: "/dashboard",
+      icon: LayoutPanelLeft,
+    },
+    {
+      title: "Lịch làm việc",
+      url: "/dashboard/schedule",
+      icon: Calendar,
+    },
+  ],
+  dashboard: [
     {
       title: "Quản lý nhân sự",
       url: "#",
@@ -29,15 +42,15 @@ const data = {
           url: "/dashboard/users",
         },
         {
-          title: "Quản lý Ban",
+          title: "Ban",
           url: "/dashboard/teams",
         },
         {
-          title: "Quản lý Chức vụ",
+          title: "Chức vụ",
           url: "/dashboard/positions",
         },
         {
-          title: "Quản lý Gen",
+          title: "Gen",
           url: "/dashboard/gens",
         },
       ],
@@ -75,6 +88,7 @@ export function AppSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <DashboardNav items={data.dashboard} />
         <NavProjects projects={workspaces} />
       </SidebarContent>
       <SidebarFooter>
