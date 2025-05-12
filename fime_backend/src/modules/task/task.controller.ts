@@ -14,6 +14,8 @@ import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 import { User } from '@/common/decorators/user.decorator';
 import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
+import { TaskPriority, TaskType } from '@prisma/client';
+import { TodoListDto } from '@/modules/task/dto/todo-list.dto';
 
 @Controller('tasks')
 export class TaskController {
@@ -42,6 +44,78 @@ export class TaskController {
     return this.taskService.moveCard(moveCardDto);
   }
 
+  @Post('add-assignee')
+  async addAssignee(
+    @Body('taskId') taskId: string,
+    @Body('assigneeId') assigneeId: string,
+  ) {
+    return {
+      message: 'Thêm thành viên vào task thành công',
+      data: await this.taskService.addAssignee(taskId, assigneeId),
+    };
+  }
+
+  @Post('remove-assignee')
+  async removeAssignee(
+    @Body('taskId') taskId: string,
+    @Body('assigneeId') assigneeId: string,
+  ) {
+    return {
+      message: 'Xóa thành viên khỏi task thành công',
+      data: await this.taskService.removeAssignee(taskId, assigneeId),
+    };
+  }
+
+  @Post('change-priority')
+  async changePriority(
+    @Body('taskId') taskId: string,
+    @Body('priority') priority: TaskPriority,
+  ) {
+    return {
+      message: 'Thay đổi mức độ ưu tiên thành công',
+      data: await this.taskService.changePriority(taskId, priority),
+    };
+  }
+
+  @Post('change-type')
+  async changeType(
+    @Body('taskId') taskId: string,
+    @Body('type') type: TaskType,
+  ) {
+    return {
+      message: 'Thay đổi loại công việc thành công',
+      data: await this.taskService.changeType(taskId, type),
+    };
+  }
+
+  @Post('change-date')
+  async changeDate(
+    @Body('taskId') taskId: string,
+    @Body('startDate') startDate: Date,
+    @Body('deadline') deadline: Date,
+  ) {
+    return {
+      message: 'Thay đổi thời gian thành công',
+      data: await this.taskService.changeDate(taskId, startDate, deadline),
+    };
+  }
+
+  @Post('sync-todo-list')
+  changeTodo(
+    @Body('taskId') taskId: string,
+    @Body('todos') todos: TodoListDto[],
+  ) {
+    return this.taskService.syncTodos(taskId, todos);
+  }
+
+  @Delete('soft-delete/:taskId')
+  async softDeleteTask(@UuidParam('taskId') taskId: string) {
+    return {
+      message: 'Xóa task thành công',
+      data: await this.taskService.softDeleteTask(taskId),
+    };
+  }
+
   @Get()
   findAll() {
     return this.taskService.findAll();
@@ -52,6 +126,14 @@ export class TaskController {
     return {
       message: 'Lấy thông tin task thành công',
       data: await this.taskService.findOne(id, ['id']),
+    };
+  }
+
+  @Get('task-details/:id')
+  async getTaskDetails(@UuidParam('id') id: string) {
+    return {
+      message: 'Lấy thông tin chi tiết task thành công',
+      data: await this.taskService.findOneWithDetails(id, ['id']),
     };
   }
 

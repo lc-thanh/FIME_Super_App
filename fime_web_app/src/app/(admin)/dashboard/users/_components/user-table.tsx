@@ -19,7 +19,7 @@ import TableSearch from "@/components/data-table/table-search";
 import SortableTableHead from "@/components/data-table/sortable-table-head";
 import UserDeleteButton from "@/app/(admin)/dashboard/users/_components/user-delete-button";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { usersQueryOptions } from "@/queries/user-query";
+import { userTableQueryOptions } from "@/queries/user-query";
 import { UserType } from "@/schemaValidations/user.schema";
 import { FimeOutlineButton } from "@/components/fime-outline-button";
 import { StatusBadge } from "@/components/status-badge";
@@ -30,7 +30,7 @@ export function UserTable() {
   const searchParams = useSearchParams();
 
   const { data: usersPaginated, isError } = useSuspenseQuery(
-    usersQueryOptions(searchParams.toString())
+    userTableQueryOptions(searchParams.toString())
   );
 
   if (isError) {

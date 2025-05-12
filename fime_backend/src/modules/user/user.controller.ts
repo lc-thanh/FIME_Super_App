@@ -43,10 +43,15 @@ export class UserController {
   }
 
   @Get()
-  async findAll(
+  async findAll(): Promise<UserViewDto[]> {
+    return this.userService.findAll();
+  }
+
+  @Get('paginated')
+  async findAllPaginated(
     @Query() params: UserFilterType,
   ): Promise<UserPaginatedResponse> {
-    return this.userService.findAll(params);
+    return this.userService.findAllPaginated(params);
   }
 
   @Get(':id')

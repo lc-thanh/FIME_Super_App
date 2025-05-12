@@ -1,8 +1,10 @@
 import http from "@/lib/http";
 import {
   ColumnType,
+  TaskPriorityType,
   TaskStatusType,
   TaskType,
+  TypeOfTaskType,
 } from "@/schemaValidations/task.schema";
 
 export type MoveCardData = {
@@ -20,6 +22,15 @@ export const TaskApiRequests = {
     return http.get<{ message: string; data: TaskType }>(`/tasks/${id}`);
   },
 
+  findOneDetails: async (id: string) => {
+    // const delay = (ms: number) =>
+    //   new Promise((resolve) => setTimeout(resolve, ms));
+    // await delay(2000);
+    return http.get<{ message: string; data: TaskType }>(
+      `/tasks/task-details/${id}`
+    );
+  },
+
   myTaskCards: async (workspaceId: string) =>
     http.get<{ message: string; data: { columns: ColumnType[] } }>(
       `/tasks/my-task-cards/${workspaceId}`
@@ -33,4 +44,44 @@ export const TaskApiRequests = {
     // await delay(2000);
     return http.post<{ message: string }>("tasks/move-card", data);
   },
+
+  addAssignee: async (taskId: string, assigneeId: string) =>
+    http.post<{ message: string; data: TaskType }>("tasks/add-assignee", {
+      taskId,
+      assigneeId,
+    }),
+
+  removeAssignee: async (taskId: string, assigneeId: string) =>
+    http.post<{ message: string; data: TaskType }>("tasks/remove-assignee", {
+      taskId,
+      assigneeId,
+    }),
+
+  changePriority: async (taskId: string, priority: TaskPriorityType) =>
+    http.post<{ message: string; data: TaskType }>("tasks/change-priority", {
+      taskId,
+      priority,
+    }),
+
+  changeType: async (taskId: string, type: TypeOfTaskType) =>
+    http.post<{ message: string; data: TaskType }>("tasks/change-type", {
+      taskId,
+      type,
+    }),
+
+  changeTaskTime: async (taskId: string, startDate: Date, deadline: Date) =>
+    http.post<{ message: string; data: TaskType }>("tasks/change-date", {
+      taskId,
+      startDate,
+      deadline,
+    }),
+
+  syncTodoList: async (taskId: string, todos: unknown) =>
+    http.post<{ message: string }>("tasks/sync-todo-list", {
+      taskId,
+      todos,
+    }),
+
+  softDelete: async (taskId: string) =>
+    http.delete<{ message: string }>(`tasks/soft-delete/${taskId}`, {}),
 };

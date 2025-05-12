@@ -42,7 +42,7 @@ import { toast } from "sonner";
 import {
   USER_QUERY_KEY,
   userQueryOptions,
-  USERS_QUERY_KEY,
+  USER_TABLE_QUERY_KEY,
 } from "@/queries/user-query";
 import { genSelectorsQueryOptions } from "@/queries/gen-query";
 
@@ -80,7 +80,7 @@ export default function UpdateUserForm({ userId }: { userId: string }) {
     },
     onSuccess: () => {
       toast.success("Cập nhật thành viên thành công!");
-      queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [USER_TABLE_QUERY_KEY] });
       router.push("/dashboard/users");
     },
     onError: (error) => {

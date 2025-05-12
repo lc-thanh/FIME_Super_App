@@ -136,8 +136,8 @@ model Task {
   type             TaskType         @default(TODO)
   status           TaskStatus       @default(TODO)
   priority         TaskPriority     @default(MEDIUM)
-  startDate        DateTime
-  deadline         DateTime
+  startDate        DateTime?
+  deadline         DateTime?
   todoLists        TodoList[]
   users            User[]
   taskComments     TaskComment[]
@@ -155,12 +155,12 @@ model Task {
 }
 
 model TodoList {
-  id        String   @id @default(uuid())
-  order     Int      @default(0) @db.SmallInt
+  id        String    @id @default(uuid())
+  order     Int       @default(0) @db.SmallInt
   content   String
-  isDone    Boolean  @default(false)
-  startDate DateTime
-  deadline  DateTime
+  isDone    Boolean   @default(false)
+  startDate DateTime?
+  deadline  DateTime?
 
   Task   Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
   taskId String

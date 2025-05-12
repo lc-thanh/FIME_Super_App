@@ -12,6 +12,7 @@ import { PriorityBadge } from "@/app/(admin)/task/components/task-card/priority-
 import { TaskTypeBadge } from "@/app/(admin)/task/components/task-card/task-type-badge";
 import { DateOfCard } from "@/app/(admin)/task/components/task-card/date-of-card";
 import { cn } from "@/lib/utils";
+import { useBoundStore } from "@/providers/store-provider";
 
 export const FimeCard: FC<TaskCardType> = ({
   id,
@@ -27,6 +28,16 @@ export const FimeCard: FC<TaskCardType> = ({
   const router = useRouter();
   const pathname = usePathname();
 
+  const { setContextMenu } = useBoundStore((state) => state);
+  const handleContextMenu = (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    event: any,
+    cardId: string | null
+  ) => {
+    event.preventDefault(); // Ngăn mở context menu mặc định của trình duyệt
+    setContextMenu(cardId, { x: event.clientX, y: event.clientY });
+  };
+
   const openTask = (taskId: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("task", taskId);
@@ -35,6 +46,9 @@ export const FimeCard: FC<TaskCardType> = ({
 
   return (
     <Card
+      onContextMenu={(e) => {
+        handleContextMenu(e, id);
+      }}
       className={cn(
         "w-[300px] shadow-md rounded-lg m-1",
         status === "DONE" && "opacity-40"

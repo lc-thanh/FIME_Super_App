@@ -1,15 +1,31 @@
 import { UserApiRequests } from "@/requests/user.request";
 import { queryOptions } from "@tanstack/react-query";
 
-export const USERS_QUERY_KEY = "users";
+export const USER_TABLE_QUERY_KEY = "user_table";
 
-export const usersQueryOptions = (searchParams: string) =>
+export const userTableQueryOptions = (searchParams: string) =>
   queryOptions({
-    queryKey: [USERS_QUERY_KEY, searchParams],
+    queryKey: [USER_TABLE_QUERY_KEY, searchParams],
     queryFn: async ({ queryKey }) => {
       const [, searchParams] = queryKey;
       try {
-        const res = await UserApiRequests.findAll(searchParams);
+        const res = await UserApiRequests.findAllPaginated(searchParams);
+        return res.payload;
+      } catch (error) {
+        console.log("Error fetching users:", error);
+        throw error;
+      }
+    },
+  });
+
+export const USERS_QUERY_KEY = "users";
+
+export const usersQueryOptions = () =>
+  queryOptions({
+    queryKey: [USERS_QUERY_KEY],
+    queryFn: async () => {
+      try {
+        const res = await UserApiRequests.findAll();
         return res.payload;
       } catch (error) {
         console.log("Error fetching users:", error);

@@ -8,8 +8,9 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from '@/prisma.service';
 import { TaskColumnDto } from '@/modules/task/dto/task-card.dto';
 import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
-import { Task, TaskStatus } from '@prisma/client';
+import { Task, TaskPriority, TaskStatus } from '@prisma/client';
 import { TaskBoardGateway } from '@/gateways/task-board/task-board.gateway';
+import { TodoListDto } from '@/modules/task/dto/todo-list.dto';
 
 const INVALID_POSITION_MESSAGE = 'Vị trí không hợp lệ!';
 
@@ -263,6 +264,181 @@ export class TaskService {
     };
   }
 
+  async addAssignee(taskId: string, assigneeId: string) {
+    const task = await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        id: assigneeId,
+      },
+    });
+    if (!user) {
+      throw new BadRequestException('Người dùng không tồn tại!');
+    }
+
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        users: {
+          connect: { id: assigneeId },
+        },
+      },
+    });
+
+    await this.prismaService.workspace.update({
+      where: {
+        id: task.workspaceId,
+      },
+      data: {
+        users: {
+          connect: { id: assigneeId },
+        },
+      },
+    });
+
+    return updatedTask;
+  }
+
+  async removeAssignee(taskId: string, assigneeId: string) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        id: assigneeId,
+      },
+    });
+    if (!user) {
+      throw new BadRequestException('Người dùng không tồn tại!');
+    }
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        users: {
+          disconnect: { id: assigneeId },
+        },
+      },
+    });
+    return updatedTask;
+  }
+
+  async changePriority(taskId: string, priority: TaskPriority) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        priority,
+      },
+    });
+    return updatedTask;
+  }
+
+  async changeType(taskId: string, type: Task['type']) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        type,
+      },
+    });
+    return updatedTask;
+  }
+
+  async changeDate(taskId: string, startDate: Date, deadline: Date) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        startDate,
+        deadline,
+      },
+    });
+    return updatedTask;
+  }
+
+  async syncTodos(taskId: string, newTodos: TodoListDto[]) {
+    // Lấy danh sách TodoIds hiện tại của Task
+    const existingIds = new Set(
+      (
+        await this.prismaService.todoList.findMany({
+          where: { taskId },
+          select: { id: true },
+        })
+      ).map((todo) => todo.id),
+    );
+
+    // Lấy danh sách ID từ `newTodos`
+    const newIds = newTodos.map((todo) => todo.id).filter((id) => !!id);
+
+    // Danh sách cần xóa (có trong DB nhưng không có trong newTodos)
+    const toDelete = [...existingIds].filter((id) => !newIds.includes(id));
+
+    // Thực hiện transaction:
+    await this.prismaService.$transaction([
+      // Upsert từng Todo
+      ...newTodos.map((todo) =>
+        this.prismaService.todoList.upsert({
+          where: { id: todo.id ?? '' },
+          update: {
+            content: todo.content,
+            isDone: todo.isDone,
+            order: todo.order,
+            startDate: todo.startDate,
+            deadline: todo.deadline,
+            User: {
+              set: todo.userIds.map((userId) => ({ id: userId })),
+            },
+          },
+          create: {
+            id: todo.id ?? undefined, // Prisma sẽ tự tạo ID nếu không có
+            content: todo.content,
+            isDone: todo.isDone,
+            order: todo.order,
+            startDate: todo.startDate,
+            deadline: todo.deadline,
+            taskId: taskId,
+            User: {
+              connect: todo.userIds.map((userId) => ({ id: userId })),
+            },
+          },
+        }),
+      ),
+      // Xóa những Todo không còn tồn tại
+      this.prismaService.todoList.deleteMany({
+        where: {
+          id: {
+            in: toDelete,
+          },
+        },
+      }),
+    ]);
+
+    return {
+      message: 'Cập nhật danh sách todo thành công!',
+    };
+  }
+
+  async softDeleteTask(taskId: string) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        isDeleted: true,
+      },
+    });
+    return updatedTask;
+  }
+
   findAll() {
     return `This action returns all task`;
   }
@@ -293,6 +469,83 @@ export class TaskService {
     }
 
     return task;
+  }
+
+  async findOneWithDetails(id: string, fields: string[], workspaceId?: string) {
+    const validFields = ['id'];
+    fields.forEach((f) => {
+      if (!validFields.includes(f)) {
+        throw new InternalServerErrorException('Trường tìm kiếm không hợp lệ!');
+      }
+    });
+
+    const task = await this.prismaService.task.findFirst({
+      where: {
+        OR: fields.map((f) => ({ [f]: id })),
+        workspaceId,
+      },
+      include: {
+        users: {
+          select: {
+            id: true,
+            fullname: true,
+            email: true,
+            image: true,
+            position: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            team: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+            gen: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        todoLists: {
+          include: {
+            User: {
+              select: {
+                id: true,
+                fullname: true,
+                email: true,
+                image: true,
+              },
+            },
+          },
+          orderBy: {
+            order: 'asc',
+          },
+        },
+        // monthlySegment: true,
+        taskActivities: true,
+        taskComments: true,
+        taskAttachments: true,
+        workspace: true,
+      },
+    });
+
+    if (!task) {
+      throw new BadRequestException('Task không tồn tại!');
+    }
+
+    return {
+      ...task,
+      todoLists: task.todoLists.map((todo) => ({
+        ...todo,
+        User: undefined,
+        users: todo.User.map((user) => user),
+      })),
+    };
   }
 
   update(id: number, updateTaskDto: UpdateTaskDto) {

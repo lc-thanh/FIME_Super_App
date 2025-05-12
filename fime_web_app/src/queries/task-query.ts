@@ -14,7 +14,7 @@ export const taskQueryOptions = (taskId: string | null) =>
           return null;
         }
 
-        const res = await TaskApiRequests.findOne(id);
+        const res = await TaskApiRequests.findOneDetails(id);
         return res.payload.data;
       } catch (error) {
         console.log("Error fetching task:", error);

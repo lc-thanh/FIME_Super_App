@@ -5,12 +5,14 @@ export const UserTask = User.pick({
   id: true,
   fullname: true,
   email: true,
+  positionId: true,
   positionName: true,
+  teamId: true,
   teamName: true,
+  genId: true,
+  genName: true,
   image: true,
-})
-  .extend({})
-  .strict();
+}).extend({});
 export type UserTaskType = z.infer<typeof UserTask>;
 
 export const TypeOfTask = z.enum([
@@ -30,14 +32,15 @@ export type TaskStatusType = z.infer<typeof TaskStatus>;
 export const TaskPriority = z.enum(["LOW", "MEDIUM", "HIGH"]);
 export type TaskPriorityType = z.infer<typeof TaskPriority>;
 
-export const TodoItem = z
-  .object({
-    id: z.string().uuid().optional(),
-    order: z.number().min(0),
-    content: z.string(),
-    isDone: z.boolean(),
-  })
-  .strict();
+export const TodoItem = z.object({
+  id: z.string().uuid().optional(),
+  order: z.number().min(0),
+  content: z.string(),
+  isDone: z.boolean(),
+  startDate: z.date().nullable(),
+  deadline: z.date().nullable(),
+  users: z.array(UserTask),
+});
 export type TodoItemType = z.infer<typeof TodoItem>;
 
 export const TaskComment = z
@@ -69,27 +72,25 @@ export const TaskActivity = z.object({
 });
 export type TaskActivityType = z.infer<typeof TaskActivity>;
 
-export const Task = z
-  .object({
-    id: z.string().uuid(),
-    title: z.string(),
-    note: z.string().optional(),
-    position: z.number(),
-    type: TypeOfTask,
-    status: TaskStatus,
-    priority: TaskPriority,
-    startDate: z.date(),
-    deadline: z.date(),
-    todoLists: z.array(TodoItem),
-    users: z.array(UserTask),
-    taskComments: z.array(TaskComment),
-    taskAttachments: z.array(TaskAttachment),
-    taskActivities: z.array(TaskActivity),
-    workspaceId: z.string().uuid(),
-    createdAt: z.date(),
-    updatedAt: z.date(),
-  })
-  .strict();
+export const Task = z.object({
+  id: z.string().uuid(),
+  title: z.string(),
+  note: z.any(),
+  position: z.number(),
+  type: TypeOfTask,
+  status: TaskStatus,
+  priority: TaskPriority,
+  startDate: z.date(),
+  deadline: z.date(),
+  todoLists: z.array(TodoItem),
+  users: z.array(UserTask),
+  taskComments: z.array(TaskComment),
+  taskAttachments: z.array(TaskAttachment),
+  taskActivities: z.array(TaskActivity),
+  workspaceId: z.string().uuid(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+});
 export type TaskType = z.infer<typeof Task>;
 
 export const TaskCard = Task.pick({
