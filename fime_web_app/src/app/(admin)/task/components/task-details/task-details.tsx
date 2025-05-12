@@ -1,37 +1,19 @@
 "use client";
 
-import { useState } from "react";
-import { Calendar } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
-import { vi } from "date-fns/locale";
+// Tiptap - Text editor
+import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
+
 import "@/app/(admin)/task/components/style.css";
 import TodoList from "@/app/(admin)/task/components/task-details/todo-list";
 import TaskTitle from "@/app/(admin)/task/components/task-details/task-title";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { taskQueryOptions } from "@/queries/task-query";
-
-// Tiptap - Text editor
-import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
+import { AssigneesPicker } from "@/app/(admin)/task/components/task-details/assignees-picker";
+import { PrioritySelect } from "@/app/(admin)/task/components/task-details/priority-select";
+import { TaskTypeSelector } from "@/app/(admin)/task/components/task-details/task-type-selector";
+import TaskTimePicker from "@/app/(admin)/task/components/task-details/task-time-picker";
 
 export const TaskDetails = ({ id }: { id: string | null }) => {
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
-  const [priority, setPriority] = useState<string | undefined>(undefined);
-
   const { data: task } = useSuspenseQuery(taskQueryOptions(id));
 
   if (!task) {
@@ -41,123 +23,34 @@ export const TaskDetails = ({ id }: { id: string | null }) => {
   return (
     <div className="p-6 pr-4 pt-0 pb-2 h-full overflow-auto">
       {/* Task Title */}
-      <TaskTitle initialTitle={task.title} className="mb-6" />
+      <TaskTitle initialTitle={task.title} className="mb-4" />
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Todo List */}
-        <div>
-          <TodoList />
+        <TodoList task={task} />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <AssigneesPicker users={task.users} taskId={task.id} />
+          {/* Priority */}
+          <TaskTimePicker
+            startDate={task.startDate}
+            deadline={task.deadline}
+            taskId={task.id}
+          />
+        </div>
+
+        {/* Dates and TaskType */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-2">
+          <PrioritySelect priority={task.priority} taskId={task.id} />
+          <TaskTypeSelector type={task.type} taskId={task.id} />
         </div>
 
         {/* Description */}
-        <div>
-          {/* <Tiptap /> */}
-          <SimpleEditor />
-        </div>
-
-        {/* Dates */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm text-gray-500 mb-1 block">
-              Ngày bắt đầu
-            </label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between text-left font-normal text-gray-400 border-gray-300"
-                >
-                  {startDate
-                    ? format(startDate, "dd/MM/yyyy", { locale: vi })
-                    : "Điền ngày bắt đầu"}
-                  <Calendar className="h-4 w-4 text-indigo-600" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={startDate}
-                  onSelect={setStartDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1 block">Deadline</label>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="w-full justify-between text-left font-normal text-gray-400 border-gray-300"
-                >
-                  {endDate
-                    ? format(endDate, "dd/MM/yyyy", { locale: vi })
-                    : "Điền ngày hoàn thành"}
-                  <Calendar className="h-4 w-4 text-rose-500" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={endDate}
-                  onSelect={setEndDate}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-
-        {/* Status and Assignee */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="text-sm text-gray-500 mb-1 block">
-              Chọn trạng thái
-            </label>
-            <Select>
-              <SelectTrigger className="border-gray-300">
-                <SelectValue placeholder="Chưa làm" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="not-started">Chưa làm</SelectItem>
-                <SelectItem value="in-progress">Đang làm</SelectItem>
-                <SelectItem value="completed">Hoàn thành</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="text-sm text-gray-500 mb-1 block">
-              Chọn người làm
-            </label>
-            <Button
-              variant="outline"
-              className="w-full justify-start border-gray-300"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-orange-500 mr-2"
-              >
-                <circle cx="12" cy="8" r="5" />
-                <path d="M20 21a8 8 0 0 0-16 0" />
-              </svg>
-              Chọn thành viên
-            </Button>
-          </div>
-        </div>
+        {/* <Tiptap /> */}
+        <SimpleEditor />
 
         {/* Attachments */}
-        <div>
+        {/* <div>
           <label className="text-sm text-gray-500 mb-1 block">Đính kèm</label>
           <div className="flex gap-2">
             <Button variant="outline" size="icon" className="h-10 w-10">
@@ -194,49 +87,7 @@ export const TaskDetails = ({ id }: { id: string | null }) => {
               </svg>
             </Button>
           </div>
-        </div>
-
-        {/* Priority */}
-        <div>
-          <label className="text-sm text-gray-500 mb-1 block">
-            Mức độ ưu tiên
-          </label>
-          <div className="flex flex-wrap gap-2">
-            <Button
-              variant="outline"
-              className={`rounded-full px-6 ${
-                priority === "high"
-                  ? "bg-red-100 text-red-500 border-red-200"
-                  : "hover:bg-red-50 hover:text-red-500"
-              }`}
-              onClick={() => setPriority("high")}
-            >
-              Cao
-            </Button>
-            <Button
-              variant="outline"
-              className={`rounded-full px-6 ${
-                priority === "medium"
-                  ? "bg-amber-100 text-amber-500 border-amber-200"
-                  : "hover:bg-amber-50 hover:text-amber-500"
-              }`}
-              onClick={() => setPriority("medium")}
-            >
-              Trung bình
-            </Button>
-            <Button
-              variant="outline"
-              className={`rounded-full px-6 ${
-                priority === "low"
-                  ? "bg-green-100 text-green-500 border-green-200"
-                  : "hover:bg-green-50 hover:text-green-500"
-              }`}
-              onClick={() => setPriority("low")}
-            >
-              Thấp
-            </Button>
-          </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

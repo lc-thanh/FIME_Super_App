@@ -39,7 +39,7 @@ import { RoleSelector } from "@/components/role-selector";
 import { teamSelectorsQueryOptions } from "@/queries/team-query";
 import { UserApiRequests } from "@/requests/user.request";
 import { toast } from "sonner";
-import { USERS_QUERY_KEY } from "@/queries/user-query";
+import { USER_TABLE_QUERY_KEY } from "@/queries/user-query";
 import { genSelectorsQueryOptions } from "@/queries/gen-query";
 
 export default function CreateUserForm() {
@@ -71,7 +71,7 @@ export default function CreateUserForm() {
     },
     onSuccess: () => {
       toast.success("Thêm thành viên mới thành công!");
-      queryClient.invalidateQueries({ queryKey: [USERS_QUERY_KEY] });
+      queryClient.invalidateQueries({ queryKey: [USER_TABLE_QUERY_KEY] });
       router.push("/dashboard/users");
     },
     onError: (error) => {

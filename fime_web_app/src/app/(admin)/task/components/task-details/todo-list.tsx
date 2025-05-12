@@ -6,45 +6,52 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { TodoItemType } from "@/schemaValidations/task.schema";
+import {
+  TaskType,
+  TodoItemType,
+  UserTaskType,
+} from "@/schemaValidations/task.schema";
+import { TodoListAssignees } from "@/app/(admin)/task/components/task-details/todo-list-assignees";
+import TodoTimePicker from "@/app/(admin)/task/components/task-details/todo-time-picker";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { TaskApiRequests } from "@/requests/task.request";
+import { TASK_QUERY_KEY } from "@/queries/task-query";
+import { toast } from "sonner";
 
-// Mock API function
-const saveTodosToAPI = async (
-  todos: TodoItemType[]
-): Promise<TodoItemType[]> => {
-  // Simulate API call with a delay
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log("Saved todos to API:", todos);
-      resolve(todos);
-    }, 1000);
-  });
-};
-
-export default function TodoList() {
+export default function TodoList({ task }: { task: TaskType }) {
   // Initialize with two example todos
-  const [todos, setTodos] = useState<TodoItemType[]>([
-    {
-      id: "c40e6dcf-e019-46b8-9c5e-12b79e2f36e9",
-      order: 0,
-      content: "Ví dụ: Chuẩn bị source",
-      isDone: true,
-    },
-    {
-      id: "357f53d2-ab24-4ded-a1bf-61e401d04b89",
-      order: 1,
-      content: "Ví dụ: Chỉnh màu",
-      isDone: false,
-    },
-  ]);
+  const [todos, setTodos] = useState<TodoItemType[]>(task.todoLists || []);
   // Keep track of original todos for cancellation
   const [originalTodos, setOriginalTodos] = useState<TodoItemType[]>(todos);
 
   // Track if there are unsaved changes
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Track loading state for save button
-  const [isSaving, setIsSaving] = useState(false);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (todos: TodoItemType[]) => {
+      const todosBody = todos.map((todo) => ({
+        id: todo.id,
+        order: todo.order,
+        content: todo.content,
+        isDone: todo.isDone,
+        startDate: todo.startDate,
+        deadline: todo.deadline,
+        userIds: todo.users.map((user) => user.id),
+      }));
+      await TaskApiRequests.syncTodoList(task.id, todosBody);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, task.id] });
+      setOriginalTodos(todos);
+      setHasChanges(false);
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, task.id] });
+      toast.error("Có lỗi xảy ra!");
+    },
+  });
 
   // Update the form when todos change
   // useState(() => {
@@ -69,6 +76,9 @@ export default function TodoList() {
       order: maxId + 1,
       content: "",
       isDone: false,
+      startDate: null,
+      deadline: null,
+      users: [],
     };
     setTodos([...todos, newTodo]);
   };
@@ -94,29 +104,34 @@ export default function TodoList() {
     setTodos(todos.filter((todo) => todo.order !== order));
   };
 
-  // Save todos to API
-  const saveTodos = async () => {
-    setIsSaving(true);
-    try {
-      const savedTodos = await saveTodosToAPI(todos);
-      setOriginalTodos(savedTodos);
-      setHasChanges(false);
-    } catch (error) {
-      console.error("Failed to save todos:", error);
-      // You could add error handling UI here
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   // Cancel changes and revert to original todos
   const cancelChanges = () => {
     setTodos([...originalTodos]);
     setHasChanges(false);
   };
 
+  // Update todo users
+  const updateTodoUsers = (order: number, users: UserTaskType[]) => {
+    setTodos(
+      todos.map((todo) => (todo.order === order ? { ...todo, users } : todo))
+    );
+  };
+
+  // Update todo startDate and deadline
+  const updateTodoTime = (
+    order: number,
+    startDate: Date | null,
+    deadline: Date | null
+  ) => {
+    setTodos(
+      todos.map((todo) =>
+        todo.order === order ? { ...todo, startDate, deadline } : todo
+      )
+    );
+  };
+
   return (
-    <div className="w-full">
+    <div className="w-full pb-2">
       <div className="bg-orange-100 rounded-full inline-block px-3 py-1 mb-1">
         <h1 className="font-semibold text-base text-orange-500">
           <CalendarCheck className="inline w-4 h-4 mb-1" /> Todo List
@@ -126,7 +141,7 @@ export default function TodoList() {
       {todos.map((todo) => (
         <div
           key={todo.order}
-          className="flex items-center space-x-2 p-1 border-b"
+          className="flex items-center space-x-2 px-1 border-b"
         >
           <Checkbox
             id={`todo-${todo.order}`}
@@ -141,36 +156,50 @@ export default function TodoList() {
                 updateTodoText(todo.order, e.target.value);
               }}
               className={cn(
-                "border-0 focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base",
+                "border-0 shadow-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 text-base",
                 todo.isDone && "text-gray-500 dark:text-gray-400 line-through"
               )}
-              placeholder="Enter a todo item"
+              placeholder="Điền todo mới..."
             />
           </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={() => deleteTodo(todo.order)}
-            className="h-8 w-8 text-gray-400 hover:text-red-500 hover:bg-red-50"
-            aria-label="Delete todo"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+          <div className="flex flex-row">
+            <TodoListAssignees
+              users={todo.users}
+              usersInTask={task.users}
+              onUpdateUsers={(users) => updateTodoUsers(todo.order, users)}
+            />
+            <TodoTimePicker
+              startDate={todo.startDate}
+              deadline={todo.deadline}
+              onUpdateTime={(startDate, deadline) =>
+                updateTodoTime(todo.order, startDate, deadline)
+              }
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => deleteTodo(todo.order)}
+              className="h-8 w-8 text-muted-foreground hover:text-red-500 hover:bg-red-50"
+              aria-label="Delete todo"
             >
-              <path d="M3 6h18" />
-              <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-              <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-            </svg>
-          </Button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M3 6h18" />
+                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+              </svg>
+            </Button>
+          </div>
         </div>
       ))}
 
@@ -192,11 +221,11 @@ export default function TodoList() {
               type="button"
               variant="fime-outline"
               size="sm"
-              onClick={saveTodos}
-              disabled={isSaving}
+              onClick={() => mutation.mutate(todos)}
+              disabled={mutation.isPending}
               className="flex items-center gap-2 "
             >
-              {isSaving ? (
+              {mutation.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
                   Đang lưu...
@@ -213,7 +242,7 @@ export default function TodoList() {
               variant="outline"
               size="sm"
               onClick={cancelChanges}
-              disabled={isSaving}
+              disabled={mutation.isPending}
               className="flex items-center gap-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-gray-100"
             >
               <X className="h-4 w-4" />

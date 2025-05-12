@@ -25,6 +25,7 @@ import dayjs from 'dayjs';
 import { ConfigService } from '@nestjs/config';
 import { extname, join } from 'path';
 import fs from 'fs/promises';
+import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 
 @Injectable()
 export class UserService {
@@ -98,7 +99,38 @@ export class UserService {
     return newUser;
   }
 
-  async findAll(params: UserFilterType): Promise<UserPaginatedResponse> {
+  async findAll(): Promise<UserViewDto[]> {
+    const users = await this.prismaService.user.findMany({
+      include: {
+        position: true,
+        team: true,
+        gen: true,
+      },
+    });
+
+    return users.map((user) => ({
+      id: user.id,
+      fullname: user.fullname,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      image: user.image,
+      positionId: user.positionId,
+      positionName: user.position?.name || null,
+      teamId: user.teamId,
+      teamName: user.team?.name || null,
+      genId: user.genId,
+      genName: user.gen?.name || null,
+      role: user.role,
+      status: user.status,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
+  }
+
+  async findAllPaginated(
+    params: UserFilterType,
+  ): Promise<UserPaginatedResponse> {
     const search = params.search || '';
     const pageSize = Number(params.pageSize) || 10;
     const page = Number(params.page) || 1;

@@ -17,8 +17,11 @@ export const UserApiRequests = {
 
     return http.post("/users", formData);
   },
-  findAll: async (params: string) => {
-    return http.get<UserPaginatedResponseType>(`/users?${params}`);
+  findAll: async () => {
+    return http.get<UserType[]>("/users");
+  },
+  findAllPaginated: async (params: string) => {
+    return http.get<UserPaginatedResponseType>(`/users/paginated?${params}`);
   },
   findOne: async (userId: string) => {
     return http.get<{ message: string; data: UserType }>(`/users/${userId}`);

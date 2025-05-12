@@ -6,8 +6,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import envConfig from "@/config";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/lib/utils";
 
 export interface Assignee {
   id: string;
@@ -30,6 +29,7 @@ export function TaskAssignees({
   className,
 }: TaskAssigneesProps) {
   const visibleAssignees = assignees.slice(0, maxVisible);
+  const anotherAssignee = assignees.slice(maxVisible);
   const remainingCount = assignees.length - maxVisible;
 
   const sizeClasses = {
@@ -55,13 +55,17 @@ export function TaskAssignees({
                   )}
                 >
                   <AvatarImage
-                    src={
-                      `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/${assignee.image}` ||
-                      ""
-                    }
+                    src={getImageUrl(assignee.image) || ""}
                     alt={`${assignee.fullname}'s avatar`}
                   />
-                  <AvatarFallback className="text-xs font-medium bg-fimeOrangeLighter text-white">
+                  <AvatarFallback
+                    className={cn(
+                      "font-medium bg-fimeOrangeLighter text-white",
+                      size === "lg" && "text-base",
+                      size === "md" && "text-sm",
+                      size === "sm" && "text-xs"
+                    )}
+                  >
                     {getInitials(assignee.fullname)}
                   </AvatarFallback>
                 </Avatar>
@@ -91,10 +95,13 @@ export function TaskAssignees({
                 </div>
               </TooltipTrigger>
               <TooltipContent side="bottom">
-                <p>
-                  {remainingCount} more{" "}
+                {anotherAssignee.map((assignee) => (
+                  <p key={assignee.id}>{assignee.fullname}</p>
+                ))}
+                {/* <p>
+                  {remainingCount} người khác
                   {remainingCount === 1 ? "assignee" : "assignees"}
-                </p>
+                </p> */}
               </TooltipContent>
             </Tooltip>
           )}

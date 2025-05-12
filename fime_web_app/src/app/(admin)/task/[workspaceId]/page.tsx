@@ -8,6 +8,7 @@ import { getQueryClient } from "@/lib/get-query-client";
 import { taskCardsQueryOptions } from "@/queries/task-query";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import TaskDialog from "@/app/(admin)/task/components/task-details/task-dialog";
+import CardContextMenu from "@/app/(admin)/task/components/task-card/card-context-menu";
 
 export default async function TaskPage({
   params,
@@ -21,6 +22,7 @@ export default async function TaskPage({
   return (
     <div className="flex w-full flex-col gap-4 w-ful align-middle">
       <TaskDialog />
+      <CardContextMenu />
 
       <header className="flex py-4 bg-fimeOrangeLighter dark:bg-orange-900 flex-row w-full justify-content-evenly pe-4 h-12 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
         <div className="flex flex-row w-full justify-content-start items-center gap-2 px-4">
