@@ -19,11 +19,6 @@ import {
 } from '@/modules/user/dto/user-pagination';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  imageFileFilter,
-  userAvatarLimits,
-  userAvatarsStorage,
-} from '@/configs/multer.config';
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 
 @Controller('users')
@@ -87,8 +82,11 @@ export class UserController {
   }
 
   @Delete(':id')
-  remove(@UuidParam() id: string) {
-    return this.userService.remove(id);
+  async remove(@UuidParam() id: string) {
+    return {
+      message: 'Xóa người dùng thành công!',
+      data: await this.userService.remove(id),
+    };
   }
 
   // OPTIONAL!!

@@ -239,7 +239,7 @@ export class UserService {
       (await this.isPhoneExist(updateUserDto.phone))
     )
       throw new UnprocessableEntityException([
-        { field: 'email', error: 'Đã tồn tại số điện thoại này!' },
+        { field: 'phone', error: 'Đã tồn tại số điện thoại này!' },
       ]);
 
     let imageName = '';
@@ -289,10 +289,7 @@ export class UserService {
     const deletedUser = await this.prismaService.user.delete({ where: { id } });
     if (user.image) await this.deleteAvatar(user.image);
 
-    return {
-      message: 'Xóa người dùng thành công!',
-      data: deletedUser,
-    };
+    return deletedUser;
   }
 
   async handleRegister(signUpDto: SignUpDto) {

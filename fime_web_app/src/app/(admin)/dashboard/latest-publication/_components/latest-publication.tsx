@@ -99,7 +99,9 @@ export default function LatestPublicationsAdmin() {
     <div className="container mx-auto px-4">
       <div className="flex justify-between items-center mb-6">
         <FimeTitle>
-          <h1 className="text-2xl font-bold">Ấn phẩm mới nhất</h1>
+          <h1 className="text-2xl font-bold">
+            Quản Lý Ấn Phẩm Mới Nhất - FIME Landing Page
+          </h1>
         </FimeTitle>
         <FimeOutlineButton
           size="default"

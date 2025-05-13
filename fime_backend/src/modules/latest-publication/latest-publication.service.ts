@@ -53,9 +53,7 @@ export class LatestPublicationService {
     };
 
     const orderBy = validSortByFields.includes(sortBy)
-      ? sortBy === 'users'
-        ? { users: { _count: sortOrder } }
-        : { [sortBy]: sortOrder }
+      ? { [sortBy]: sortOrder }
       : { [defaultSortBy]: sortOrder };
 
     const publications = await this.prismaService.latestPublication.findMany({

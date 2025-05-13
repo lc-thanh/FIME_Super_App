@@ -255,9 +255,9 @@ model LatestPublication {
 }
 
 model NewestProducts {
-  id    String   @id @default(uuid())
+  id    String    @id @default(uuid())
   title String
-  date  DateTime
+  date  DateTime?
   note  String?
   image String?
   link  String?

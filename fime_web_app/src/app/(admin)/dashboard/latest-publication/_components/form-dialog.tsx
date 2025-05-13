@@ -125,9 +125,7 @@ export default function PublicationFormDialog({
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === "create"
-              ? "Thêm mới Publication"
-              : "Chỉnh sửa Publication"}
+            {mode === "create" ? "Thêm Ấn Phẩm Mới Nhất" : "Chỉnh sửa Ấn Phẩm"}
           </DialogTitle>
         </DialogHeader>
 
@@ -200,7 +198,7 @@ export default function PublicationFormDialog({
                 Hủy
               </Button>
               <Button
-                variant="default"
+                variant="gradient"
                 type="submit"
                 className="w-[100px]"
                 disabled={mutation.isPending}
