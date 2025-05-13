@@ -113,13 +113,20 @@ export function objectToFormData<T extends Record<string, any>>(
         ? transformKeys(key, value)
         : value;
 
+      // Nếu value là Date, chuyển thành ISO string
+      if (transformedValue instanceof Date) {
+        formData.append(key, transformedValue.toISOString());
+      }
       // Nếu value là string hoặc Blob, append trực tiếp, ngược lại JSON.stringify
-      formData.append(
-        key,
-        transformedValue instanceof Blob || typeof transformedValue === "string"
-          ? transformedValue
-          : JSON.stringify(transformedValue)
-      );
+      else {
+        formData.append(
+          key,
+          transformedValue instanceof Blob ||
+            typeof transformedValue === "string"
+            ? transformedValue
+            : JSON.stringify(transformedValue)
+        );
+      }
     }
   });
   return formData;
@@ -128,4 +135,12 @@ export function objectToFormData<T extends Record<string, any>>(
 export const getImageUrl = (filename?: string) => {
   if (!filename) return undefined;
   return `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/users/avatars/${filename}`;
+};
+
+export const getProductImageUrl = (image?: string) => {
+  if (!image) return undefined;
+  if (image.startsWith("http")) {
+    return image;
+  }
+  return `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/newest-products/images/${image}`;
 };
