@@ -66,7 +66,7 @@ const data = {
         },
         {
           title: "Sản phẩm gần đây",
-          url: "#",
+          url: "/newest-products",
         },
       ],
     },

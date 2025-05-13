@@ -244,22 +244,23 @@ model TeamSegment {
 // FIME LANDING PAGE SECTION
 
 model LatestPublication {
-  id          String  @id @default(uuid())
-  title       String
-  description String?
-  embed_code  String?
+  id         String  @id @default(uuid())
+  title      String
+  note       String?
+  embed_code String
+  isActive   Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model NewestProducts {
-  id          String   @id @default(uuid())
-  title       String
-  date        DateTime
-  description String?
-  image       String?
-  link        String?
+  id    String   @id @default(uuid())
+  title String
+  date  DateTime
+  note  String?
+  image String?
+  link  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -15,6 +15,7 @@ import { TeamModule } from './modules/team/team.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { GenModule } from './modules/gen/gen.module';
+import { LatestPublicationModule } from './modules/latest-publication/latest-publication.module';
 
 @Module({
   imports: [
@@ -57,6 +58,7 @@ import { GenModule } from './modules/gen/gen.module';
     PositionModule,
     TeamModule,
     GenModule,
+    LatestPublicationModule,
   ],
   controllers: [AppController],
   providers: [
