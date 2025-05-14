@@ -15,6 +15,8 @@ import {
   PublicationPaginatedResponse,
 } from '@/modules/latest-publication/dto/publication-pagination';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
+import { Public } from '@/common/decorators/public-route.decorator';
+import { PublicationViewDto } from '@/modules/latest-publication/dto/publication-view.dto';
 
 @Controller('latest-publications')
 export class LatestPublicationController {
@@ -37,6 +39,12 @@ export class LatestPublicationController {
     @Query() params: PublicationFilterType,
   ): Promise<PublicationPaginatedResponse> {
     return this.latestPublicationService.findAll(params);
+  }
+
+  @Get('public')
+  @Public()
+  getPublic(): Promise<PublicationViewDto> {
+    return this.latestPublicationService.getActivePublic();
   }
 
   @Get(':id')

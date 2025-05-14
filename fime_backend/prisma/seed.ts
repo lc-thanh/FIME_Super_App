@@ -258,9 +258,85 @@ const seedTasks = async () => {
   });
 };
 
+const seedLandingPage = async () => {
+  await prisma.latestPublication.upsert({
+    where: { id: 'cdada2b7-86de-42cf-bc9d-d8c282fc9f91' },
+    update: {},
+    create: {
+      id: 'cdada2b7-86de-42cf-bc9d-d8c282fc9f91',
+      title: 'IT FESTIVAL 2025',
+      embed_code: `<iframe
+              src="https://www.facebook.com/plugins/video.php?height=314&href=https://www.facebook.com/fitmediahaui/videos/1224055816008338%2F&show_text=false&width=560&t=0"
+              style={{
+                border: "none",
+                overflow: "hidden",
+                width: "100%",
+                height: "auto",
+                aspectRatio: "16/9",
+              }}
+              scrolling="no"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen={true}
+            ></iframe>`,
+    },
+  });
+
+  await prisma.latestPublication.upsert({
+    where: { id: '851b0739-bb3e-4967-8ab8-b7422f27b6aa' },
+    update: {},
+    create: {
+      id: '851b0739-bb3e-4967-8ab8-b7422f27b6aa',
+      title:
+        'ĐẠI HỘI ĐẠI BIỂU LIÊN CHI HỘI SINH VIÊN VIỆT NAM TRƯỜNG CNTT & TT LẦN THỨ I, NHIỆM KỲ 2025 - 2028',
+      embed_code: `<iframe
+              src="https://www.facebook.com/plugins/video.php?height=314&href=https%3A%2F%2Fwww.facebook.com%2Ffitmediahaui%2Fvideos%2F1220048349718752%2F&show_text=false&width=560&t=0"
+              style={{
+                border: "none",
+                overflow: "hidden",
+                width: "100%",
+                height: "auto",
+                aspectRatio: "16/9",
+              }}
+              scrolling="no"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+              allowFullScreen={true}
+            ></iframe>`,
+    },
+  });
+
+  await prisma.newestProducts.upsert({
+    where: { id: '00bc1450-f7e9-47dc-9140-f6c341e0408d' },
+    update: {},
+    create: {
+      id: '00bc1450-f7e9-47dc-9140-f6c341e0408d',
+      title: '8.5 Đại hội đại Biểu LCH khóa I',
+      note: 'Vào ngày 08/05/2025, tại hội trường tầng 2 – nhà A3, Đại hội Đại biểu Liên chi Hội Sinh viên Trường Công nghệ Thông tin và Truyền thông lần thứ I, nhiệm kỳ 2025 – 2028 đã được long trọng tổ chức trong không khí trang nghiêm và đầy tinh thần trách nhiệm',
+      date: new Date('2025-05-08'),
+      image: 'newest-product-1747191174208-871050879.jpg',
+      link: 'https://drive.google.com/drive/folders/1KLOq1x29iE9KWSTAiEqg_UK0lIDA14LQ?usp=drive_link',
+    },
+  });
+
+  await prisma.newestProducts.upsert({
+    where: { id: 'f3b0c1a2-4c5e-4f6b-8c7d-9e5f3b1c2d3e' },
+    update: {},
+    create: {
+      id: 'f3b0c1a2-4c5e-4f6b-8c7d-9e5f3b1c2d3e',
+      title: 'Gala IT Festival 2025',
+      note: 'Đêm Gala là sân khấu của vòng chung kết SICT’s Got Talent với những tiết mục đặc sắc, bùng nổ, sáng tạo và đầy ý nghĩa từ các thí sinh tài năng. Bên cạnh đó, lễ trao giải cho các cuộc thi trước đó đã vinh danh những nỗ lực xuất sắc, khép lại hành trình IT Festival 2025 bằng một dấu son trọn vẹn.',
+      date: new Date('2025-04-05'),
+      image: 'newest-product-1747190741150-980401952.jpg',
+      link: 'https://drive.google.com/drive/folders/1cPPOrxvdN-SGktaho0utV2ZTD6-ig2Qp?usp=drive_link',
+    },
+  });
+};
+
 const main = async () => {
   await seedUsers();
   await seedTasks();
+  await seedLandingPage();
   console.log('Seeding completed!');
 };
 

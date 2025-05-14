@@ -1,5 +1,3 @@
-"use client";
-
 import { UserTable } from "@/app/(admin)/dashboard/users/_components/user-table";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { FimeTitle } from "@/components/fime-title";

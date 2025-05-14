@@ -109,14 +109,14 @@ export default function NewestProductsAdmin() {
                 className="relative w-full overflow-hidden rounded-md"
                 style={{
                   width: "100%",
-                  aspectRatio: "4/3", // Tỉ lệ khung hình 2:3
+                  aspectRatio: "3/2",
                   overflow: "hidden",
                 }}
               >
                 <Image
                   src={
                     getProductImageUrl(product?.image || "") ||
-                    "/login_page_cover.jpg"
+                    "/newest-product/newest-product_cover.jpg"
                   }
                   alt={product.title}
                   fill
@@ -142,13 +142,15 @@ export default function NewestProductsAdmin() {
 
                 {product.note && (
                   <p className="text-muted-foreground text-sm mb-4">
-                    {product.note}
+                    {product.note.slice(0, 180)}...
                   </p>
                 )}
 
                 {product.link && (
                   <div className="flex items-center text-sm text-blue-500 mb-4">
-                    <Link2 className="h-4 w-4 mr-1" />
+                    <div>
+                      <Link2 className="h-4 w-4 mr-1" />
+                    </div>
                     <a
                       href={product.link}
                       target="_blank"

@@ -139,7 +139,7 @@ export function EventCalendar({ tasks, className }: EventCalendarProps) {
               day.isCurrentMonth
                 ? "bg-background"
                 : "bg-muted/30 text-muted-foreground",
-              day.isToday && "border-primary"
+              day.isToday && "border-fimeYellow border-2"
             )}
           >
             <div className="flex justify-between items-center mb-1">
@@ -147,7 +147,7 @@ export function EventCalendar({ tasks, className }: EventCalendarProps) {
                 className={cn(
                   "text-sm font-medium",
                   day.isToday &&
-                    "bg-primary text-primary-foreground rounded-full w-6 h-6 flex items-center justify-center"
+                    "bg-gradient-to-br from-fimeOrange from-30% to-fimeYellow to-90% text-white rounded-full w-5 h-5 flex items-center justify-center"
                 )}
               >
                 {day.isCurrentMonth ? day.date.getDate() : ""}

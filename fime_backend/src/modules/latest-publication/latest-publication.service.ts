@@ -10,6 +10,7 @@ import {
 } from '@/modules/latest-publication/dto/publication-pagination';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma.service';
+import { PublicationViewDto } from '@/modules/latest-publication/dto/publication-view.dto';
 
 @Injectable()
 export class LatestPublicationService {
@@ -80,6 +81,25 @@ export class LatestPublicationService {
       totalPage: Math.ceil(total / pageSize),
       hasNextPage: total > page * pageSize,
       hasPreviousPage: page > 1,
+    };
+  }
+
+  async getActivePublic(): Promise<PublicationViewDto> {
+    const publication = await this.prismaService.latestPublication.findFirst({
+      where: { isActive: true },
+    });
+
+    if (!publication)
+      throw new BadRequestException('Không có ấn phẩm nào được kích hoạt');
+
+    return {
+      id: publication.id,
+      title: publication.title,
+      note: publication.note,
+      embed_code: publication.embed_code,
+      isActive: publication.isActive,
+      createdAt: publication.createdAt,
+      updatedAt: publication.updatedAt,
     };
   }
 

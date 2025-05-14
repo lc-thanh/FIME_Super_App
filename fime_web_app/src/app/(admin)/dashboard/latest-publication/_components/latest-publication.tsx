@@ -126,7 +126,9 @@ export default function LatestPublicationsAdmin() {
               <div className="mb-2 flex justify-between items-start">
                 <h2 className="text-xl font-semibold">{publication.title}</h2>
                 {publication.isActive && (
-                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  <div>
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                  </div>
                 )}
               </div>
 

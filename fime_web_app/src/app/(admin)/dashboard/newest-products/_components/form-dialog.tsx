@@ -314,7 +314,11 @@ export default function NewestProductFormDialog({
                   <FormItem>
                     <FormLabel>Mô tả</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Nhập mô tả" {...field} />
+                      <Textarea
+                        placeholder="Nhập mô tả"
+                        className="w-full h-36 resize-y"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

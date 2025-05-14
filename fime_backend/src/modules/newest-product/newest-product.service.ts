@@ -17,6 +17,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma.service';
 import { extname, join } from 'path';
 import fs from 'fs/promises';
+import { NewestProductViewDto } from '@/modules/newest-product/dto/newest-product-view.dto';
 
 @Injectable()
 export class NewestProductService {
@@ -108,6 +109,23 @@ export class NewestProductService {
       hasNextPage: total > page * pageSize,
       hasPreviousPage: page > 1,
     };
+  }
+
+  async findAllWithoutPagination(): Promise<NewestProductViewDto[]> {
+    const newestProducts = await this.prismaService.newestProducts.findMany({
+      orderBy: { date: 'desc' },
+    });
+
+    return newestProducts.map((product) => ({
+      id: product.id,
+      title: product.title,
+      date: product.date,
+      note: product.note,
+      image: product.image,
+      link: product.link,
+      createdAt: product.createdAt,
+      updatedAt: product.updatedAt,
+    }));
   }
 
   async uploadImage(file: Express.Multer.File, condition?: boolean) {

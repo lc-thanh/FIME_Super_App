@@ -19,6 +19,8 @@ import {
 } from '@/modules/newest-product/dto/newest-product-pagination';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
+import { NewestProductViewDto } from '@/modules/newest-product/dto/newest-product-view.dto';
+import { Public } from '@/common/decorators/public-route.decorator';
 
 @Controller('newest-products')
 export class NewestProductController {
@@ -44,6 +46,12 @@ export class NewestProductController {
     @Query() params: NewestProductFilterType,
   ): Promise<NewestProductPaginatedResponse> {
     return this.newestProductService.findAll(params);
+  }
+
+  @Get('all')
+  @Public()
+  findAllWithoutPagination(): Promise<NewestProductViewDto[]> {
+    return this.newestProductService.findAllWithoutPagination();
   }
 
   @Get(':id')
