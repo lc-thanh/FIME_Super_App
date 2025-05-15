@@ -11,6 +11,7 @@ import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
 import { Task, TaskPriority, TaskStatus } from '@prisma/client';
 import { TaskBoardGateway } from '@/gateways/task-board/task-board.gateway';
 import { TodoListDto } from '@/modules/task/dto/todo-list.dto';
+import { JsonObject } from '@prisma/client/runtime/library';
 
 const INVALID_POSITION_MESSAGE = 'Vị trí không hợp lệ!';
 
@@ -424,6 +425,19 @@ export class TaskService {
     return {
       message: 'Cập nhật danh sách todo thành công!',
     };
+  }
+
+  async syncNote(taskId: string, note: JsonObject) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        note,
+      },
+    });
+    return updatedTask;
   }
 
   async softDeleteTask(taskId: string) {

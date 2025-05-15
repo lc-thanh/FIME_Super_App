@@ -47,7 +47,7 @@ export const TaskDetails = ({ id }: { id: string | null }) => {
 
         {/* Description */}
         {/* <Tiptap /> */}
-        <SimpleEditor />
+        <SimpleEditor note={task.note} taskId={task.id} />
 
         {/* Attachments */}
         {/* <div>

@@ -16,6 +16,7 @@ import { User } from '@/common/decorators/user.decorator';
 import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
 import { TaskPriority, TaskType } from '@prisma/client';
 import { TodoListDto } from '@/modules/task/dto/todo-list.dto';
+import { JsonObject } from '@prisma/client/runtime/library';
 
 @Controller('tasks')
 export class TaskController {
@@ -106,6 +107,17 @@ export class TaskController {
     @Body('todos') todos: TodoListDto[],
   ) {
     return this.taskService.syncTodos(taskId, todos);
+  }
+
+  @Post('sync-note')
+  async syncNote(
+    @Body('taskId') taskId: string,
+    @Body('note') note: JsonObject,
+  ) {
+    return {
+      message: 'Cập nhật ghi chú thành công',
+      data: await this.taskService.syncNote(taskId, note),
+    };
   }
 
   @Delete('soft-delete/:taskId')

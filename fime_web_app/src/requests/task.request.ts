@@ -83,6 +83,12 @@ export const TaskApiRequests = {
       todos,
     }),
 
+  syncNote: async (taskId: string, note: unknown) =>
+    http.post<{ message: string; data: TaskType }>("tasks/sync-note", {
+      taskId,
+      note,
+    }),
+
   softDelete: async (taskId: string) =>
     http.delete<{ message: string }>(`tasks/soft-delete/${taskId}`, {}),
 
