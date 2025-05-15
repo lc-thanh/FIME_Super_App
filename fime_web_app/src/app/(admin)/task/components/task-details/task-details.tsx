@@ -26,9 +26,6 @@ export const TaskDetails = ({ id }: { id: string | null }) => {
       <TaskTitle initialTitle={task.title} className="mb-4" />
 
       <div className="space-y-4">
-        {/* Todo List */}
-        <TodoList task={task} />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <AssigneesPicker users={task.users} taskId={task.id} />
           {/* Priority */}
@@ -38,12 +35,13 @@ export const TaskDetails = ({ id }: { id: string | null }) => {
             taskId={task.id}
           />
         </div>
-
         {/* Dates and TaskType */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-2">
           <PrioritySelect priority={task.priority} taskId={task.id} />
           <TaskTypeSelector type={task.type} taskId={task.id} />
         </div>
+        {/* Todo List */}
+        <TodoList task={task} />
 
         {/* Description */}
         {/* <Tiptap /> */}

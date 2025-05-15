@@ -39,6 +39,23 @@ export const taskCardsQueryOptions = (workspaceId: string) =>
     },
   });
 
+export const ALL_SELECTABLE_ASSIGNEES_QUERY_KEY = "allSelectableAssignees";
+
+export const allSelectableAssigneesQueryOptions = (taskId: string) =>
+  queryOptions({
+    queryKey: [ALL_SELECTABLE_ASSIGNEES_QUERY_KEY, taskId],
+    queryFn: async ({ queryKey }) => {
+      const [, id] = queryKey; // lấy taskId từ queryKey
+      try {
+        const res = await TaskApiRequests.getAllSelectableAssignees(id);
+        return res.payload.data;
+      } catch (error) {
+        console.log("Error fetching selectable assignees:", error);
+        throw error;
+      }
+    },
+  });
+
 export const SCHEDULE_QUERY_KEY = "schedule";
 
 export const scheduleQueryOptions = () =>

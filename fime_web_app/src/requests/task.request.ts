@@ -1,6 +1,7 @@
 import { type Event } from "@/app/(admin)/dashboard/schedule/_components/event-calendar";
 import http from "@/lib/http";
 import {
+  AssigneeType,
   ColumnType,
   TaskPriorityType,
   TaskStatusType,
@@ -45,6 +46,12 @@ export const TaskApiRequests = {
     // await delay(2000);
     return http.post<{ message: string }>("tasks/move-card", data);
   },
+
+  getAllSelectableAssignees: async (taskId: string) =>
+    http.get<{
+      message: string;
+      data: AssigneeType[];
+    }>(`tasks/all-selectable-assignees/${taskId}`),
 
   addAssignee: async (taskId: string, assigneeId: string) =>
     http.post<{ message: string; data: TaskType }>("tasks/add-assignee", {

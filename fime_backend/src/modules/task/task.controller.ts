@@ -40,6 +40,14 @@ export class TaskController {
     };
   }
 
+  @Get('all-selectable-assignees/:taskId')
+  async getAllSelectableAssignees(@UuidParam('taskId') taskId: string) {
+    return {
+      message: 'Lấy danh sách thành viên có thể thêm vào task thành công',
+      data: await this.taskService.getAllSelectableAssignees(taskId),
+    };
+  }
+
   @Post('move-card')
   moveCard(@Body() moveCardDto: MoveCardDto) {
     return this.taskService.moveCard(moveCardDto);

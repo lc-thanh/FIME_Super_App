@@ -8,10 +8,12 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from '@/prisma.service';
 import { TaskColumnDto } from '@/modules/task/dto/task-card.dto';
 import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
-import { Task, TaskPriority, TaskStatus } from '@prisma/client';
+import { Task, TaskPriority, TaskStatus, User } from '@prisma/client';
 import { TaskBoardGateway } from '@/gateways/task-board/task-board.gateway';
 import { TodoListDto } from '@/modules/task/dto/todo-list.dto';
 import { JsonObject } from '@prisma/client/runtime/library';
+import { UserViewDto } from '@/modules/user/dto/user-view.dto';
+import { UserService } from '@/modules/user/user.service';
 
 const INVALID_POSITION_MESSAGE = 'Vị trí không hợp lệ!';
 
@@ -20,6 +22,7 @@ export class TaskService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly taskBoardGateway: TaskBoardGateway,
+    private readonly userService: UserService,
   ) {}
 
   create(createTaskDto: CreateTaskDto) {
@@ -100,6 +103,58 @@ export class TaskService {
     });
 
     return columns;
+  }
+
+  async getAllSelectableAssignees(
+    taskId: string,
+  ): Promise<(UserViewDto & { isRecommended: boolean })[]> {
+    const task = await this.findOne(taskId, ['id'], undefined, undefined);
+
+    const allUsers = await this.prismaService.user.findMany({
+      where: {
+        status: {
+          not: 'BANNED',
+        },
+        NOT: {
+          role: {
+            has: 'FORMER_MEMBER', // Lọc các user không phải cựu thành viên
+          },
+        },
+      },
+      include: {
+        position: true,
+        team: true,
+        gen: true,
+      },
+    });
+
+    let allUsersFreeOnDate: Pick<User, 'id'>[] = [];
+    if (task.startDate && task.deadline) {
+      allUsersFreeOnDate = await this.userService.getAllUsersFreeOnDate(
+        task.startDate,
+        task.deadline,
+      );
+    }
+
+    return allUsers.map((user) => ({
+      id: user.id,
+      fullname: user.fullname,
+      email: user.email,
+      phone: user.phone,
+      address: user.address,
+      image: user.image,
+      positionId: user.positionId,
+      positionName: user.position?.name || null,
+      teamId: user.teamId,
+      teamName: user.team?.name || null,
+      genId: user.genId,
+      genName: user.gen?.name || null,
+      role: user.role,
+      status: user.status,
+      isRecommended: allUsersFreeOnDate.some((u) => u.id === user.id),
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
   }
 
   async calcTaskNewPosition({

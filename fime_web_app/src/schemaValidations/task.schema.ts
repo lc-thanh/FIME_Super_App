@@ -15,6 +15,11 @@ export const UserTask = User.pick({
 }).extend({});
 export type UserTaskType = z.infer<typeof UserTask>;
 
+export const Assignee = UserTask.extend({
+  isRecommended: z.boolean(),
+});
+export type AssigneeType = z.infer<typeof Assignee>;
+
 export const TypeOfTask = z.enum([
   "TODO",
   "MONTHLY_SEGMENTS",
