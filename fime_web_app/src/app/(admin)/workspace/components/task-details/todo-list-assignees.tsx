@@ -1,6 +1,6 @@
 "use client";
 
-import { TaskAssignees } from "@/app/(admin)/task/components/task-card/task-assignees";
+import { TaskAssignees } from "@/app/(admin)/workspace/components/task-card/task-assignees";
 import {
   Command,
   CommandEmpty,

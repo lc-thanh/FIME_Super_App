@@ -154,7 +154,7 @@ export function EventCalendar({ tasks, className }: EventCalendarProps) {
               </span>
             </div>
 
-            <div className="space-y-1 overflow-y-auto max-h-[80px]">
+            <div className="space-y-1 overflow-y-auto max-h-[96px]">
               {day.isCurrentMonth &&
                 getTasksForDate(day.date).map((task) => (
                   <EventTooltip key={task.id} task={task} />

@@ -3,15 +3,14 @@
 // Tiptap - Text editor
 import { SimpleEditor } from "@/components/tiptap-templates/simple/simple-editor";
 
-import "@/app/(admin)/task/components/style.css";
-import TodoList from "@/app/(admin)/task/components/task-details/todo-list";
-import TaskTitle from "@/app/(admin)/task/components/task-details/task-title";
+import TodoList from "@/app/(admin)/workspace/components/task-details/todo-list";
+import TaskTitle from "@/app/(admin)/workspace/components/task-details/task-title";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { taskQueryOptions } from "@/queries/task-query";
-import { AssigneesPicker } from "@/app/(admin)/task/components/task-details/assignees-picker";
-import { PrioritySelect } from "@/app/(admin)/task/components/task-details/priority-select";
-import { TaskTypeSelector } from "@/app/(admin)/task/components/task-details/task-type-selector";
-import TaskTimePicker from "@/app/(admin)/task/components/task-details/task-time-picker";
+import { AssigneesPicker } from "@/app/(admin)/workspace/components/task-details/assignees-picker";
+import { PrioritySelect } from "@/app/(admin)/workspace/components/task-details/priority-select";
+import { TaskTypeSelector } from "@/app/(admin)/workspace/components/task-details/task-type-selector";
+import TaskTimePicker from "@/app/(admin)/workspace/components/task-details/task-time-picker";
 
 export const TaskDetails = ({ id }: { id: string | null }) => {
   const { data: task } = useSuspenseQuery(taskQueryOptions(id));

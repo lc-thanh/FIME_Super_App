@@ -5,7 +5,7 @@ import { NextMiddleware, NextRequest, NextResponse } from "next/server";
 export const SIGNIN_SUB_URL = "/login";
 export const SIGNOUT_SUB_URL = "/logout";
 export const ADMIN_SUB_URL = "/dashboard";
-export const TASK_SUB_URL = "/task";
+export const WORKSPACE_SUB_URL = "/workspace";
 export const SESSION_TIMEOUT = 60 * 60 * 24 * 30; // 30 days
 export const TOKEN_REFRESH_BUFFER = 1000 * 60 * 15;
 export const SESSION_SECURE = process.env.AUTH_URL?.startsWith("https://");
@@ -111,7 +111,7 @@ export const middleware: NextMiddleware = async (req: NextRequest) => {
     let newUrl = `${SIGNIN_SUB_URL}`;
     if (
       req.nextUrl.pathname.startsWith(ADMIN_SUB_URL) ||
-      req.nextUrl.pathname.startsWith(TASK_SUB_URL)
+      req.nextUrl.pathname.startsWith(WORKSPACE_SUB_URL)
     ) {
       newUrl = `${SIGNIN_SUB_URL}?redirectFrom=${req.nextUrl.pathname}`;
     }
@@ -159,7 +159,7 @@ export const config = {
   matcher: [
     "/login/:path*",
     "/dashboard/:path*",
-    "/task/:path*",
+    "/workspace/:path*",
     "/logout/:path*",
   ],
 };

@@ -1,7 +1,7 @@
 "use client";
 
-import { TaskAssignees } from "@/app/(admin)/task/components/task-card/task-assignees";
-import { AssigneesFacetedFilter } from "@/app/(admin)/task/components/task-details/assignees-faceted-filter";
+import { TaskAssignees } from "@/app/(admin)/workspace/components/task-card/task-assignees";
+import { AssigneesFacetedFilter } from "@/app/(admin)/workspace/components/task-details/assignees-faceted-filter";
 import {
   Command,
   CommandEmpty,

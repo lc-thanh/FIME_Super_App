@@ -7,10 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Box } from "@/components/ui/box";
 import { TaskCardType } from "@/schemaValidations/task.schema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { TaskAssignees } from "@/app/(admin)/task/components/task-card/task-assignees";
-import { PriorityBadge } from "@/app/(admin)/task/components/task-card/priority-badge";
-import { TaskTypeBadge } from "@/app/(admin)/task/components/task-card/task-type-badge";
-import { DateOfCard } from "@/app/(admin)/task/components/task-card/date-of-card";
+import { TaskAssignees } from "@/app/(admin)/workspace/components/task-card/task-assignees";
+import { PriorityBadge } from "@/app/(admin)/workspace/components/task-card/priority-badge";
+import { TaskTypeBadge } from "@/app/(admin)/workspace/components/task-card/task-type-badge";
+import { DateOfCard } from "@/app/(admin)/workspace/components/task-card/date-of-card";
 import { cn } from "@/lib/utils";
 import { useBoundStore } from "@/providers/store-provider";
 

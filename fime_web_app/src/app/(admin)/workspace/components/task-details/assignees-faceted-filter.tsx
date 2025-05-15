@@ -1,7 +1,7 @@
 "use client";
 
 import type { FacetedFilterOption } from "@/types/data-table";
-import { CustomFacetedFilter } from "@/app/(admin)/task/components/task-details/custom-faceted-filter";
+import { CustomFacetedFilter } from "@/app/(admin)/workspace/components/task-details/custom-faceted-filter";
 
 interface AssigneesFacetedFilterProps {
   teams: { id: string; name: string }[];

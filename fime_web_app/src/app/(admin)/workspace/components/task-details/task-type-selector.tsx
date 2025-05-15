@@ -9,7 +9,7 @@ import { TypeOfTask, TypeOfTaskType } from "@/schemaValidations/task.schema";
 import {
   TYPE_CLASS,
   TYPE_TEXT,
-} from "@/app/(admin)/task/components/task-card/task-type-badge";
+} from "@/app/(admin)/workspace/components/task-card/task-type-badge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskApiRequests } from "@/requests/task.request";
 import { toast } from "sonner";

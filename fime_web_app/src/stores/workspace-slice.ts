@@ -12,7 +12,7 @@ interface Workspace {
 //     const res = await workspaceApiRequest.myWorkspaces();
 //     return res.payload.data.map((item) => ({
 //       name: item.name,
-//       url: `/task/${item.id}`,
+//       url: `/workspace/${item.id}`,
 //       icon: Frame,
 //     }));
 //   } catch (error) {

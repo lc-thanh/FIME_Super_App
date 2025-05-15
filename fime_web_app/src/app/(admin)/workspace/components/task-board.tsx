@@ -7,9 +7,8 @@ import {
   moveCard,
 } from "@caldwell619/react-kanban";
 
-import { renderCard } from "@/app/(admin)/task/components/task-card/card";
-import { renderColumnHeader } from "@/app/(admin)/task/components/column-header";
-import "@/app/(admin)/task/components/style.css";
+import { renderCard } from "@/app/(admin)/workspace/components/task-card/card";
+import { renderColumnHeader } from "@/app/(admin)/workspace/components/column-header";
 import {
   ColumnIdToNumber,
   ColumnType,
