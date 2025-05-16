@@ -11,7 +11,10 @@ import { Save, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskApiRequests } from "@/requests/task.request";
 import { toast } from "sonner";
-import { TASK_QUERY_KEY } from "@/queries/task-query";
+import {
+  TASK_ACTIVITIES_QUERY_KEY,
+  TASK_QUERY_KEY,
+} from "@/queries/task-query";
 
 export default function TaskTimePicker({
   startDate,
@@ -36,6 +39,9 @@ export default function TaskTimePicker({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
       // Cập nhật giá trị ban đầu sau khi lưu
       setOriginalDate(date);
       setIsChanged(false);

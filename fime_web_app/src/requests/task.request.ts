@@ -3,6 +3,7 @@ import http from "@/lib/http";
 import {
   AssigneeType,
   ColumnType,
+  TaskActivityPaginatedResponseType,
   TaskPriorityType,
   TaskStatusType,
   TaskType,
@@ -95,6 +96,15 @@ export const TaskApiRequests = {
       taskId,
       note,
     }),
+
+  getTaskActivities: async (params: string, taskId: string) => {
+    // const delay = (ms: number) =>
+    //   new Promise((resolve) => setTimeout(resolve, ms));
+    // await delay(2000);
+    return http.get<TaskActivityPaginatedResponseType>(
+      `tasks/task-activities/${taskId}?${params}`
+    );
+  },
 
   softDelete: async (taskId: string) =>
     http.delete<{ message: string }>(`tasks/soft-delete/${taskId}`, {}),

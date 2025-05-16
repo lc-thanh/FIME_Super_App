@@ -56,6 +56,30 @@ export const allSelectableAssigneesQueryOptions = (taskId: string) =>
     },
   });
 
+export const TASK_ACTIVITIES_QUERY_KEY = "taskActivities";
+
+export const taskActivitiesQueryOptions = (
+  searchParams: string,
+  taskId: string
+) =>
+  queryOptions({
+    queryKey: [TASK_ACTIVITIES_QUERY_KEY, searchParams, taskId],
+    queryFn: async ({ queryKey }) => {
+      const [, searchParams, taskId] = queryKey; // lấy searchParams từ queryKey
+      try {
+        const res = await TaskApiRequests.getTaskActivities(
+          searchParams,
+          taskId
+        );
+        return res.payload;
+      } catch (error) {
+        console.log("Error fetching task activities:", error);
+        throw error;
+      }
+    },
+    staleTime: 0,
+  });
+
 export const SCHEDULE_QUERY_KEY = "schedule";
 
 export const scheduleQueryOptions = () =>

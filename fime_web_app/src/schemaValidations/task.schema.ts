@@ -35,10 +35,19 @@ export const TaskStatus = z.enum(["TODO", "IN_PROGRESS", "IN_REVIEW", "DONE"]);
 export type TaskStatusType = z.infer<typeof TaskStatus>;
 
 export const TaskStatusText = {
-  TODO: "Chưa làm",
-  IN_PROGRESS: "Đang làm",
-  IN_REVIEW: "Chờ duyệt",
+  TODO: "Việc cần làm",
+  IN_PROGRESS: "Đang thực hiện",
+  IN_REVIEW: "Chờ đánh giá",
   DONE: "Hoàn thành",
+};
+
+export const TaskStatusTextColor = {
+  TODO: "text-blue-500 bg-blue-50 dark:bg-blue-900 dark:text-blue-300",
+  IN_PROGRESS:
+    "text-yellow-600 bg-yellow-50 dark:bg-yellow-900 dark:text-yellow-300",
+  IN_REVIEW:
+    "text-purple-500 bg-purple-50 dark:bg-purple-900 dark:text-purple-300",
+  DONE: "text-green-500 bg-green-50 dark:bg-green-900 dark:text-green-300",
 };
 
 export const TaskPriority = z.enum(["LOW", "MEDIUM", "HIGH"]);
@@ -76,13 +85,47 @@ export const TaskAttachment = z
   .strict();
 export type TaskAttachmentType = z.infer<typeof TaskAttachment>;
 
+export const TypeOfTaskActivity = z.enum([
+  "CREATE_CARD",
+  "DELETE_CARD",
+  "MOVE_CARD",
+  "CHANGE_TITLE",
+  "ADD_ASSIGNEE",
+  "REMOVE_ASSIGNEE",
+  "SYNC_TODO",
+  "SYNC_NOTE",
+  "ATTACHMENT",
+  "CHANGE_PRIORITY",
+  "CHANGE_TYPE",
+  "CHANGE_DATE",
+]);
+export type TypeOfTaskActivityType = z.infer<typeof TypeOfTaskActivity>;
+
 export const TaskActivity = z.object({
   id: z.string().uuid(),
   content: z.string(),
-  user: UserTask,
+  type: TypeOfTaskActivity,
+  user: UserTask.pick({
+    id: true,
+    fullname: true,
+    image: true,
+  }),
   createdAt: z.date(),
 });
 export type TaskActivityType = z.infer<typeof TaskActivity>;
+
+export const TaskActivityPaginatedResponse = z.object({
+  data: z.array(TaskActivity),
+  page: z.number(),
+  pageSize: z.number(),
+  total: z.number(),
+  totalPage: z.number(),
+  hasNextPage: z.boolean(),
+  hasPreviousPage: z.boolean(),
+});
+export type TaskActivityPaginatedResponseType = z.infer<
+  typeof TaskActivityPaginatedResponse
+>;
 
 export const Task = z.object({
   id: z.string().uuid(),

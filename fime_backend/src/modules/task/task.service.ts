@@ -8,12 +8,27 @@ import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from '@/prisma.service';
 import { TaskColumnDto } from '@/modules/task/dto/task-card.dto';
 import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
-import { Task, TaskPriority, TaskStatus, User } from '@prisma/client';
+import {
+  Prisma,
+  Task,
+  TaskActivityType,
+  TaskPriority,
+  TaskStatus,
+  TaskType,
+  User,
+} from '@prisma/client';
 import { TaskBoardGateway } from '@/gateways/task-board/task-board.gateway';
 import { TodoListDto } from '@/modules/task/dto/todo-list.dto';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 import { UserService } from '@/modules/user/user.service';
+import {
+  defaultSortBy,
+  defaultSortOrder,
+  TaskActivitiesPaginatedResponse,
+  TaskActivityFilterType,
+} from '@/modules/task/dto/task-activities-pagination';
+import dayjs from 'dayjs';
 
 const INVALID_POSITION_MESSAGE = 'Vị trí không hợp lệ!';
 
@@ -267,7 +282,7 @@ export class TaskService {
     );
   }
 
-  async moveCard(data: MoveCardDto) {
+  async moveCard(data: MoveCardDto, userId: string) {
     const { workspaceId, cardId, cardBeforeId, cardAfterId, column } = data;
 
     // Kiểm tra trùng Id
@@ -278,7 +293,7 @@ export class TaskService {
       throw new BadRequestException(INVALID_POSITION_MESSAGE);
     }
 
-    await this.findOne(cardId, ['id'], workspaceId);
+    const prev_task = await this.findOne(cardId, ['id'], workspaceId);
     const taskBefore = cardBeforeId
       ? await this.findOne(cardBeforeId, ['id'], workspaceId, column)
       : null;
@@ -304,6 +319,18 @@ export class TaskService {
       },
     });
 
+    // Thêm TaskActivity nếu có thay đổi trạng thái
+    if (prev_task.status !== column) {
+      await this.prismaService.taskActivity.create({
+        data: {
+          type: TaskActivityType.MOVE_CARD,
+          content: column,
+          userId,
+          taskId: cardId,
+        },
+      });
+    }
+
     if (shouldReIndex) {
       await this.reIndexTaskCardsByColumn(column);
     }
@@ -320,15 +347,37 @@ export class TaskService {
     };
   }
 
-  async addAssignee(taskId: string, assigneeId: string) {
+  async changeTitle(taskId: string, title: string, userId: string) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const updatedTask = await this.prismaService.task.update({
+      where: {
+        id: taskId,
+      },
+      data: {
+        title,
+      },
+    });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.CHANGE_TITLE,
+        content: title,
+        userId,
+        taskId,
+      },
+    });
+    return updatedTask;
+  }
+
+  async addAssignee(taskId: string, assigneeId: string, userId: string) {
     const task = await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
 
-    const user = await this.prismaService.user.findFirst({
+    const assignee = await this.prismaService.user.findFirst({
       where: {
         id: assigneeId,
       },
     });
-    if (!user) {
+    if (!assignee) {
       throw new BadRequestException('Người dùng không tồn tại!');
     }
 
@@ -354,17 +403,26 @@ export class TaskService {
       },
     });
 
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.ADD_ASSIGNEE,
+        content: assigneeId + '@' + assignee.fullname,
+        userId,
+        taskId,
+      },
+    });
+
     return updatedTask;
   }
 
-  async removeAssignee(taskId: string, assigneeId: string) {
+  async removeAssignee(taskId: string, assigneeId: string, userId: string) {
     await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
-    const user = await this.prismaService.user.findFirst({
+    const assignee = await this.prismaService.user.findFirst({
       where: {
         id: assigneeId,
       },
     });
-    if (!user) {
+    if (!assignee) {
       throw new BadRequestException('Người dùng không tồn tại!');
     }
     const updatedTask = await this.prismaService.task.update({
@@ -377,10 +435,20 @@ export class TaskService {
         },
       },
     });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.REMOVE_ASSIGNEE,
+        content: assigneeId + '@' + assignee.fullname,
+        userId,
+        taskId,
+      },
+    });
+
     return updatedTask;
   }
 
-  async changePriority(taskId: string, priority: TaskPriority) {
+  async changePriority(taskId: string, priority: TaskPriority, userId: string) {
     await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
     const updatedTask = await this.prismaService.task.update({
       where: {
@@ -390,10 +458,18 @@ export class TaskService {
         priority,
       },
     });
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.CHANGE_PRIORITY,
+        content: priority,
+        userId,
+        taskId,
+      },
+    });
     return updatedTask;
   }
 
-  async changeType(taskId: string, type: Task['type']) {
+  async changeType(taskId: string, type: TaskType, userId: string) {
     await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
     const updatedTask = await this.prismaService.task.update({
       where: {
@@ -403,10 +479,24 @@ export class TaskService {
         type,
       },
     });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.CHANGE_TYPE,
+        content: type,
+        userId,
+        taskId,
+      },
+    });
     return updatedTask;
   }
 
-  async changeDate(taskId: string, startDate: Date, deadline: Date) {
+  async changeDate(
+    taskId: string,
+    startDate: Date,
+    deadline: Date,
+    userId: string,
+  ) {
     await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
     const updatedTask = await this.prismaService.task.update({
       where: {
@@ -417,10 +507,19 @@ export class TaskService {
         deadline,
       },
     });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.CHANGE_DATE,
+        content: `${dayjs(startDate).format('DD/MM/YYYY')} - ${dayjs(deadline).format('DD/MM/YYYY')}`,
+        userId,
+        taskId,
+      },
+    });
     return updatedTask;
   }
 
-  async syncTodos(taskId: string, newTodos: TodoListDto[]) {
+  async syncTodos(taskId: string, newTodos: TodoListDto[], userId: string) {
     // Lấy danh sách TodoIds hiện tại của Task
     const existingIds = new Set(
       (
@@ -477,12 +576,21 @@ export class TaskService {
       }),
     ]);
 
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.SYNC_TODO,
+        content: '',
+        userId,
+        taskId,
+      },
+    });
+
     return {
       message: 'Cập nhật danh sách todo thành công!',
     };
   }
 
-  async syncNote(taskId: string, note: JsonObject) {
+  async syncNote(taskId: string, note: JsonObject, userId: string) {
     await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
     const updatedTask = await this.prismaService.task.update({
       where: {
@@ -492,10 +600,19 @@ export class TaskService {
         note,
       },
     });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.SYNC_NOTE,
+        content: '',
+        userId,
+        taskId,
+      },
+    });
     return updatedTask;
   }
 
-  async softDeleteTask(taskId: string) {
+  async softDeleteTask(taskId: string, userId: string) {
     await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
     const updatedTask = await this.prismaService.task.update({
       where: {
@@ -503,6 +620,15 @@ export class TaskService {
       },
       data: {
         isDeleted: true,
+      },
+    });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.DELETE_CARD,
+        content: '',
+        userId,
+        taskId,
       },
     });
     return updatedTask;
@@ -717,6 +843,66 @@ export class TaskService {
         User: undefined,
         users: todo.User.map((user) => user),
       })),
+    };
+  }
+
+  async getTaskActivities(
+    params: TaskActivityFilterType,
+    taskId: string,
+  ): Promise<TaskActivitiesPaginatedResponse> {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+
+    const search = params.search || '';
+    const pageSize = Number(params.pageSize) || 6;
+    const page = Number(params.page) || 1;
+    // Không dùng skip nữa, lấy từ đầu đến hết trang hiện tại
+    const take = pageSize * page;
+    const sortBy = defaultSortBy;
+    const sortOrder: Prisma.SortOrder = defaultSortOrder;
+
+    const where = {
+      taskId,
+      OR: [
+        { content: { contains: search, mode: Prisma.QueryMode.insensitive } },
+      ],
+    };
+
+    const orderBy = { [sortBy]: sortOrder };
+
+    const taskActivities = await this.prismaService.taskActivity.findMany({
+      where,
+      take,
+      orderBy,
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullname: true,
+            image: true,
+          },
+        },
+      },
+    });
+    const total = await this.prismaService.taskActivity.count({ where });
+
+    return {
+      data: taskActivities.map((activity) => ({
+        id: activity.id,
+        content: activity.content,
+        type: activity.type,
+        user: {
+          id: activity.user.id,
+          fullname: activity.user.fullname,
+          image: activity.user.image,
+        },
+        createdAt: activity.createdAt,
+      })),
+      page,
+      pageSize,
+      total,
+      totalPage: Math.ceil(total / pageSize),
+      hasNextPage: total > page * pageSize,
+      hasPreviousPage: page > 1,
     };
   }
 

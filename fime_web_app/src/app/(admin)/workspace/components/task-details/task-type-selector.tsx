@@ -13,7 +13,10 @@ import {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskApiRequests } from "@/requests/task.request";
 import { toast } from "sonner";
-import { TASK_QUERY_KEY } from "@/queries/task-query";
+import {
+  TASK_ACTIVITIES_QUERY_KEY,
+  TASK_QUERY_KEY,
+} from "@/queries/task-query";
 
 export const TaskTypeSelector = ({
   type,
@@ -30,6 +33,9 @@ export const TaskTypeSelector = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
     },
     onError: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });

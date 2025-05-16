@@ -11,6 +11,7 @@ import { AssigneesPicker } from "@/app/(admin)/workspace/components/task-details
 import { PrioritySelect } from "@/app/(admin)/workspace/components/task-details/priority-select";
 import { TaskTypeSelector } from "@/app/(admin)/workspace/components/task-details/task-type-selector";
 import TaskTimePicker from "@/app/(admin)/workspace/components/task-details/task-time-picker";
+import { TaskActivities } from "@/app/(admin)/workspace/components/task-details/task-activities";
 
 export const TaskDetails = ({ id }: { id: string | null }) => {
   const { data: task } = useSuspenseQuery(taskQueryOptions(id));
@@ -45,6 +46,8 @@ export const TaskDetails = ({ id }: { id: string | null }) => {
         {/* Description */}
         {/* <Tiptap /> */}
         <SimpleEditor note={task.note} taskId={task.id} />
+
+        <TaskActivities taskId={task.id} />
 
         {/* Attachments */}
         {/* <div>

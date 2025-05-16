@@ -22,6 +22,7 @@ import { genSelectorsQueryOptions } from "@/queries/gen-query";
 import {
   ALL_SELECTABLE_ASSIGNEES_QUERY_KEY,
   allSelectableAssigneesQueryOptions,
+  TASK_ACTIVITIES_QUERY_KEY,
   TASK_QUERY_KEY,
 } from "@/queries/task-query";
 import { teamSelectorsQueryOptions } from "@/queries/team-query";
@@ -88,6 +89,9 @@ export const AssigneesPicker = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
     },
     onError: () => {
       toast.error("Có lỗi xảy ra!");

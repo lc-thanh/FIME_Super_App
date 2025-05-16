@@ -87,7 +87,10 @@ import { Loader2, NotebookPen } from "lucide-react";
 import { TaskType } from "@/schemaValidations/task.schema";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskApiRequests } from "@/requests/task.request";
-import { TASK_QUERY_KEY } from "@/queries/task-query";
+import {
+  TASK_ACTIVITIES_QUERY_KEY,
+  TASK_QUERY_KEY,
+} from "@/queries/task-query";
 import { toast } from "sonner";
 
 const MainToolbarContent = ({
@@ -320,6 +323,9 @@ export function SimpleEditor({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
       editor?.setEditable(false);
       setIsEditable(false);
       toast.success("Đã cập nhật ghi chú!");
