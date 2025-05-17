@@ -1,25 +1,24 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Delete } from '@nestjs/common';
 import { WorkspaceService } from './workspace.service';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { User } from '@/common/decorators/user.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 
 @Controller('workspaces')
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @Post()
-  create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
-    return this.workspaceService.create(createWorkspaceDto);
+  async create(
+    @Body() createWorkspaceDto: CreateWorkspaceDto,
+    @User() user: IAccessTokenPayload,
+  ) {
+    return {
+      message: 'Tạo workspace mới thành công!',
+      data: await this.workspaceService.create(createWorkspaceDto, user.sub),
+    };
   }
 
   @Get()
@@ -28,25 +27,38 @@ export class WorkspaceController {
   }
 
   @Get('my')
-  findAllPersonal(@User() user: IAccessTokenPayload) {
-    return this.workspaceService.findAllPersonal(user.sub);
+  async findAllPersonal(@User() user: IAccessTokenPayload) {
+    return await this.workspaceService.findAllPersonal(user.sub);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.workspaceService.findOne(+id);
+  async findOne(@UuidParam('id') id: string) {
+    return {
+      message: 'Lấy thông tin workspace thành công!',
+      data: await this.workspaceService.findOne(id),
+    };
   }
 
   @Patch(':id')
-  update(
-    @Param('id') id: string,
+  async rename(
+    @UuidParam('id') id: string,
     @Body() updateWorkspaceDto: UpdateWorkspaceDto,
   ) {
-    return this.workspaceService.update(+id, updateWorkspaceDto);
+    return {
+      message: 'Đổi tên workspace thành công!',
+      data: await this.workspaceService.update(id, updateWorkspaceDto),
+    };
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.workspaceService.remove(+id);
+  @Delete(':workspaceId')
+  async remove(
+    @UuidParam('workspaceId') workspaceId: string,
+    @Body('password') password: string,
+    @User() user: IAccessTokenPayload,
+  ) {
+    return {
+      message: 'Xóa workspace thành công!',
+      data: await this.workspaceService.remove(workspaceId, password, user.sub),
+    };
   }
 }

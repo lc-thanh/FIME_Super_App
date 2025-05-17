@@ -1,8 +1,3 @@
-interface SidebarWorkspaceData {
-  name: string;
-  url: string;
-}
-
 interface SidebarData {
   navMain: {
     title: string;
@@ -18,5 +13,4 @@ interface SidebarData {
       url: string;
     }[];
   }[];
-  projects: SidebarWorkspaceData[];
 }

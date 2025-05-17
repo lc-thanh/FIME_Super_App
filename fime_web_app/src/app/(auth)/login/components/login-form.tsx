@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { PasswordField } from "@/components/password-input";
+import { PasswordInput } from "@/components/password-input";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -106,12 +106,36 @@ export function LoginForm({
                   )}
                 />
 
-                <PasswordField
+                <FormField
+                  control={form.control}
+                  name={"password"}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        <span>
+                          Mật khẩu <span className="text-destructive">*</span>
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <PasswordInput field={field} placeholder="Mật khẩu" />
+                      </FormControl>
+                      <FormMessage />
+                      <FormDescription className="text-right">
+                        <Link
+                          href="#"
+                          className="hover:underline hover:underline-offset-4 hover:text-fimeOrange"
+                        >
+                          Quên mật khẩu?
+                        </Link>
+                      </FormDescription>
+                    </FormItem>
+                  )}
+                />
+
+                {/* <PasswordField
                   name="password"
                   label={
-                    <span>
-                      Mật khẩu <span className="text-destructive">*</span>
-                    </span>
+                    
                   }
                   placeholder="Mật khẩu"
                   description={
@@ -124,7 +148,7 @@ export function LoginForm({
                       </Link>
                     </FormDescription>
                   }
-                />
+                /> */}
 
                 <Button
                   type="submit"

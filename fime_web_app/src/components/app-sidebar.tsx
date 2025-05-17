@@ -11,11 +11,12 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
-  SidebarRail,
+  // SidebarRail,
 } from "@/components/ui/sidebar";
 import { User } from "next-auth";
-import { NavProjects } from "@/components/nav-projects";
+import { NavWorkspaces } from "@/components/nav-workspaces";
 import { NavMain } from "@/components/nav-main";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 // This is sample data.
 const data = {
@@ -75,11 +76,9 @@ const data = {
 
 export function AppSidebar({
   user,
-  workspaces,
   ...props
 }: React.ComponentProps<typeof Sidebar> & {
   user: Pick<User, "fullname" | "email" | "image"> | undefined;
-  workspaces: SidebarWorkspaceData[];
 }) {
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -87,14 +86,16 @@ export function AppSidebar({
         <TeamSwitcher />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <DashboardNav items={data.dashboard} />
-        <NavProjects projects={workspaces} />
+        <ScrollArea>
+          <NavMain items={data.navMain} />
+          <DashboardNav items={data.dashboard} />
+          <NavWorkspaces />
+        </ScrollArea>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={user} />
       </SidebarFooter>
-      <SidebarRail />
+      {/* <SidebarRail /> */}
     </Sidebar>
   );
 }

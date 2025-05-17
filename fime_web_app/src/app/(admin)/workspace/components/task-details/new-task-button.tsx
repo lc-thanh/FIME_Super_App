@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { TASK_CARDS_QUERY_KEY } from "@/queries/task-query";
 import { TaskApiRequests } from "@/requests/task.request";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Loader2, Plus } from "lucide-react";
 import { toast } from "sonner";
 
 export default function NewTaskButton({
@@ -31,8 +31,19 @@ export default function NewTaskButton({
   });
 
   return (
-    <Button variant="gradient" onClick={() => mutation.mutate()}>
-      <Plus className="mr-2 h-4 w-4" /> Thêm Task Mới
+    <Button
+      variant="animated-gradient"
+      onClick={() => mutation.mutate()}
+      disabled={mutation.isPending}
+    >
+      {mutation.isPending ? (
+        <div className="animate-spin">
+          <Loader2 className="h-4 w-4" />
+        </div>
+      ) : (
+        <Plus className="h-4 w-4" />
+      )}{" "}
+      Thêm Task Mới
     </Button>
   );
 }

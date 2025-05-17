@@ -9,6 +9,7 @@ import { taskCardsQueryOptions } from "@/queries/task-query";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
 import TaskDialog from "@/app/(admin)/workspace/components/task-details/task-dialog";
 import CardContextMenu from "@/app/(admin)/workspace/components/task-card/card-context-menu";
+import WorkspaceTitle from "@/app/(admin)/workspace/components/workspace-title";
 
 export default async function TaskPage({
   params,
@@ -28,9 +29,7 @@ export default async function TaskPage({
         <div className="flex flex-row w-full justify-content-start items-center gap-2 px-4">
           <SidebarTrigger className="text-white" />
           <Separator orientation="vertical" className="mr-2 h-4" />
-          <h1 className="text-xl text-white font-bold tracking-tight first:mt-0">
-            Quản lý công việc
-          </h1>
+          <WorkspaceTitle workspaceId={workspaceId} />
         </div>
         <div className="flex flex-row gap-4">
           <ActionSearchBar />
@@ -40,7 +39,10 @@ export default async function TaskPage({
 
       <div className="w-full px-4 flex flex-row justify-between items-center">
         <div></div>
-        <NewTaskButton workspaceId={workspaceId} />
+        <div className="flex flex-row gap-2">
+          <div></div>
+          <NewTaskButton workspaceId={workspaceId} />
+        </div>
       </div>
 
       <div className="w-fit m-auto">
