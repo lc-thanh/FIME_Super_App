@@ -79,11 +79,28 @@ export const TaskAttachment = z
     id: z.string().uuid(),
     title: z.string(),
     url: z.string(),
-    user: UserTask,
+    user: UserTask.pick({
+      id: true,
+      fullname: true,
+      image: true,
+    }),
     createdAt: z.date(),
   })
   .strict();
 export type TaskAttachmentType = z.infer<typeof TaskAttachment>;
+
+export const CreateTaskAttachmentBody = z
+  .object({
+    title: z
+      .string()
+      .min(1, { message: "Tiêu đề không được để trống!" })
+      .max(100, { message: "Tiêu đề quá dài!" }),
+    url: z.string().url({ message: "URL không hợp lệ" }),
+  })
+  .strict();
+export type CreateTaskAttachmentBodyType = z.infer<
+  typeof CreateTaskAttachmentBody
+>;
 
 export const TypeOfTaskActivity = z.enum([
   "CREATE_CARD",
@@ -94,7 +111,8 @@ export const TypeOfTaskActivity = z.enum([
   "REMOVE_ASSIGNEE",
   "SYNC_TODO",
   "SYNC_NOTE",
-  "ATTACHMENT",
+  "ADD_ATTACHMENT",
+  "REMOVE_ATTACHMENT",
   "CHANGE_PRIORITY",
   "CHANGE_TYPE",
   "CHANGE_DATE",

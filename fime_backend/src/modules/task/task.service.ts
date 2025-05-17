@@ -78,6 +78,13 @@ export class TaskService {
       },
     });
 
+    // Gửi thông báo đến các user khác trong cùng workspace
+    // để tự động cập nhật lại task board bằng socket.io
+    this.taskBoardGateway.server
+      .to(`workspace-${workspaceId}`)
+      // .except(data.socketId || '')
+      .emit('board-updated');
+
     return newTask;
   }
 
@@ -668,6 +675,14 @@ export class TaskService {
         taskId,
       },
     });
+
+    // Gửi thông báo đến các user khác trong cùng workspace
+    // để tự động cập nhật lại task board bằng socket.io
+    this.taskBoardGateway.server
+      .to(`workspace-${updatedTask.workspaceId}`)
+      // .except(data.socketId || '')
+      .emit('board-updated');
+
     return updatedTask;
   }
 
@@ -941,6 +956,97 @@ export class TaskService {
       hasNextPage: total > page * pageSize,
       hasPreviousPage: page > 1,
     };
+  }
+
+  async getTaskAttachments(taskId: string) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const attachments = await this.prismaService.taskAttachment.findMany({
+      where: {
+        taskId,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            fullname: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    return attachments.map((attachment) => ({
+      id: attachment.id,
+      title: attachment.title,
+      url: attachment.url,
+      user: {
+        id: attachment.user.id,
+        fullname: attachment.user.fullname,
+        image: attachment.user.image,
+      },
+      createdAt: attachment.createdAt,
+    }));
+  }
+
+  async addTaskAttachment(
+    taskId: string,
+    title: string,
+    url: string,
+    userId: string,
+  ) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const newAttachment = await this.prismaService.taskAttachment.create({
+      data: {
+        title,
+        url,
+        taskId,
+        userId,
+      },
+    });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.ADD_ATTACHMENT,
+        content: title,
+        userId,
+        taskId,
+      },
+    });
+
+    return newAttachment;
+  }
+
+  async deleteTaskAttachment(
+    taskId: string,
+    attachmentId: string,
+    userId: string,
+  ) {
+    await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không
+    const attachment = await this.prismaService.taskAttachment.findFirst({
+      where: {
+        id: attachmentId,
+        taskId,
+      },
+    });
+    if (!attachment) {
+      throw new BadRequestException('Đính kèm không tồn tại!');
+    }
+    await this.prismaService.taskAttachment.delete({
+      where: {
+        id: attachmentId,
+      },
+    });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.REMOVE_ATTACHMENT,
+        content: attachment.title,
+        userId,
+        taskId,
+      },
+    });
+
+    return attachment;
   }
 
   update(id: number, updateTaskDto: UpdateTaskDto) {

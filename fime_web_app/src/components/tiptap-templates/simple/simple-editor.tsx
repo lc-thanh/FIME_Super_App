@@ -339,8 +339,8 @@ export function SimpleEditor({
   return (
     <EditorContext.Provider value={{ editor }}>
       <div className="flex flex-row items-center justify-between w-full mb-2">
-        <span className="text-lg text-muted-foreground">
-          <NotebookPen className="inline w-5 h-5 mb-1" /> Ghi chú
+        <span className="text-lg text-primary">
+          <NotebookPen className="inline w-5 h-5 mb-1 mr-1" /> Ghi chú
         </span>
         <div className="flex flex-row gap-2">
           {!isEditable ? (

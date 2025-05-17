@@ -80,6 +80,23 @@ export const taskActivitiesQueryOptions = (
     staleTime: 0,
   });
 
+export const TASK_ATTACHMENTS_QUERY_KEY = "taskAttachments";
+
+export const taskAttachmentsQueryOptions = (taskId: string) =>
+  queryOptions({
+    queryKey: [TASK_ATTACHMENTS_QUERY_KEY, taskId],
+    queryFn: async ({ queryKey }) => {
+      const [, id] = queryKey; // lấy taskId từ queryKey
+      try {
+        const res = await TaskApiRequests.getTaskAttachments(id);
+        return res.payload;
+      } catch (error) {
+        console.log("Error fetching task attachments:", error);
+        throw error;
+      }
+    },
+  });
+
 export const SCHEDULE_QUERY_KEY = "schedule";
 
 export const scheduleQueryOptions = () =>

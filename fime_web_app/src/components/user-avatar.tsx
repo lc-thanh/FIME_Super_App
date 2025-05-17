@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import envConfig from "@/config";
+import { cn } from "@/lib/utils";
 
 // function getFirstLetterOfLastName(fullName: string) {
 //   if (!fullName) return "";
@@ -20,14 +21,24 @@ function getInitials(name: string): string {
 export const UserAvatar = ({
   image,
   fullname,
+  size = "md",
   className,
 }: {
   image: string | null | undefined;
   fullname: string;
+  size?: "sm" | "md" | "lg";
   className?: string;
 }) => {
+  const sizeClasses = {
+    sm: "h-6 w-6 text-xs",
+    md: "h-8 w-8 text-sm",
+    lg: "h-10 w-10 text-base",
+  };
+
+  const avatarSize = sizeClasses[size];
+
   return (
-    <Avatar className={`w-8 h-8 ${className}`}>
+    <Avatar className={cn(avatarSize, className)}>
       <AvatarImage
         src={
           `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/users/avatars/${image}` ||

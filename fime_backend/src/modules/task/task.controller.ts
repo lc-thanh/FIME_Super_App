@@ -208,6 +208,45 @@ export class TaskController {
     return this.taskService.getTaskActivities(params, id);
   }
 
+  @Get('task-attachments/:taskId')
+  getTaskAttachments(@UuidParam('taskId') taskId: string) {
+    return this.taskService.getTaskAttachments(taskId);
+  }
+
+  @Post('task-attachments/:taskId')
+  async addTaskAttachment(
+    @UuidParam('taskId') taskId: string,
+    @Body('title') title: string,
+    @Body('url') url: string,
+    @User() user: IAccessTokenPayload,
+  ) {
+    return {
+      message: 'Thêm đính kèm thành công',
+      data: await this.taskService.addTaskAttachment(
+        taskId,
+        title,
+        url,
+        user.sub,
+      ),
+    };
+  }
+
+  @Delete('task-attachments/:taskId/:attachmentId')
+  async deleteTaskAttachment(
+    @UuidParam('taskId') taskId: string,
+    @UuidParam('attachmentId') attachmentId: string,
+    @User() user: IAccessTokenPayload,
+  ) {
+    return {
+      message: 'Xóa đính kèm thành công',
+      data: await this.taskService.deleteTaskAttachment(
+        taskId,
+        attachmentId,
+        user.sub,
+      ),
+    };
+  }
+
   // @Patch(':id')
   // update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
   //   return this.taskService.update(+id, updateTaskDto);

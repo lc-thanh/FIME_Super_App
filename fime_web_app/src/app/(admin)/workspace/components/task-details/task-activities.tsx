@@ -24,6 +24,7 @@ import {
   TYPE_CLASS,
   TYPE_TEXT,
 } from "@/app/(admin)/workspace/components/task-card/task-type-badge";
+import { History } from "lucide-react";
 
 const contentGenerator = (content: string, type: TypeOfTaskActivityType) => {
   switch (type) {
@@ -68,8 +69,18 @@ const contentGenerator = (content: string, type: TypeOfTaskActivityType) => {
       return <p>Đã chỉnh sửa Todo List</p>;
     case "SYNC_NOTE":
       return <p>Đã chỉnh sửa ghi chú</p>;
-    case "ATTACHMENT":
-      return <p>{content}</p>;
+    case "ADD_ATTACHMENT":
+      return (
+        <p>
+          Đã thêm đính kèm: <b>{content}</b>
+        </p>
+      );
+    case "REMOVE_ATTACHMENT":
+      return (
+        <p>
+          Đã xóa đính kèm: <b>{content}</b>
+        </p>
+      );
     case "CHANGE_PRIORITY":
       return (
         <p>
@@ -137,7 +148,11 @@ export const TaskActivities = ({ taskId }: { taskId: string }) => {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg text-muted-foreground">Hoạt động</h3>
+      <div className="flex flex-row gap-2 items-center text-primary">
+        <History className="h-5 w-5" />
+
+        <h3 className="text-lg">Hoạt động</h3>
+      </div>
 
       <div className="space-y-3">
         {allActivities.length === 0 ? (

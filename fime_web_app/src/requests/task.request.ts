@@ -3,7 +3,9 @@ import http from "@/lib/http";
 import {
   AssigneeType,
   ColumnType,
+  CreateTaskAttachmentBodyType,
   TaskActivityPaginatedResponseType,
+  TaskAttachmentType,
   TaskPriorityType,
   TaskStatusType,
   TaskType,
@@ -118,6 +120,29 @@ export const TaskApiRequests = {
       `tasks/task-activities/${taskId}?${params}`
     );
   },
+
+  getTaskAttachments: async (taskId: string) => {
+    return http.get<TaskAttachmentType[]>(`tasks/task-attachments/${taskId}`);
+  },
+
+  addTaskAttachment: async (
+    taskId: string,
+    body: CreateTaskAttachmentBodyType
+  ) => {
+    return http.post<{ message: string; data: TaskAttachmentType }>(
+      `tasks/task-attachments/${taskId}`,
+      {
+        title: body.title,
+        url: body.url,
+      }
+    );
+  },
+
+  deleteTaskAttachment: async (taskId: string, attachmentId: string) =>
+    http.delete<{ message: string }>(
+      `tasks/task-attachments/${taskId}/${attachmentId}`,
+      {}
+    ),
 
   softDelete: async (taskId: string) =>
     http.delete<{ message: string }>(`tasks/soft-delete/${taskId}`, {}),
