@@ -53,13 +53,15 @@ const contentGenerator = (content: string, type: TypeOfTaskActivityType) => {
     case "ADD_ASSIGNEE":
       return (
         <p>
-          Đã thêm <b className="text-white">{content.split("@")[1]}</b> vào thẻ
+          Đã thêm <b className="text-primary">{content.split("@")[1]}</b> vào
+          thẻ
         </p>
       );
     case "REMOVE_ASSIGNEE":
       return (
         <p>
-          Đã xóa <b className="text-white">{content.split("@")[1]}</b> khỏi thẻ
+          Đã xóa <b className="text-primary">{content.split("@")[1]}</b> khỏi
+          thẻ
         </p>
       );
     case "SYNC_TODO":

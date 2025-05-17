@@ -18,6 +18,9 @@ export type MoveCardData = {
 };
 
 export const TaskApiRequests = {
+  create: async (workspaceId: string) =>
+    http.post<{ message: string; data: TaskType }>(`/tasks/`, { workspaceId }),
+
   findOne: async (id: string) => {
     const delay = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
@@ -47,6 +50,12 @@ export const TaskApiRequests = {
     // await delay(2000);
     return http.post<{ message: string }>("tasks/move-card", data);
   },
+
+  changeTitle: async (taskId: string, title: string) =>
+    http.post<{ message: string; data: TaskType }>("tasks/change-title", {
+      taskId,
+      title,
+    }),
 
   getAllSelectableAssignees: async (taskId: string) =>
     http.get<{
@@ -78,7 +87,11 @@ export const TaskApiRequests = {
       type,
     }),
 
-  changeTaskTime: async (taskId: string, startDate: Date, deadline: Date) =>
+  changeTaskTime: async (
+    taskId: string,
+    startDate: Date | null,
+    deadline: Date | null
+  ) =>
     http.post<{ message: string; data: TaskType }>("tasks/change-date", {
       taskId,
       startDate,

@@ -1,4 +1,4 @@
-import NewTaskDialog from "@/app/(admin)/workspace/components/task-details/new-task-dialog";
+import NewTaskButton from "@/app/(admin)/workspace/components/task-details/new-task-button";
 import { TaskBoard } from "@/app/(admin)/workspace/components/task-board";
 import ActionSearchBar from "@/components/action-search-bar";
 import { ModeToggle } from "@/components/mode-toggle";
@@ -40,7 +40,7 @@ export default async function TaskPage({
 
       <div className="w-full px-4 flex flex-row justify-between items-center">
         <div></div>
-        <NewTaskDialog />
+        <NewTaskButton workspaceId={workspaceId} />
       </div>
 
       <div className="w-fit m-auto">

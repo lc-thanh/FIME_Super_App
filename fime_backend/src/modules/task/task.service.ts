@@ -40,8 +40,45 @@ export class TaskService {
     private readonly userService: UserService,
   ) {}
 
-  create(createTaskDto: CreateTaskDto) {
-    return 'This action adds a new task';
+  async create(workspaceId: string, userId: string) {
+    const workspace = await this.prismaService.workspace.findFirst({
+      where: {
+        id: workspaceId,
+      },
+    });
+    if (!workspace)
+      throw new BadRequestException(
+        'Workspace không tồn tại hoặc bạn không có quyền truy cập!',
+      );
+
+    const lastTaskOfTodoColumn = await this.prismaService.task.findFirst({
+      where: {
+        status: TaskStatus.TODO,
+        workspaceId,
+      },
+      orderBy: {
+        position: 'desc',
+      },
+    });
+
+    const newTask = await this.prismaService.task.create({
+      data: {
+        title: 'Công việc mới',
+        position: (lastTaskOfTodoColumn?.position ?? 0) + 1000,
+        workspaceId,
+      },
+    });
+
+    await this.prismaService.taskActivity.create({
+      data: {
+        type: TaskActivityType.CREATE_CARD,
+        content: '',
+        userId,
+        taskId: newTask.id,
+      },
+    });
+
+    return newTask;
   }
 
   async getTaskCards(userId: string, workspaceId: string) {
@@ -493,8 +530,8 @@ export class TaskService {
 
   async changeDate(
     taskId: string,
-    startDate: Date,
-    deadline: Date,
+    startDate: Date | null,
+    deadline: Date | null,
     userId: string,
   ) {
     await this.findOne(taskId, ['id']); // Kiểm tra task có tồn tại không

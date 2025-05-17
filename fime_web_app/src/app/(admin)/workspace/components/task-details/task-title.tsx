@@ -7,21 +7,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Save, SquarePen, X } from "lucide-react";
 import { FimeTitle } from "@/components/fime-title";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  TASK_ACTIVITIES_QUERY_KEY,
+  TASK_QUERY_KEY,
+} from "@/queries/task-query";
+import { TaskApiRequests } from "@/requests/task.request";
+import { toast } from "sonner";
 
 interface TaskTitleProps {
   initialTitle: string;
-  onSave?: (newTitle: string) => void;
+  taskId: string;
   className?: string;
 }
 
 export default function TaskTitle({
   initialTitle = "Card Title",
-  onSave,
+  taskId,
   className = "",
 }: TaskTitleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState(initialTitle);
   const [editedTitle, setEditedTitle] = useState(initialTitle);
+
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (newTitle: string) => {
+      await TaskApiRequests.changeTitle(taskId, newTitle);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
+      setTitle(editedTitle);
+      setIsEditing(false);
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      toast.error("Có lỗi xảy ra!");
+    },
+  });
 
   const handleClick = () => {
     if (!isEditing) {
@@ -32,11 +59,7 @@ export default function TaskTitle({
 
   const handleSave = () => {
     if (editedTitle.trim() === "") return;
-    setTitle(editedTitle);
-    setIsEditing(false);
-    if (onSave) {
-      onSave(editedTitle);
-    }
+    mutation.mutate(editedTitle);
   };
 
   const handleCancel = () => {

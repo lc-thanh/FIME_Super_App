@@ -23,7 +23,7 @@ export const TaskDetails = ({ id }: { id: string | null }) => {
   return (
     <div className="p-6 pr-4 pt-0 pb-2 h-full overflow-auto">
       {/* Task Title */}
-      <TaskTitle initialTitle={task.title} className="mb-4" />
+      <TaskTitle initialTitle={task.title} taskId={task.id} className="mb-4" />
 
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

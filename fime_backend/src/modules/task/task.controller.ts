@@ -3,14 +3,11 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   Query,
 } from '@nestjs/common';
 import { TaskService } from './task.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 import { User } from '@/common/decorators/user.decorator';
@@ -25,8 +22,14 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
-  create(@Body() createTaskDto: CreateTaskDto) {
-    return this.taskService.create(createTaskDto);
+  async create(
+    @Body('workspaceId') workspaceId: string,
+    @User() user: IAccessTokenPayload,
+  ) {
+    return {
+      message: 'Tạo task mới thành công',
+      data: await this.taskService.create(workspaceId, user.sub),
+    };
   }
 
   @Get('my-task-cards/:workspaceId')
@@ -121,8 +124,8 @@ export class TaskController {
   @Post('change-date')
   async changeDate(
     @Body('taskId') taskId: string,
-    @Body('startDate') startDate: Date,
-    @Body('deadline') deadline: Date,
+    @Body('startDate') startDate: Date | null,
+    @Body('deadline') deadline: Date | null,
     @User() user: IAccessTokenPayload,
   ) {
     return {
@@ -205,10 +208,10 @@ export class TaskController {
     return this.taskService.getTaskActivities(params, id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
-    return this.taskService.update(+id, updateTaskDto);
-  }
+  // @Patch(':id')
+  // update(@Param('id') id: string, @Body() updateTaskDto: UpdateTaskDto) {
+  //   return this.taskService.update(+id, updateTaskDto);
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
