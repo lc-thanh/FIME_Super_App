@@ -39,6 +39,64 @@ export const taskCardsQueryOptions = (workspaceId: string) =>
     },
   });
 
+export const ALL_SELECTABLE_ASSIGNEES_QUERY_KEY = "allSelectableAssignees";
+
+export const allSelectableAssigneesQueryOptions = (taskId: string) =>
+  queryOptions({
+    queryKey: [ALL_SELECTABLE_ASSIGNEES_QUERY_KEY, taskId],
+    queryFn: async ({ queryKey }) => {
+      const [, id] = queryKey; // lấy taskId từ queryKey
+      try {
+        const res = await TaskApiRequests.getAllSelectableAssignees(id);
+        return res.payload.data;
+      } catch (error) {
+        console.log("Error fetching selectable assignees:", error);
+        throw error;
+      }
+    },
+  });
+
+export const TASK_ACTIVITIES_QUERY_KEY = "taskActivities";
+
+export const taskActivitiesQueryOptions = (
+  searchParams: string,
+  taskId: string
+) =>
+  queryOptions({
+    queryKey: [TASK_ACTIVITIES_QUERY_KEY, searchParams, taskId],
+    queryFn: async ({ queryKey }) => {
+      const [, searchParams, taskId] = queryKey; // lấy searchParams từ queryKey
+      try {
+        const res = await TaskApiRequests.getTaskActivities(
+          searchParams,
+          taskId
+        );
+        return res.payload;
+      } catch (error) {
+        console.log("Error fetching task activities:", error);
+        throw error;
+      }
+    },
+    staleTime: 0,
+  });
+
+export const TASK_ATTACHMENTS_QUERY_KEY = "taskAttachments";
+
+export const taskAttachmentsQueryOptions = (taskId: string) =>
+  queryOptions({
+    queryKey: [TASK_ATTACHMENTS_QUERY_KEY, taskId],
+    queryFn: async ({ queryKey }) => {
+      const [, id] = queryKey; // lấy taskId từ queryKey
+      try {
+        const res = await TaskApiRequests.getTaskAttachments(id);
+        return res.payload;
+      } catch (error) {
+        console.log("Error fetching task attachments:", error);
+        throw error;
+      }
+    },
+  });
+
 export const SCHEDULE_QUERY_KEY = "schedule";
 
 export const scheduleQueryOptions = () =>

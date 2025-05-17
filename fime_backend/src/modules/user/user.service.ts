@@ -215,6 +215,34 @@ export class UserService {
     return user;
   }
 
+  async getAllUsersFreeOnDate(startDate: Date, deadline: Date) {
+    const users = await this.prismaService.user.findMany({
+      where: {
+        tasks: {
+          none: {
+            status: { not: 'DONE' },
+            isDeleted: false,
+            OR: [
+              {
+                startDate: { lte: deadline },
+                deadline: { gte: startDate },
+              },
+              {
+                startDate: { gte: startDate },
+                deadline: { lte: deadline },
+              },
+            ],
+          },
+        },
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    return users;
+  }
+
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
@@ -360,6 +388,7 @@ export class UserService {
       // Xóa file
       await fs.unlink(filePath);
       return true;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       // Nếu không tồn tại hoặc lỗi khác
       return false;

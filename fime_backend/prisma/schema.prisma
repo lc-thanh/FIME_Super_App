@@ -194,13 +194,30 @@ model TaskAttachment {
   updatedAt DateTime @updatedAt
 }
 
+enum TaskActivityType {
+  CREATE_CARD
+  DELETE_CARD
+  MOVE_CARD
+  CHANGE_TITLE
+  ADD_ASSIGNEE
+  REMOVE_ASSIGNEE
+  SYNC_TODO
+  SYNC_NOTE
+  ADD_ATTACHMENT
+  REMOVE_ATTACHMENT
+  CHANGE_PRIORITY
+  CHANGE_TYPE
+  CHANGE_DATE
+}
+
 model TaskActivity {
-  id      String @id @default(uuid())
+  id      String           @id @default(uuid())
   content String
+  type    TaskActivityType
   taskId  String
   userId  String
-  task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  task    Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

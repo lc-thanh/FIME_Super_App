@@ -17,10 +17,12 @@ export const DateOfCard = ({
   deadline,
   status,
 }: {
-  startDate: Date;
-  deadline: Date;
+  startDate: Date | null;
+  deadline: Date | null;
   status: TaskStatusType;
 }) => {
+  if (!startDate || !deadline) return null;
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>

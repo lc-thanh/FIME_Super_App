@@ -35,12 +35,12 @@ export function EventTooltip({ task }: TaskCardProps) {
         <TooltipTrigger asChild>
           <div
             className={cn(
-              "text-xs p-1 rounded border-l-2 truncate cursor-pointer",
+              "text-sm p-1 rounded border-l-2 truncate cursor-pointer",
               getPriorityColor(task.priority)
             )}
           >
             <Link
-              href={`/task/${task.workspaceId}?task=${
+              href={`/workspace/${task.workspaceId}?task=${
                 task.taskId ? task.taskId : task.id
               }`}
             >

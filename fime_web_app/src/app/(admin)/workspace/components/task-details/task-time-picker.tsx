@@ -11,15 +11,18 @@ import { Save, X } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskApiRequests } from "@/requests/task.request";
 import { toast } from "sonner";
-import { TASK_QUERY_KEY } from "@/queries/task-query";
+import {
+  TASK_ACTIVITIES_QUERY_KEY,
+  TASK_QUERY_KEY,
+} from "@/queries/task-query";
 
 export default function TaskTimePicker({
   startDate,
   deadline,
   taskId,
 }: {
-  startDate: Date;
-  deadline: Date;
+  startDate: Date | null;
+  deadline: Date | null;
   taskId: string;
 }) {
   const queryClient = useQueryClient();
@@ -29,13 +32,16 @@ export default function TaskTimePicker({
       startDate,
       deadline,
     }: {
-      startDate: Date;
-      deadline: Date;
+      startDate: Date | null;
+      deadline: Date | null;
     }) => {
       await TaskApiRequests.changeTaskTime(taskId, startDate, deadline);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
       // Cập nhật giá trị ban đầu sau khi lưu
       setOriginalDate(date);
       setIsChanged(false);
@@ -46,10 +52,13 @@ export default function TaskTimePicker({
     },
   });
 
-  const initialDateRange = {
-    from: dayjs(startDate).toDate(),
-    to: dayjs(deadline).toDate(),
-  };
+  const initialDateRange =
+    startDate && deadline
+      ? {
+          from: dayjs(startDate).toDate(),
+          to: dayjs(deadline).toDate(),
+        }
+      : undefined;
 
   const [date, setDate] = useState<DateRange | undefined>(initialDateRange);
   const [originalDate, setOriginalDate] = useState<DateRange | undefined>(
@@ -59,24 +68,16 @@ export default function TaskTimePicker({
 
   // Kiểm tra xem giá trị đã thay đổi chưa
   useEffect(() => {
-    if (!originalDate || !date) {
-      setIsChanged(false);
-      return;
-    }
-
-    const fromChanged = originalDate.from?.getTime() !== date.from?.getTime();
-    const toChanged = originalDate.to?.getTime() !== date.to?.getTime();
+    const fromChanged = originalDate?.from?.getTime() !== date?.from?.getTime();
+    const toChanged = originalDate?.to?.getTime() !== date?.to?.getTime();
 
     setIsChanged(fromChanged || toChanged);
   }, [date, originalDate]);
 
   const handleSubmit = () => {
-    console.log("Ngày bắt đầu:", date?.from);
-    console.log("Ngày kết thúc:", date?.to);
-    // Xử lý dữ liệu ở đây
     mutation.mutate({
-      startDate: date?.from ?? new Date(),
-      deadline: date?.to ?? new Date(),
+      startDate: date?.from ?? null,
+      deadline: date?.to ?? null,
     });
   };
 

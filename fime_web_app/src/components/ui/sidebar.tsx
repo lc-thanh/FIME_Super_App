@@ -76,7 +76,7 @@ const SidebarProvider = React.forwardRef<
   ) => {
     const isMobile = useIsMobile();
     const pathname = usePathname();
-    const alwaysOpenMobile = pathname.startsWith("/task");
+    const alwaysOpenMobile = pathname.startsWith("/workspace");
     const [openMobile, setOpenMobile] = React.useState(false);
 
     // This is the internal state of the sidebar.
@@ -189,7 +189,7 @@ const Sidebar = React.forwardRef<
     const { isMobile, state, open, setOpen, openMobile, setOpenMobile } =
       useSidebar();
     const pathname = usePathname();
-    const alwaysOpenMobile = pathname.startsWith("/task");
+    const alwaysOpenMobile = pathname.startsWith("/workspace");
 
     if (collapsible === "none") {
       return (

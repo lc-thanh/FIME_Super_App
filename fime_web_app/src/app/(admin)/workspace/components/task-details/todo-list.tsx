@@ -11,11 +11,14 @@ import {
   TodoItemType,
   UserTaskType,
 } from "@/schemaValidations/task.schema";
-import { TodoListAssignees } from "@/app/(admin)/task/components/task-details/todo-list-assignees";
-import TodoTimePicker from "@/app/(admin)/task/components/task-details/todo-time-picker";
+import { TodoListAssignees } from "@/app/(admin)/workspace/components/task-details/todo-list-assignees";
+import TodoTimePicker from "@/app/(admin)/workspace/components/task-details/todo-time-picker";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { TaskApiRequests } from "@/requests/task.request";
-import { TASK_QUERY_KEY } from "@/queries/task-query";
+import {
+  TASK_ACTIVITIES_QUERY_KEY,
+  TASK_QUERY_KEY,
+} from "@/queries/task-query";
 import { toast } from "sonner";
 
 export default function TodoList({ task }: { task: TaskType }) {
@@ -44,6 +47,9 @@ export default function TodoList({ task }: { task: TaskType }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, task.id] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
       setOriginalTodos(todos);
       setHasChanges(false);
     },

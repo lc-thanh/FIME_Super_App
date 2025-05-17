@@ -1,7 +1,11 @@
 import { type Event } from "@/app/(admin)/dashboard/schedule/_components/event-calendar";
 import http from "@/lib/http";
 import {
+  AssigneeType,
   ColumnType,
+  CreateTaskAttachmentBodyType,
+  TaskActivityPaginatedResponseType,
+  TaskAttachmentType,
   TaskPriorityType,
   TaskStatusType,
   TaskType,
@@ -16,6 +20,9 @@ export type MoveCardData = {
 };
 
 export const TaskApiRequests = {
+  create: async (workspaceId: string) =>
+    http.post<{ message: string; data: TaskType }>(`/tasks/`, { workspaceId }),
+
   findOne: async (id: string) => {
     const delay = (ms: number) =>
       new Promise((resolve) => setTimeout(resolve, ms));
@@ -46,6 +53,18 @@ export const TaskApiRequests = {
     return http.post<{ message: string }>("tasks/move-card", data);
   },
 
+  changeTitle: async (taskId: string, title: string) =>
+    http.post<{ message: string; data: TaskType }>("tasks/change-title", {
+      taskId,
+      title,
+    }),
+
+  getAllSelectableAssignees: async (taskId: string) =>
+    http.get<{
+      message: string;
+      data: AssigneeType[];
+    }>(`tasks/all-selectable-assignees/${taskId}`),
+
   addAssignee: async (taskId: string, assigneeId: string) =>
     http.post<{ message: string; data: TaskType }>("tasks/add-assignee", {
       taskId,
@@ -70,7 +89,11 @@ export const TaskApiRequests = {
       type,
     }),
 
-  changeTaskTime: async (taskId: string, startDate: Date, deadline: Date) =>
+  changeTaskTime: async (
+    taskId: string,
+    startDate: Date | null,
+    deadline: Date | null
+  ) =>
     http.post<{ message: string; data: TaskType }>("tasks/change-date", {
       taskId,
       startDate,
@@ -82,6 +105,44 @@ export const TaskApiRequests = {
       taskId,
       todos,
     }),
+
+  syncNote: async (taskId: string, note: unknown) =>
+    http.post<{ message: string; data: TaskType }>("tasks/sync-note", {
+      taskId,
+      note,
+    }),
+
+  getTaskActivities: async (params: string, taskId: string) => {
+    // const delay = (ms: number) =>
+    //   new Promise((resolve) => setTimeout(resolve, ms));
+    // await delay(2000);
+    return http.get<TaskActivityPaginatedResponseType>(
+      `tasks/task-activities/${taskId}?${params}`
+    );
+  },
+
+  getTaskAttachments: async (taskId: string) => {
+    return http.get<TaskAttachmentType[]>(`tasks/task-attachments/${taskId}`);
+  },
+
+  addTaskAttachment: async (
+    taskId: string,
+    body: CreateTaskAttachmentBodyType
+  ) => {
+    return http.post<{ message: string; data: TaskAttachmentType }>(
+      `tasks/task-attachments/${taskId}`,
+      {
+        title: body.title,
+        url: body.url,
+      }
+    );
+  },
+
+  deleteTaskAttachment: async (taskId: string, attachmentId: string) =>
+    http.delete<{ message: string }>(
+      `tasks/task-attachments/${taskId}/${attachmentId}`,
+      {}
+    ),
 
   softDelete: async (taskId: string) =>
     http.delete<{ message: string }>(`tasks/soft-delete/${taskId}`, {}),

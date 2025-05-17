@@ -4,9 +4,8 @@ import { Suspense, useEffect, useState } from "react";
 import { CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import "@/app/(admin)/task/components/style.css";
-import { TaskDetails } from "@/app/(admin)/task/components/task-details/task-details";
-import TaskDetailsLoader from "@/app/(admin)/task/components/task-details/task-details-loader";
+import { TaskDetails } from "@/app/(admin)/workspace/components/task-details/task-details";
+import TaskDetailsLoader from "@/app/(admin)/workspace/components/task-details/task-details-loader";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 export default function TaskDialog() {

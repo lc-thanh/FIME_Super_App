@@ -7,10 +7,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Box } from "@/components/ui/box";
 import { TaskCardType } from "@/schemaValidations/task.schema";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { TaskAssignees } from "@/app/(admin)/task/components/task-card/task-assignees";
-import { PriorityBadge } from "@/app/(admin)/task/components/task-card/priority-badge";
-import { TaskTypeBadge } from "@/app/(admin)/task/components/task-card/task-type-badge";
-import { DateOfCard } from "@/app/(admin)/task/components/task-card/date-of-card";
+import { TaskAssignees } from "@/app/(admin)/workspace/components/task-card/task-assignees";
+import { PriorityBadge } from "@/app/(admin)/workspace/components/task-card/priority-badge";
+import { TaskTypeBadge } from "@/app/(admin)/workspace/components/task-card/task-type-badge";
+import { DateOfCard } from "@/app/(admin)/workspace/components/task-card/date-of-card";
 import { cn } from "@/lib/utils";
 import { useBoundStore } from "@/providers/store-provider";
 
@@ -73,18 +73,6 @@ export const FimeCard: FC<TaskCardType> = ({
               />
             </Box>
             <div className="flex flex-row items-center justify-between gap-2">
-              {/* {prLink ? (
-                  <Avatar className="w-[24px] h-[24px]">
-                    <Link
-                      href={prLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Link2 size={20} />
-                    </Link>
-                  </Avatar>
-                ) : null} */}
-              {/* <Badge>{storyPoints}</Badge> */}
               <TaskAssignees assignees={users} />
             </div>
           </Box>

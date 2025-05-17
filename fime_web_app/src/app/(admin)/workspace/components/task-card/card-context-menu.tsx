@@ -1,6 +1,6 @@
 "use client";
 
-import CardDeleteAlert from "@/app/(admin)/task/components/task-card/card-delete-alert";
+import CardDeleteAlert from "@/app/(admin)/workspace/components/task-card/card-delete-alert";
 import {
   Command,
   CommandGroup,

@@ -10,7 +10,7 @@ export const WorkspaceApiRequest = {
       );
       return res.payload.data.map((workspace) => ({
         name: workspace.name,
-        url: `/task/${workspace.id}`,
+        url: `/workspace/${workspace.id}`,
       }));
     } catch (error) {
       console.log("Fetch myWorkspaces error: ", error);

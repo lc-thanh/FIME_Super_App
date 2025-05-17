@@ -1,11 +1,17 @@
 "use client";
 
 import * as React from "react";
-import { EditorContent, EditorContext, useEditor } from "@tiptap/react";
+import {
+  EditorContent,
+  EditorContext,
+  JSONContent,
+  useEditor,
+} from "@tiptap/react";
 
 // --- Tiptap Core Extensions ---
 import { StarterKit } from "@tiptap/starter-kit";
-import { Image } from "@tiptap/extension-image";
+import Placeholder from "@tiptap/extension-placeholder";
+// import { Image } from "@tiptap/extension-image";
 import { TaskItem } from "@tiptap/extension-task-item";
 import { TaskList } from "@tiptap/extension-task-list";
 import { TextAlign } from "@tiptap/extension-text-align";
@@ -30,7 +36,7 @@ import {
 } from "@/components/tiptap-ui-primitive/toolbar";
 
 // --- Tiptap Node ---
-import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
+// import { ImageUploadNode } from "@/components/tiptap-node/image-upload-node/image-upload-node-extension";
 import "@/components/tiptap-node/code-block-node/code-block-node.scss";
 import "@/components/tiptap-node/list-node/list-node.scss";
 import "@/components/tiptap-node/image-node/image-node.scss";
@@ -68,16 +74,24 @@ import { useWindowSize } from "@/hooks/use-window-size";
 // import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle";
 
 // --- Lib ---
-import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
+// import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils";
 
 // --- Styles ---
 import "@/components/tiptap-templates/simple/simple-editor.scss";
 
-import content from "@/components/tiptap-templates/simple/data/content.json";
+// import content from "@/components/tiptap-templates/simple/data/content.json";
 
 import "@/styles/_keyframe-animations.scss";
 import "@/styles/_variables.scss";
-import { NotebookPen } from "lucide-react";
+import { Loader2, NotebookPen } from "lucide-react";
+import { TaskType } from "@/schemaValidations/task.schema";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { TaskApiRequests } from "@/requests/task.request";
+import {
+  TASK_ACTIVITIES_QUERY_KEY,
+  TASK_QUERY_KEY,
+} from "@/queries/task-query";
+import { toast } from "sonner";
 
 const MainToolbarContent = ({
   onHighlighterClick,
@@ -180,7 +194,13 @@ const MobileToolbarContent = ({
   </>
 );
 
-export function SimpleEditor() {
+export function SimpleEditor({
+  note,
+  taskId,
+}: {
+  note: Pick<TaskType, "note">;
+  taskId: string;
+}) {
   const isMobile = useIsMobile();
   const windowSize = useWindowSize();
   const [mobileView, setMobileView] = React.useState<
@@ -232,23 +252,27 @@ export function SimpleEditor() {
       TaskList,
       TaskItem.configure({ nested: true }),
       Highlight.configure({ multicolor: true }),
-      Image,
+      // Image,
       Typography,
       Superscript,
       Subscript,
-
-      Selection,
-      ImageUploadNode.configure({
-        accept: "image/*",
-        maxSize: MAX_FILE_SIZE,
-        limit: 3,
-        upload: handleImageUpload,
-        onError: (error) => console.error("Upload failed:", error),
+      Placeholder.configure({
+        placeholder: "Nhập nội dung ghi chú tại đây...",
+        showOnlyWhenEditable: false,
+        emptyEditorClass: "is-editor-empty",
       }),
+      Selection,
+      // ImageUploadNode.configure({
+      //   accept: "image/*",
+      //   maxSize: MAX_FILE_SIZE,
+      //   limit: 3,
+      //   upload: handleImageUpload,
+      //   onError: (error) => console.error("Upload failed:", error),
+      // }),
       TrailingNode,
       Link.configure({ openOnClick: false }),
     ],
-    content: content,
+    content: note,
     editable: isEditable,
   });
 
@@ -291,29 +315,63 @@ export function SimpleEditor() {
     }
   }, [isMobile, mobileView]);
 
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (data: JSONContent | undefined) => {
+      await TaskApiRequests.syncNote(taskId, data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
+      editor?.setEditable(false);
+      setIsEditable(false);
+      toast.success("Đã cập nhật ghi chú!");
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      toast.error("Có lỗi xảy ra!");
+    },
+  });
+
   return (
     <EditorContext.Provider value={{ editor }}>
       <div className="flex flex-row items-center justify-between w-full mb-2">
-        <span className="text-lg text-muted-foreground">
-          <NotebookPen className="inline w-5 h-5 mb-1" /> Ghi chú
+        <span className="text-lg text-primary">
+          <NotebookPen className="inline w-5 h-5 mb-1 mr-1" /> Ghi chú
         </span>
         <div className="flex flex-row gap-2">
+          {!isEditable ? (
+            <Button
+              type="button"
+              onClick={() => {
+                editor?.setEditable(true);
+                setIsEditable(true);
+              }}
+            >
+              Sửa
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={() => {
+                editor?.setEditable(false);
+                setIsEditable(false);
+              }}
+            >
+              Hủy
+            </Button>
+          )}
           <Button
             type="button"
             onClick={() => {
-              editor?.setEditable(true);
-              setIsEditable(true);
+              mutation.mutate(editor?.getJSON());
             }}
+            disabled={!isEditable || mutation.isPending}
           >
-            Sửa
-          </Button>
-          <Button
-            type="button"
-            onClick={() => {
-              editor?.setEditable(false);
-              setIsEditable(false);
-            }}
-          >
+            {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             Lưu
           </Button>
         </div>

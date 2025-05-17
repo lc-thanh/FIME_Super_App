@@ -1,5 +1,5 @@
-import NewTaskDialog from "@/app/(admin)/task/components/task-details/new-task-dialog";
-import { TaskBoard } from "@/app/(admin)/task/components/task-board";
+import NewTaskButton from "@/app/(admin)/workspace/components/task-details/new-task-button";
+import { TaskBoard } from "@/app/(admin)/workspace/components/task-board";
 import ActionSearchBar from "@/components/action-search-bar";
 import { ModeToggle } from "@/components/mode-toggle";
 import { Separator } from "@/components/ui/separator";
@@ -7,8 +7,8 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getQueryClient } from "@/lib/get-query-client";
 import { taskCardsQueryOptions } from "@/queries/task-query";
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query";
-import TaskDialog from "@/app/(admin)/task/components/task-details/task-dialog";
-import CardContextMenu from "@/app/(admin)/task/components/task-card/card-context-menu";
+import TaskDialog from "@/app/(admin)/workspace/components/task-details/task-dialog";
+import CardContextMenu from "@/app/(admin)/workspace/components/task-card/card-context-menu";
 
 export default async function TaskPage({
   params,
@@ -40,7 +40,7 @@ export default async function TaskPage({
 
       <div className="w-full px-4 flex flex-row justify-between items-center">
         <div></div>
-        <NewTaskDialog />
+        <NewTaskButton workspaceId={workspaceId} />
       </div>
 
       <div className="w-fit m-auto">

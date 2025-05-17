@@ -1,6 +1,6 @@
 "use client";
 
-import { TaskAssignees } from "@/app/(admin)/task/components/task-card/task-assignees";
+import { TaskAssignees } from "@/app/(admin)/workspace/components/task-card/task-assignees";
 import {
   Command,
   CommandEmpty,
@@ -16,79 +16,48 @@ import {
 } from "@/components/ui/popover";
 import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
-import { TASK_QUERY_KEY } from "@/queries/task-query";
-import { usersQueryOptions } from "@/queries/user-query";
-import { TaskApiRequests } from "@/requests/task.request";
 import { UserTaskType } from "@/schemaValidations/task.schema";
-import {
-  useMutation,
-  useQueryClient,
-  useSuspenseQuery,
-} from "@tanstack/react-query";
 import { Check, Users } from "lucide-react";
-import { toast } from "sonner";
 
-export const AssigneesPicker = ({
+export const TodoListAssignees = ({
   users,
-  taskId,
+  usersInTask,
+  onUpdateUsers,
 }: {
   users: UserTaskType[];
-  taskId: string;
+  usersInTask: UserTaskType[];
+  onUpdateUsers: (users: UserTaskType[]) => void;
 }) => {
   const selectedValues = new Set(users.map((user) => user.id));
 
-  const queryClient = useQueryClient();
-  const { data: allUsers } = useSuspenseQuery(usersQueryOptions());
-
-  const addUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      await TaskApiRequests.addAssignee(taskId, userId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
-    },
-    onError: () => {
-      toast.error("Có lỗi xảy ra!");
-      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
-    },
-  });
-
-  const removeUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      await TaskApiRequests.removeAssignee(taskId, userId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
-    },
-    onError: () => {
-      toast.error("Có lỗi xảy ra!");
-      queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
-    },
-  });
-
   const handleSelect = (isSelected: boolean, value: string) => {
-    if (isSelected) {
-      selectedValues.delete(value);
-      removeUserMutation.mutate(value);
-    } else {
-      selectedValues.add(value);
-      addUserMutation.mutate(value);
-    }
+    // if (isSelected) {
+    //   selectedValues.delete(value);
+    // } else {
+    //   selectedValues.add(value);
+    // }
+    const updatedUsers = isSelected
+      ? users.filter((user) => user.id !== value) // Xóa user nếu đã được chọn
+      : [...users, usersInTask.find((user) => user.id === value)!]; // Thêm user nếu chưa được chọn
+
+    onUpdateUsers(updatedUsers); // Gọi callback để cập nhật trạng thái
   };
 
   return (
-    <div className="flex flex-col gap-2">
-      <span className="text-sm text-muted-foreground">
-        <Users className="inline w-4 h-4 mb-1" /> Thành viên
-      </span>
+    <div className="flex flex-col">
       <Popover modal={true}>
-        <PopoverTrigger className="w-fit">
+        <PopoverTrigger className="w-fit h-full flex align-middle">
           {!!users.length ? (
-            <TaskAssignees assignees={users} maxVisible={5} size="lg" />
+            <TaskAssignees
+              assignees={users}
+              maxVisible={2}
+              size="sm"
+              className="mr-1"
+            />
           ) : (
-            <span className="text-muted-foreground">
-              Chưa có thành viên nào
-            </span>
+            <div className="hover:bg-primary-foreground p-[9px] py-1 rounded-md cursor-pointer text-muted-foreground hover:text-primary">
+              <Users className="inline w-4 h-4 mb-[3px]" />
+            </div>
           )}
         </PopoverTrigger>
 
@@ -98,7 +67,7 @@ export const AssigneesPicker = ({
             <CommandList className="max-h-full">
               <CommandEmpty>Không có kết quả</CommandEmpty>
               <CommandGroup className="max-h-[18.75rem] overflow-y-auto overflow-x-hidden">
-                {[...allUsers]
+                {[...usersInTask]
                   .sort((a, b) => {
                     const aSelected = selectedValues.has(a.id);
                     const bSelected = selectedValues.has(b.id);
@@ -113,13 +82,6 @@ export const AssigneesPicker = ({
                         onSelect={() => {
                           handleSelect(isSelected, user.id);
                         }}
-                        disabled={
-                          addUserMutation.isPending ||
-                          removeUserMutation.isPending ||
-                          !!queryClient.isFetching({
-                            queryKey: [TASK_QUERY_KEY, taskId],
-                          })
-                        }
                       >
                         <div
                           className={cn(
