@@ -1,14 +1,31 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateWorkspaceDto } from './dto/create-workspace.dto';
 import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { PrismaService } from '@/prisma.service';
+import { comparePasswordHelper } from '@/helpers/util';
+import { ViewWorkspaceDto } from '@/modules/workspace/dto/view-workspace.dto';
 
 @Injectable()
 export class WorkspaceService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  create(createWorkspaceDto: CreateWorkspaceDto) {
-    return 'This action adds a new workspace';
+  create(createWorkspaceDto: CreateWorkspaceDto, userId: string) {
+    const { name } = createWorkspaceDto;
+    const workspace = this.prismaService.workspace.create({
+      data: {
+        name,
+        users: {
+          connect: {
+            id: userId,
+          },
+        },
+      },
+    });
+    return workspace;
   }
 
   findAll() {
@@ -32,15 +49,71 @@ export class WorkspaceService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workspace`;
+  async findOne(id: string): Promise<ViewWorkspaceDto> {
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: {
+        id,
+      },
+      include: {
+        users: {
+          select: {
+            id: true,
+            fullname: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    if (!workspace) {
+      throw new BadRequestException('Workspace không tồn tại');
+    }
+
+    return workspace;
   }
 
-  update(id: number, updateWorkspaceDto: UpdateWorkspaceDto) {
-    return `This action updates a #${id} workspace`;
+  async update(id: string, updateWorkspaceDto: UpdateWorkspaceDto) {
+    const updatedWorkspace = await this.prismaService.workspace.update({
+      where: {
+        id,
+      },
+      data: {
+        name: updateWorkspaceDto.name,
+      },
+    });
+
+    return updatedWorkspace;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workspace`;
+  async remove(workspaceId: string, password: string, userId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+    if (!user) {
+      throw new BadRequestException('Người dùng không tồn tại');
+    }
+
+    const validPassword = await comparePasswordHelper(password, user.password);
+    if (!validPassword) {
+      throw new UnauthorizedException('Mật khẩu không chính xác');
+    }
+
+    const workspace = await this.prismaService.workspace.findUnique({
+      where: {
+        id: workspaceId,
+      },
+    });
+    if (!workspace) {
+      throw new BadRequestException('Workspace không tồn tại');
+    }
+    const deletedWorkspace = await this.prismaService.workspace.delete({
+      where: {
+        id: workspaceId,
+      },
+    });
+
+    return deletedWorkspace;
   }
 }
