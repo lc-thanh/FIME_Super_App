@@ -17,6 +17,8 @@ import { join } from 'path';
 import { GenModule } from './modules/gen/gen.module';
 import { LatestPublicationModule } from './modules/latest-publication/latest-publication.module';
 import { NewestProductModule } from './modules/newest-product/newest-product.module';
+import { RolesGuard } from '@/common/guards/role.guard';
+import { SharedModule } from '@/modules/shared/shared.module';
 
 @Module({
   imports: [
@@ -61,13 +63,18 @@ import { NewestProductModule } from './modules/newest-product/newest-product.mod
     GenModule,
     LatestPublicationModule,
     NewestProductModule,
+    SharedModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard,
+      useClass: JwtAuthGuard, // Chạy Auth trước
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard, // Chạy Role sau
     },
   ],
 })

@@ -21,7 +21,7 @@ enum Role {
   ADMIN // Quyền hạn cao nhất
   MANAGER // Điều phối công việc trong đội
   MEMBER // Thành viên
-  FORMER_MEMBER // Cựu thành viên (không còn hoạt động trong đội nhưng vẫn có quyền truy cập vào các tài liệu cũ)
+  FORMER_MEMBER // Cựu thành viên (không còn hoạt động trong đội nhưng vẫn có quyền truy cập vào chương trình) (sẽ không được chương trình gợi ý khi chọn người tham gia công việc)
 }
 
 // Enum cho trạng thái User
