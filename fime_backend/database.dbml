@@ -5,6 +5,22 @@ Enum "Role" {
   "FORMER_MEMBER"
 }
 
+Enum "TaskActivityType" {
+  "CREATE_CARD"
+  "DELETE_CARD"
+  "MOVE_CARD"
+  "CHANGE_TITLE"
+  "ADD_ASSIGNEE"
+  "REMOVE_ASSIGNEE"
+  "SYNC_TODO"
+  "SYNC_NOTE"
+  "ADD_ATTACHMENT"
+  "REMOVE_ATTACHMENT"
+  "CHANGE_PRIORITY"
+  "CHANGE_TYPE"
+  "CHANGE_DATE"
+}
+
 Enum "TaskPriority" {
   "LOW"
   "MEDIUM"
@@ -104,8 +120,8 @@ Table "Task" {
   "type" TaskType [not null, default: 'TODO']
   "status" TaskStatus [not null, default: 'TODO']
   "priority" TaskPriority [not null, default: 'MEDIUM']
-  "startDate" timestamp [not null]
-  "deadline" timestamp [not null]
+  "startDate" timestamp
+  "deadline" timestamp
   "workspaceId" text [not null]
   "monthlySegmentId" text
   "isDeleted" bool [not null, default: false]
@@ -118,8 +134,9 @@ Table "TodoList" {
   "id" text [pk, not null]
   "order" int2 [not null, default: 0]
   "content" text [not null]
-  "startDate" timestamp [not null]
-  "deadline" timestamp [not null]
+  "isDone" bool [not null, default: false]
+  "startDate" timestamp
+  "deadline" timestamp
   "taskId" text [not null]
 
   Indexes {
@@ -149,6 +166,7 @@ Table "TaskAttachment" {
 Table "TaskActivity" {
   "id" text [pk, not null]
   "content" text [not null]
+  "type" TaskActivityType [not null]
   "taskId" text [not null]
   "userId" text [not null]
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
@@ -184,8 +202,9 @@ Table "TeamSegment" {
 Table "LatestPublication" {
   "id" text [pk, not null]
   "title" text [not null]
-  "description" text
-  "embed_code" text
+  "note" text
+  "embed_code" text [not null]
+  "isActive" bool [not null, default: false]
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]
   "updatedAt" timestamp [not null]
 }
@@ -193,8 +212,8 @@ Table "LatestPublication" {
 Table "NewestProducts" {
   "id" text [pk, not null]
   "title" text [not null]
-  "date" timestamp [not null]
-  "description" text
+  "date" timestamp
+  "note" text
   "image" text
   "link" text
   "createdAt" timestamp [not null, default: `CURRENT_TIMESTAMP`]

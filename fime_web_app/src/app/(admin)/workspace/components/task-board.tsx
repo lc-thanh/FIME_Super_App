@@ -25,9 +25,9 @@ import {
   taskCardsQueryOptions,
 } from "@/queries/task-query";
 import { MoveCardData, TaskApiRequests } from "@/requests/task.request";
-import { toast } from "sonner";
 import { useSocketEvent } from "@/hooks/use-socket-event";
 import { useEmitOnConnect } from "@/hooks/use-emit-on-connect";
+import { handleApiError } from "@/lib/utils";
 
 interface MyBoard {
   columns: ColumnType[];
@@ -68,8 +68,10 @@ export const TaskBoard = ({ workspaceId }: { workspaceId: string }) => {
       });
     },
     onError: (error) => {
-      console.error(">>> move card error", error);
-      toast.error("Có lỗi xảy ra!");
+      handleApiError({
+        error,
+        toastMessage: "Di chuyển thẻ thất bại",
+      });
       queryClient.invalidateQueries({
         queryKey: [TASK_CARDS_QUERY_KEY, workspaceId],
       });

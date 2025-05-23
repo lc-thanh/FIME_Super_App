@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { handleApiError } from "@/lib/utils";
 import { TASK_CARDS_QUERY_KEY } from "@/queries/task-query";
 import { TaskApiRequests } from "@/requests/task.request";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,8 +26,11 @@ export default function NewTaskButton({
       });
       toast.success("Thêm Task mới thành công!");
     },
-    onError: () => {
-      toast.error("Có lỗi xảy ra!");
+    onError: (error) => {
+      handleApiError({
+        error,
+        toastMessage: "Thêm Task mới thất bại",
+      });
     },
   });
 

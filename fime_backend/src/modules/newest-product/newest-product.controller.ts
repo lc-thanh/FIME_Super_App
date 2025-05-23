@@ -21,6 +21,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 import { NewestProductViewDto } from '@/modules/newest-product/dto/newest-product-view.dto';
 import { Public } from '@/common/decorators/public-route.decorator';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('newest-products')
 export class NewestProductController {
@@ -28,6 +30,7 @@ export class NewestProductController {
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
+  @Roles(Role.MANAGER)
   async create(
     @Body() createNewestProductDto: CreateNewestProductDto,
     @UploadedFile() file: Express.Multer.File,
@@ -61,6 +64,7 @@ export class NewestProductController {
 
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))
+  @Roles(Role.MANAGER)
   async update(
     @UuidParam() id: string,
     @Body() updateNewestProductDto: UpdateNewestProductDto,
@@ -77,6 +81,7 @@ export class NewestProductController {
   }
 
   @Delete(':id')
+  @Roles(Role.MANAGER)
   async remove(@UuidParam('id') id: string) {
     return {
       message: 'Xóa sản phẩm thành công!',

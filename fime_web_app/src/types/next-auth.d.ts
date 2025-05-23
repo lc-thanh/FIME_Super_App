@@ -1,3 +1,5 @@
+import { UserRoleType } from "@/schemaValidations/user.schema";
+
 declare module "next-auth" {
   /**
    * The shape of the user object returned in the OAuth providers' `profile` callback,
@@ -8,7 +10,7 @@ declare module "next-auth" {
     fullname: string;
     email: string;
     image?: string;
-    role: string[];
+    role: UserRoleType[];
     access_token: string;
     refresh_token: string;
     expires_at: number;

@@ -17,6 +17,8 @@ import {
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 import { Public } from '@/common/decorators/public-route.decorator';
 import { PublicationViewDto } from '@/modules/latest-publication/dto/publication-view.dto';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('latest-publications')
 export class LatestPublicationController {
@@ -25,6 +27,7 @@ export class LatestPublicationController {
   ) {}
 
   @Post()
+  @Roles(Role.MANAGER)
   async create(@Body() createLatestPublicationDto: CreateLatestPublicationDto) {
     return {
       message: 'Tạo ấn phẩm mới thành công!',
@@ -53,6 +56,7 @@ export class LatestPublicationController {
   }
 
   @Put(':id')
+  @Roles(Role.MANAGER)
   async update(
     @UuidParam('id') id: string,
     @Body() updateLatestPublicationDto: UpdateLatestPublicationDto,
@@ -67,6 +71,7 @@ export class LatestPublicationController {
   }
 
   @Post(':id/active')
+  @Roles(Role.MANAGER)
   async active(@UuidParam('id') id: string) {
     return {
       message: 'Kích hoạt ấn phẩm thành công!',
@@ -75,6 +80,7 @@ export class LatestPublicationController {
   }
 
   @Delete(':id')
+  @Roles(Role.MANAGER)
   async remove(@UuidParam('id') id: string) {
     return {
       message: 'Xóa ấn phẩm thành công!',

@@ -1,3 +1,4 @@
+import { CUSTOM_FORBIDDEN_MESSAGE } from '@/common/decorators/custom-forbidden-message.decorator';
 import { IS_PUBLIC_KEY } from '@/common/decorators/public-route.decorator';
 import { ROLES_KEY } from '@/common/decorators/roles.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
@@ -35,7 +36,7 @@ export class RolesGuard implements CanActivate {
     const { user } = context
       .switchToHttp()
       .getRequest<{ user: IAccessTokenPayload }>();
-    const userRoles: Role[] = (user?.role as Role[]) || [];
+    const userRoles: Role[] = user?.role || [];
 
     // Nếu user chưa đăng nhập hoặc không có role
     if (userRoles.length === 0) return false;
@@ -51,8 +52,14 @@ export class RolesGuard implements CanActivate {
     );
 
     if (!hasPermission) {
+      const customForbiddenMessage = this.reflector.getAllAndOverride<string>(
+        CUSTOM_FORBIDDEN_MESSAGE,
+        [context.getHandler(), context.getClass()],
+      );
+
       throw new ForbiddenException(
-        'Quyền truy cập của bạn không đủ để thực hiện hành động này!',
+        customForbiddenMessage ||
+          'Quyền truy cập của bạn không đủ để thực hiện hành động này!',
       );
     }
 

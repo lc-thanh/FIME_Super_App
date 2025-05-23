@@ -57,6 +57,7 @@ export default function UpdateUserForm({ userId }: { userId: string }) {
   const { data: positions } = useSuspenseQuery(positionSelectors());
   const { data: teams } = useSuspenseQuery(teamSelectorsQueryOptions());
   const { data: gens } = useSuspenseQuery(genSelectorsQueryOptions());
+  console.log("gens", gens);
 
   const form = useForm<UpdateUserBodyType>({
     resolver: zodResolver(UpdateUserBody),
@@ -104,6 +105,7 @@ export default function UpdateUserForm({ userId }: { userId: string }) {
       <form
         onSubmit={form.handleSubmit(onSubmit, (errors) => {
           console.log(errors);
+          console.log("genId", form.getValues("genId"));
         })}
         className="space-y-3 w-full lg:grid grid-cols-2 gap-6"
       >

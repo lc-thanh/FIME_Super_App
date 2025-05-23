@@ -21,8 +21,10 @@ import { LatestPublicationType } from "@/schemaValidations/publication.schema";
 import { FimeTitle } from "@/components/fime-title";
 import DeleteConfirmationDialog from "@/app/(admin)/dashboard/latest-publication/_components/delete-dialog";
 import { FimeOutlineButton } from "@/components/fime-outline-button";
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export default function LatestPublicationsAdmin() {
+  const { isManager } = useUserRoleStore((state) => state);
   const searchParams = useSearchParams();
 
   const [selectedPublication, setSelectedPublication] = useState<Omit<
@@ -103,13 +105,15 @@ export default function LatestPublicationsAdmin() {
             Quản Lý Ấn Phẩm Mới Nhất - FIME Landing Page
           </h1>
         </FimeTitle>
-        <FimeOutlineButton
-          size="default"
-          icon={Plus}
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          Thêm
-        </FimeOutlineButton>
+        {isManager() && (
+          <FimeOutlineButton
+            size="default"
+            icon={Plus}
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            Thêm
+          </FimeOutlineButton>
+        )}
       </div>
 
       <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-6">
@@ -151,6 +155,7 @@ export default function LatestPublicationsAdmin() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleEditClick(publication)}
+                  disabled={!isManager()}
                 >
                   <PencilIcon className="h-4 w-4 mr-2" />
                   Sửa
@@ -159,6 +164,7 @@ export default function LatestPublicationsAdmin() {
                   variant="outline"
                   size="sm"
                   className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  disabled={!isManager()}
                   onClick={() =>
                     handleDeleteClick({
                       id: publication.id,
@@ -178,7 +184,9 @@ export default function LatestPublicationsAdmin() {
                 size="sm"
                 onClick={() => handleToggleActive(publication.id)}
                 disabled={
-                  toggleActiveMutation.isPending || publication.isActive
+                  toggleActiveMutation.isPending ||
+                  publication.isActive ||
+                  !isManager()
                 }
               >
                 {toggleActiveMutation.isPending &&

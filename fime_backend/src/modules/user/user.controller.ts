@@ -20,6 +20,8 @@ import {
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('users')
 export class UserController {
@@ -27,6 +29,7 @@ export class UserController {
 
   @Post()
   @UseInterceptors(FileInterceptor('image'))
+  @Roles(Role.ADMIN)
   async create(
     @Body() createUserDto: CreateUserDto,
     @UploadedFile() file: Express.Multer.File,
@@ -70,6 +73,7 @@ export class UserController {
 
   @Put(':id')
   @UseInterceptors(FileInterceptor('image'))
+  @Roles(Role.ADMIN)
   async update(
     @UuidParam() id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -81,7 +85,35 @@ export class UserController {
     };
   }
 
+  @Post(':id/reset-password')
+  @Roles(Role.ADMIN)
+  async resetPassword(@UuidParam() id: string) {
+    return {
+      message: 'Đặt lại mật khẩu thành công!',
+      data: await this.userService.resetPassword(id),
+    };
+  }
+
+  @Post(':id/lock')
+  @Roles(Role.ADMIN)
+  async lock(@UuidParam() id: string) {
+    return {
+      message: 'Khóa người dùng thành công!',
+      data: await this.userService.lock(id),
+    };
+  }
+
+  @Post(':id/unlock')
+  @Roles(Role.ADMIN)
+  async unlock(@UuidParam() id: string) {
+    return {
+      message: 'Mở khóa người dùng thành công!',
+      data: await this.userService.unlock(id),
+    };
+  }
+
   @Delete(':id')
+  @Roles(Role.ADMIN)
   async remove(@UuidParam() id: string) {
     return {
       message: 'Xóa người dùng thành công!',

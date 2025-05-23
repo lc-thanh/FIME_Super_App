@@ -8,6 +8,8 @@ import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { PrismaService } from '@/prisma.service';
 import { comparePasswordHelper } from '@/helpers/util';
 import { ViewWorkspaceDto } from '@/modules/workspace/dto/view-workspace.dto';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class WorkspaceService {
@@ -28,16 +30,22 @@ export class WorkspaceService {
     return workspace;
   }
 
-  findAll() {
-    return `This action returns all workspace`;
-  }
+  async findAllPersonal(user: IAccessTokenPayload) {
+    // Admin có thể xem tất cả workspace
+    if (user.role.some((role) => role === Role.ADMIN)) {
+      const workspaces = await this.prismaService.workspace.findMany();
+      return {
+        message: 'Lấy danh sách workspace thành công!',
+        data: workspaces,
+      };
+    }
 
-  async findAllPersonal(userId: string) {
+    // Người dùng bình thường chỉ có thể xem workspace của mình
     const workspaces = await this.prismaService.workspace.findMany({
       where: {
         users: {
           some: {
-            id: userId,
+            id: user.sub,
           },
         },
       },

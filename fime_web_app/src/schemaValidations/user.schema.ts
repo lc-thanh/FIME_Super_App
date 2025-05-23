@@ -4,6 +4,13 @@ import { z } from "zod";
 export const UserRole = z.enum(["ADMIN", "MANAGER", "MEMBER", "FORMER_MEMBER"]);
 export type UserRoleType = z.infer<typeof UserRole>;
 
+export const UserRoleText = {
+  ADMIN: "Quản trị",
+  MANAGER: "Quản lý",
+  MEMBER: "Thành viên",
+  FORMER_MEMBER: "Cựu thành viên",
+};
+
 export const UserStatus = z.enum(["ACTIVE", "INACTIVE", "BANNED"]);
 export type UserStatusType = z.infer<typeof UserStatus>;
 

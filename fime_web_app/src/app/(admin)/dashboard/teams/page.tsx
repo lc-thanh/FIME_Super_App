@@ -10,7 +10,7 @@ export default function Page() {
     <div className="flex flex-col container mx-auto px-4 mt-2 gap-4 w-full">
       <FimeTitle>
         <h1 className="scroll-m-20 pb-4 text-2xl font-semibold tracking-tight first:mt-0">
-          Quản lý các ban
+          Thông tin các ban
         </h1>
       </FimeTitle>
 

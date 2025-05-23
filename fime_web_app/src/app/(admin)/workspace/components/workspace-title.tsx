@@ -17,6 +17,7 @@ import {
   workspaceQueryOptions,
 } from "@/queries/workspace-query";
 import { toast } from "sonner";
+import { handleApiError } from "@/lib/utils";
 
 interface WorkspaceTitleProps {
   workspaceId: string;
@@ -56,8 +57,11 @@ export default function WorkspaceTitle({
       toast.success("Đổi tên workspace thành công");
       setIsEditing(false);
     },
-    onError: () => {
-      toast.error("Có lỗi xảy ra!");
+    onError: (error) => {
+      handleApiError({
+        error,
+        toastMessage: "Có lỗi xảy ra!",
+      });
     },
   });
 

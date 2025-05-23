@@ -81,7 +81,9 @@ export function DeleteWorkspaceDialog({
           <DialogTitle className="text-destructive">Xóa Workspace</DialogTitle>
           <DialogDescription>
             Bạn có chắc chắn muốn xóa workspace &quot;<b>{workspaceName}</b>
-            &quot;? Hành động này không thể hoàn tác.
+            &quot;? Điều này sẽ <b>xóa tất cả</b> dữ liệu liên quan đến
+            workspace này, bao gồm các thẻ Công việc. Hành động này không thể
+            hoàn tác.
           </DialogDescription>
         </DialogHeader>
 

@@ -17,62 +17,7 @@ import { User } from "next-auth";
 import { NavWorkspaces } from "@/components/nav-workspaces";
 import { NavMain } from "@/components/nav-main";
 import { ScrollArea } from "@/components/ui/scroll-area";
-
-// This is sample data.
-const data = {
-  navMain: [
-    {
-      title: "Trang chủ",
-      url: "/dashboard",
-      icon: LayoutPanelLeft,
-    },
-    {
-      title: "Lịch làm việc",
-      url: "/dashboard/schedule",
-      icon: Calendar,
-    },
-  ],
-  dashboard: [
-    {
-      title: "Quản lý nhân sự",
-      url: "#",
-      icon: Users,
-      items: [
-        {
-          title: "Thành viên",
-          url: "/dashboard/users",
-        },
-        {
-          title: "Ban",
-          url: "/dashboard/teams",
-        },
-        {
-          title: "Chức vụ",
-          url: "/dashboard/positions",
-        },
-        {
-          title: "Gen",
-          url: "/dashboard/gens",
-        },
-      ],
-    },
-    {
-      title: "Chỉnh sửa Website",
-      url: "#",
-      icon: PanelsTopLeft,
-      items: [
-        {
-          title: "Ấn phẩm mới nhất",
-          url: "/dashboard/latest-publication",
-        },
-        {
-          title: "Sản phẩm gần đây",
-          url: "/dashboard/newest-products",
-        },
-      ],
-    },
-  ],
-} as SidebarData;
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export function AppSidebar({
   user,
@@ -80,6 +25,63 @@ export function AppSidebar({
 }: React.ComponentProps<typeof Sidebar> & {
   user: Pick<User, "fullname" | "email" | "image"> | undefined;
 }) {
+  const { isAdmin, isManager } = useUserRoleStore((state) => state);
+
+  const data = {
+    navMain: [
+      {
+        title: "Trang chủ",
+        url: "/dashboard",
+        icon: LayoutPanelLeft,
+      },
+      {
+        title: "Lịch làm việc",
+        url: "/dashboard/schedule",
+        icon: Calendar,
+      },
+    ],
+    dashboard: [
+      {
+        title: isAdmin() ? "Quản lý nhân sự" : "Thông tin nhân sự",
+        url: "#",
+        icon: Users,
+        items: [
+          {
+            title: "Thành viên",
+            url: "/dashboard/users",
+          },
+          {
+            title: "Ban",
+            url: "/dashboard/teams",
+          },
+          {
+            title: "Chức vụ",
+            url: "/dashboard/positions",
+          },
+          {
+            title: "Gen",
+            url: "/dashboard/gens",
+          },
+        ],
+      },
+      {
+        title: isManager() ? "Chỉnh sửa Website" : "Website FIME",
+        url: "#",
+        icon: PanelsTopLeft,
+        items: [
+          {
+            title: "Ấn phẩm mới nhất",
+            url: "/dashboard/latest-publication",
+          },
+          {
+            title: "Sản phẩm gần đây",
+            url: "/dashboard/newest-products",
+          },
+        ],
+      },
+    ],
+  } as SidebarData;
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>

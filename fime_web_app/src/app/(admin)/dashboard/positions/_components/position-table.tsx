@@ -22,8 +22,10 @@ import dayjs from "dayjs";
 import { positionsQueryOptions } from "@/queries/position-query";
 import { PositionType } from "@/schemaValidations/position.schema";
 import PositionDeleteButton from "@/app/(admin)/dashboard/positions/_components/position-delete-button";
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export function PositionTable() {
+  const { isAdmin } = useUserRoleStore((state) => state);
   const searchParams = useSearchParams();
 
   const { data: positionsPaginated, isError } = useSuspenseQuery(
@@ -41,13 +43,13 @@ export function PositionTable() {
           <TableSearch placeholder="Tìm kiếm.." />
         </div>
 
-        <div className="flex flex-row">
+        {isAdmin() && (
           <Link href="/dashboard/positions/create">
             <FimeOutlineButton size="sm" icon={Plus}>
               Thêm chức vụ mới
             </FimeOutlineButton>
           </Link>
-        </div>
+        )}
       </div>
 
       <Table className="w-full text-center border">
@@ -67,7 +69,9 @@ export function PositionTable() {
             >
               Ngày tạo
             </SortableTableHead>
-            <TableHead className="text-center border">Tùy chọn</TableHead>
+            {isAdmin() && (
+              <TableHead className="text-center border">Tùy chọn</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -83,17 +87,19 @@ export function PositionTable() {
                 <TableCell>
                   {dayjs(position.createdAt).format("DD/MM/YYYY")}
                 </TableCell>
-                <TableCell>
-                  <div className="flex flex-row h-full justify-center">
-                    <Link href={`/dashboard/positions/edit/${position.id}`}>
-                      <Button variant="ghost" size="icon">
-                        <FilePenLine size={20} className="text-blue-500" />
-                      </Button>
-                    </Link>
+                {isAdmin() && (
+                  <TableCell>
+                    <div className="flex flex-row h-full justify-center">
+                      <Link href={`/dashboard/positions/edit/${position.id}`}>
+                        <Button variant="ghost" size="icon">
+                          <FilePenLine size={20} className="text-blue-500" />
+                        </Button>
+                      </Link>
 
-                    <PositionDeleteButton positionId={position.id} />
-                  </div>
-                </TableCell>
+                      <PositionDeleteButton positionId={position.id} />
+                    </div>
+                  </TableCell>
+                )}
               </TableRow>
             )
           )}

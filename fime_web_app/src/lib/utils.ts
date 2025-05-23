@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import envConfig from "@/config";
-import { EntityError } from "@/lib/http";
+import { clientTokens, EntityError } from "@/lib/http";
 import { clsx, type ClassValue } from "clsx";
 import { UseFormSetError } from "react-hook-form";
 import { toast } from "sonner";
@@ -143,4 +143,8 @@ export const getProductImageUrl = (image?: string) => {
     return image;
   }
   return `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/newest-products/images/${image}`;
+};
+
+export const getClientRole = () => {
+  if (typeof window !== "undefined") return clientTokens.user?.role;
 };

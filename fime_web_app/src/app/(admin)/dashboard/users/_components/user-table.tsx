@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -11,23 +10,36 @@ import {
 } from "@/components/ui/table";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { FilePenLine, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import Pagination from "@/components/data-table/my-pagination";
 import { TableFacetedFilter } from "@/components/data-table/data-table-faceted-filter";
 import TableSearch from "@/components/data-table/table-search";
 import SortableTableHead from "@/components/data-table/sortable-table-head";
-import UserDeleteButton from "@/app/(admin)/dashboard/users/_components/user-delete-button";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { userTableQueryOptions } from "@/queries/user-query";
-import { UserType } from "@/schemaValidations/user.schema";
+import { UserRoleText, UserType } from "@/schemaValidations/user.schema";
 import { FimeOutlineButton } from "@/components/fime-outline-button";
 import { StatusBadge } from "@/components/status-badge";
 import { UserAvatar } from "@/components/user-avatar";
 import { Badge } from "@/components/ui/badge";
+import UserTableRowActions from "@/app/(admin)/dashboard/users/_components/table-row-actions";
+import { useState } from "react";
+import DeleteUserDialog from "@/app/(admin)/dashboard/users/_components/delete-user-dialog";
+import ResetPasswordDialog from "@/app/(admin)/dashboard/users/_components/reset-password-dialog";
+import LockUserDialog from "@/app/(admin)/dashboard/users/_components/lock-user-dialog";
+import UnlockUserDialog from "@/app/(admin)/dashboard/users/_components/unlock-user-dialog";
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export function UserTable() {
+  const { isAdmin } = useUserRoleStore((state) => state);
+
   const searchParams = useSearchParams();
+  const [actionId, setActionId] = useState<string>("");
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openResetPasswordDialog, setOpenResetPasswordDialog] = useState(false);
+  const [openLockDialog, setOpenLockDialog] = useState(false);
+  const [openUnlockDialog, setOpenUnlockDialog] = useState(false);
 
   const { data: usersPaginated, isError } = useSuspenseQuery(
     userTableQueryOptions(searchParams.toString())
@@ -44,7 +56,7 @@ export function UserTable() {
           <TableSearch placeholder="Tìm kiếm.." />
 
           <TableFacetedFilter
-            title="Danh mục"
+            title="Ban"
             filterName="categoryIds"
             options={
               // categories.map((category) => ({
@@ -59,22 +71,15 @@ export function UserTable() {
           />
         </div>
 
-        <div className="flex flex-row">
+        {isAdmin() && (
           <Link href="/dashboard/users/create">
             <FimeOutlineButton size="sm" icon={Plus}>
               Thêm thành viên
             </FimeOutlineButton>
           </Link>
-        </div>
+        )}
       </div>
 
-      {/* {isLoading ? (
-        <DataTableSkeleton
-          columnCount={8}
-          rowCount={6}
-          showViewOptions={false}
-        />
-      ) : ( */}
       <Table className="w-full text-center border">
         {/* <TableCaption>A list of your recent invoices.</TableCaption> */}
         <TableHeader>
@@ -92,7 +97,9 @@ export function UserTable() {
             <TableHead className="text-center border">Email</TableHead>
             <TableHead className="text-center border">Gen</TableHead>
             <TableHead className="text-center border">Vai trò</TableHead>
-            <TableHead className="text-center border">Tùy chọn</TableHead>
+            {isAdmin() && (
+              <TableHead className="text-center border">Tùy chọn</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -118,47 +125,90 @@ export function UserTable() {
               <TableCell>{user.teamName}</TableCell>
               <TableCell>{user.email}</TableCell>
               <TableCell>{user.genName}</TableCell>
-              <TableCell className="flex gap-2 items-center justify-center">
+              <TableCell className="space-x-1 space-y-1 max-w-52">
                 {user.role.map((role) => {
                   if (role === "ADMIN")
                     return (
                       <Badge variant="fimeGradient" key={role}>
-                        Admin
+                        {UserRoleText[role]}
+                      </Badge>
+                    );
+                  if (role === "MANAGER")
+                    return (
+                      <Badge
+                        key={role}
+                        className="bg-indigo-500 text-white hover:bg-indigo-500"
+                      >
+                        {UserRoleText[role]}
                       </Badge>
                     );
                   return (
                     <Badge variant="outline" key={role}>
-                      {role}
+                      {UserRoleText[role]}
                     </Badge>
                   );
                 })}
               </TableCell>
-              <TableCell>
-                <div className="flex flex-row h-full justify-center">
-                  <Link href={`/dashboard/users/edit/${user.id}`}>
-                    <Button variant="ghost" size="icon">
-                      <FilePenLine size={20} className="text-blue-500" />
-                    </Button>
-                  </Link>
-
-                  <UserDeleteButton
-                    // id={user.id}
-                    callback={() => {
-                      console.log("delete user", user.id);
-                    }}
-                  />
-                </div>
-              </TableCell>
+              {isAdmin() && (
+                <TableCell>
+                  <div className="flex flex-row h-full justify-center">
+                    <UserTableRowActions
+                      id={user.id}
+                      fullName={user.fullname}
+                      islocked={user.status === "BANNED"}
+                      setActionId={setActionId}
+                      setOpenDeleteDialog={setOpenDeleteDialog}
+                      setOpenResetPasswordDialog={setOpenResetPasswordDialog}
+                      setOpenLockDialog={setOpenLockDialog}
+                      setOpenUnlockDialog={setOpenUnlockDialog}
+                    />
+                  </div>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>
-        {/* <TableFooter>
-            <TableRow>
-              <TableCell colSpan={4}>Total</TableCell>
-              <TableCell className="text-right">$2,500.00</TableCell>
-            </TableRow>
-          </TableFooter> */}
       </Table>
+
+      <DeleteUserDialog
+        id={actionId}
+        fullname={
+          usersPaginated?.data.find((user) => user.id === actionId)?.fullname ??
+          ""
+        }
+        open={openDeleteDialog}
+        setOpen={setOpenDeleteDialog}
+      />
+
+      <ResetPasswordDialog
+        id={actionId}
+        fullname={
+          usersPaginated?.data.find((user) => user.id === actionId)?.fullname ??
+          ""
+        }
+        open={openResetPasswordDialog}
+        setOpen={setOpenResetPasswordDialog}
+      />
+
+      <LockUserDialog
+        id={actionId}
+        fullname={
+          usersPaginated?.data.find((user) => user.id === actionId)?.fullname ??
+          ""
+        }
+        open={openLockDialog}
+        setOpen={setOpenLockDialog}
+      />
+
+      <UnlockUserDialog
+        id={actionId}
+        fullname={
+          usersPaginated?.data.find((user) => user.id === actionId)?.fullname ??
+          ""
+        }
+        open={openUnlockDialog}
+        setOpen={setOpenUnlockDialog}
+      />
 
       <div className="mt-5 flex w-full justify-center">
         <Pagination totalPages={usersPaginated?.totalPage ?? 0} />

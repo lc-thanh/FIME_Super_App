@@ -72,9 +72,8 @@ export class UserService {
       this.configService.get<string>('DEFAULT_PASSWORD') || '123456',
     );
     if (!hashedPassword) {
-      throw new HttpException(
+      throw new InternalServerErrorException(
         'Có lỗi xảy ra trong quá trình mã hóa mật khẩu!',
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
@@ -306,6 +305,63 @@ export class UserService {
     return userUpdate;
   }
 
+  async resetPassword(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại!');
+    }
+
+    const hashedPassword = await hashPasswordHelper(
+      this.configService.get<string>('DEFAULT_PASSWORD') || '123456',
+    );
+    if (!hashedPassword) {
+      throw new InternalServerErrorException(
+        'Có lỗi xảy ra trong quá trình mã hóa mật khẩu!',
+      );
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+
+    return updatedUser;
+  }
+
+  async lock(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại!');
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id },
+      data: { status: UserStatus.BANNED },
+    });
+
+    return updatedUser;
+  }
+
+  async unlock(id: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+    });
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại!');
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id },
+      data: { status: UserStatus.INACTIVE },
+    });
+
+    return updatedUser;
+  }
+
   async remove(id: string) {
     const user = await this.prismaService.user.findUnique({
       where: { id },
@@ -330,9 +386,8 @@ export class UserService {
 
     const hashedPassword = await hashPasswordHelper(signUpDto.password);
     if (!hashedPassword) {
-      throw new HttpException(
+      throw new InternalServerErrorException(
         'Có lỗi xảy ra trong quá trình mã hóa mật khẩu!',
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 

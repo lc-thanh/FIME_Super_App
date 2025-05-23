@@ -25,8 +25,10 @@ import { NewestProductType } from "@/schemaValidations/newest-product.schema";
 import MyPagination from "@/components/data-table/my-pagination";
 import DeleteConfirmationDialog from "@/app/(admin)/dashboard/newest-products/_components/delete-dialog";
 import { getProductImageUrl } from "@/lib/utils";
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export default function NewestProductsAdmin() {
+  const { isManager } = useUserRoleStore((state) => state);
   const searchParams = useSearchParams();
 
   const [selectedProduction, setSelectedProduction] = useState<Omit<
@@ -89,13 +91,15 @@ export default function NewestProductsAdmin() {
             Quản Lý Các Sản Phẩm Gần Đây - FIME Landing Page
           </h1>
         </FimeTitle>
-        <FimeOutlineButton
-          size="default"
-          icon={Plus}
-          onClick={() => setIsAddDialogOpen(true)}
-        >
-          Thêm
-        </FimeOutlineButton>
+        {isManager() && (
+          <FimeOutlineButton
+            size="default"
+            icon={Plus}
+            onClick={() => setIsAddDialogOpen(true)}
+          >
+            Thêm
+          </FimeOutlineButton>
+        )}
       </div>
 
       <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -170,6 +174,7 @@ export default function NewestProductsAdmin() {
                   variant="outline"
                   size="sm"
                   onClick={() => handleEditClick(product)}
+                  disabled={!isManager()}
                 >
                   <PencilIcon className="h-4 w-4 mr-2" />
                   Sửa
@@ -178,6 +183,7 @@ export default function NewestProductsAdmin() {
                   variant="outline"
                   size="sm"
                   className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                  disabled={!isManager()}
                   onClick={() =>
                     handleDeleteClick({
                       id: product.id,

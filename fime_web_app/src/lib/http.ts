@@ -3,6 +3,7 @@ import envConfig from "@/config";
 import { signOut as signOutClient } from "next-auth/react";
 import { auth } from "@/auth";
 import AuthApiRequests from "@/requests/auth.request";
+import { User } from "next-auth";
 
 type CustomOptions = Omit<RequestInit, "method"> & {
   isPublic?: boolean | undefined; // Nếu là true thì không cần phải truyền access_token vào header
@@ -44,6 +45,17 @@ class ClientTokens {
       throw new Error("Cannot set token on server side");
     }
     this._expires_at = value;
+  }
+
+  private _user: User | null = null;
+  get user() {
+    return this._user;
+  }
+  set user(user: User | null) {
+    if (typeof window === "undefined") {
+      throw new Error("Cannot set token on server side");
+    }
+    this._user = user;
   }
 }
 export const clientTokens = new ClientTokens();

@@ -15,15 +15,18 @@ import {
   PositionPaginatedResponse,
 } from '@/modules/position/dto/position-pagination';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('positions')
 export class PositionController {
   constructor(private readonly positionService: PositionService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   async create(@Body() createPositionDto: CreatePositionDto) {
     return {
-      message: 'Tạo ban mới thành công!',
+      message: 'Tạo chức vụ mới thành công!',
       data: await this.positionService.create(createPositionDto),
     };
   }
@@ -49,6 +52,7 @@ export class PositionController {
   }
 
   @Put(':id')
+  @Roles(Role.ADMIN)
   async update(
     @UuidParam('id') id: string,
     @Body() updatePositionDto: UpdatePositionDto,
@@ -60,6 +64,7 @@ export class PositionController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   async remove(@UuidParam('id') id: string) {
     return {
       message: 'Xóa chức vụ thành công!',

@@ -27,4 +27,16 @@ services:
 volumes:
   pgdata:
   pgadmin:
+#
 # docker compose -p fime-project up -d
+#
+# Connect to pgadmin at http://localhost:5050
+# Login with:
+# Email: admin@admin.com
+# Password: root
+#
+# In pgadmin, add a new server with the following details:
+# Host: db
+# Port: 5432
+# Username: admin
+# Password: root

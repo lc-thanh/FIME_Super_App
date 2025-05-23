@@ -15,12 +15,15 @@ import {
   TeamPaginatedResponse,
 } from '@/modules/team/dto/team-pagination';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('teams')
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   async create(@Body() createTeamDto: CreateTeamDto) {
     return {
       message: 'Tạo ban mới thành công!',
@@ -47,6 +50,7 @@ export class TeamController {
   }
 
   @Put(':id')
+  @Roles(Role.ADMIN)
   async update(
     @UuidParam('id') id: string,
     @Body() updateTeamDto: UpdateTeamDto,
@@ -58,6 +62,7 @@ export class TeamController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   async remove(@UuidParam('id') id: string) {
     return {
       message: 'Xóa ban thành công!',

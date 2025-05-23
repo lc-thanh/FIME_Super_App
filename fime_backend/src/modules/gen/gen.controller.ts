@@ -15,15 +15,18 @@ import {
   GenFilterType,
   GenPaginatedResponse,
 } from '@/modules/gen/dto/gen-pagination';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('gens')
 export class GenController {
   constructor(private readonly genService: GenService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   async create(@Body() createGenDto: CreateGenDto) {
     return {
-      message: 'Tạo ban mới thành công!',
+      message: 'Tạo gen mới thành công!',
       data: await this.genService.create(createGenDto),
     };
   }
@@ -47,6 +50,7 @@ export class GenController {
   }
 
   @Put(':id')
+  @Roles(Role.ADMIN)
   async update(
     @UuidParam('id') id: string,
     @Body() updateGenDto: UpdateGenDto,
@@ -58,6 +62,7 @@ export class GenController {
   }
 
   @Delete(':id')
+  @Roles(Role.ADMIN)
   async remove(@UuidParam('id') id: string) {
     return {
       message: 'Xóa gen thành công!',
