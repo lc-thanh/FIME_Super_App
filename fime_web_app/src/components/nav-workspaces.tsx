@@ -45,6 +45,7 @@ import {
 import { WorkspaceApiRequest } from "@/requests/workspace.request";
 import { toast } from "sonner";
 import { DeleteWorkspaceDialog } from "@/components/delete-workspace-dialog";
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 interface WorkspaceUrl {
   id: string;
@@ -53,6 +54,7 @@ interface WorkspaceUrl {
 }
 
 export function NavWorkspaces() {
+  const { isAdmin } = useUserRoleStore((state) => state);
   const queryClient = useQueryClient();
   const { isMobile } = useSidebar();
   const [isCreating, setIsCreating] = useState(false);
@@ -231,7 +233,7 @@ export function NavWorkspaces() {
                       </SidebarMenuAction>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
-                      className="w-40 rounded-lg"
+                      className="w-fit rounded-lg"
                       side={isMobile ? "bottom" : "right"}
                       align={isMobile ? "end" : "start"}
                     >
@@ -242,79 +244,85 @@ export function NavWorkspaces() {
                         </Link>
                       </DropdownMenuItem> */}
                       <DropdownMenuItem
-                        onClick={() => handleShareWorkspace(item.id)}
+                        onClick={() => handleShareWorkspace(item.url)}
                       >
                         <LinkIcon className="mr-2 h-4 w-4 text-muted-foreground" />
                         <span>Lấy link</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => startRenaming(item)}>
-                        <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
-                        <span>Đổi tên</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem
-                        onClick={() =>
-                          handleDeleteWorkspace({
-                            id: item.id,
-                            name: item.name,
-                          })
-                        }
-                        className="text-destructive focus:text-destructive"
-                      >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        <span>Xóa Workspace</span>
-                      </DropdownMenuItem>
+                      {isAdmin() && (
+                        <>
+                          <DropdownMenuItem onClick={() => startRenaming(item)}>
+                            <Pencil className="mr-2 h-4 w-4 text-muted-foreground" />
+                            <span>Đổi tên</span>
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={() =>
+                              handleDeleteWorkspace({
+                                id: item.id,
+                                name: item.name,
+                              })
+                            }
+                            className="text-nowrap text-destructive focus:text-destructive"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>Xóa Workspace</span>
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </>
               )}
             </SidebarMenuItem>
           ))}
-          <SidebarMenuItem>
-            {isCreating ? (
-              <div className="flex items-center gap-1">
-                <Input
-                  ref={inputRef}
-                  value={newWorkspaceName}
-                  onChange={(e) => setNewWorkspaceName(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Tên workspace"
-                  className="h-7 text-sm"
-                />
-                <div className="flex gap-1">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={handleCreateWorkspace}
-                    disabled={addingMutation.isPending}
-                  >
-                    <Check className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={() => {
-                      setIsCreating(false);
-                      setNewWorkspaceName("");
-                    }}
-                    disabled={addingMutation.isPending}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+          {isAdmin() && (
+            <SidebarMenuItem>
+              {isCreating ? (
+                <div className="flex items-center gap-1">
+                  <Input
+                    ref={inputRef}
+                    value={newWorkspaceName}
+                    onChange={(e) => setNewWorkspaceName(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder="Tên workspace"
+                    className="h-7 text-sm"
+                  />
+                  <div className="flex gap-1">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={handleCreateWorkspace}
+                      disabled={addingMutation.isPending}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={() => {
+                        setIsCreating(false);
+                        setNewWorkspaceName("");
+                      }}
+                      disabled={addingMutation.isPending}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <SidebarMenuButton
-                onClick={() => setIsCreating(true)}
-                className="text-sidebar-foreground/70"
-              >
-                <Plus className="text-sidebar-foreground/70" />
-                <span>Mới</span>
-              </SidebarMenuButton>
-            )}
-          </SidebarMenuItem>
+              ) : (
+                <SidebarMenuButton
+                  onClick={() => setIsCreating(true)}
+                  className="text-sidebar-foreground/70"
+                >
+                  <Plus className="text-sidebar-foreground/70" />
+                  <span>Mới</span>
+                </SidebarMenuButton>
+              )}
+            </SidebarMenuItem>
+          )}
         </SidebarMenu>
       </SidebarGroup>
 

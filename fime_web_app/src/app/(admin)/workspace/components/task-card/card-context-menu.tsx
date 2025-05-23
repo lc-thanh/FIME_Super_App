@@ -11,7 +11,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Popover, PopoverContent } from "@/components/ui/popover";
 import { useBoundStore } from "@/providers/store-provider";
-import { Trash } from "lucide-react";
+import { Navigation, Trash } from "lucide-react";
 import { useState } from "react";
 
 const CardContextMenu = () => {
@@ -42,24 +42,25 @@ const CardContextMenu = () => {
                 <CommandSeparator />
                 <CommandItem>
                   <div
-                    className="w-full h-full flex flex-row"
+                    className="h-full w-full flex flex-row items-center"
+                    onClick={() => setTransferCard(selectedCard)}
+                  >
+                    Di chuyển thẻ
+                    <Navigation className="ml-auto h-4 w-4" />
+                  </div>
+                </CommandItem>
+                <CommandItem>
+                  <div
+                    className="w-full h-full flex flex-row items-center text-destructive"
                     onClick={() => setDeleteCard(selectedCard)}
                   >
                     Xóa Thẻ
                     <Trash className="ml-auto h-4 w-4" />
                   </div>
                 </CommandItem>
-                <CommandItem className="w-full h-full">
-                  <div
-                    className="h-full w-full"
-                    onClick={() => setTransferCard(selectedCard)}
-                  >
-                    Search Emoji
-                  </div>
-                </CommandItem>
-                <CommandItem>
+                {/* <CommandItem>
                   <span>Calculator</span>
-                </CommandItem>
+                </CommandItem> */}
               </CommandGroup>
             </CommandList>
           </Command>

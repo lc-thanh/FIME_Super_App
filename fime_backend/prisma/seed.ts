@@ -30,10 +30,10 @@ const seedUsers = async () => {
   });
 
   const gen_10 = await prisma.gen.upsert({
-    where: { id: '10f3b1c2-d3e-4f6b-8c7d-9e5f3b1c2d3e' },
+    where: { id: '20354d7a-e4fe-47af-8ff6-187bca92f3f9' },
     update: {},
     create: {
-      id: '10f3b1c2-d3e-4f6b-8c7d-9e5f3b1c2d3e',
+      id: '20354d7a-e4fe-47af-8ff6-187bca92f3f9',
       name: 'Gen 10',
     },
   });

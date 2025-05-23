@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -10,6 +11,7 @@ import { TaskColumnDto } from '@/modules/task/dto/task-card.dto';
 import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
 import {
   Prisma,
+  Role,
   Task,
   TaskActivityType,
   TaskPriority,
@@ -29,6 +31,8 @@ import {
   TaskActivityFilterType,
 } from '@/modules/task/dto/task-activities-pagination';
 import dayjs from 'dayjs';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { AccessControlService } from '@/modules/shared/access-control.service';
 
 const INVALID_POSITION_MESSAGE = 'Vị trí không hợp lệ!';
 
@@ -38,6 +42,7 @@ export class TaskService {
     private readonly prismaService: PrismaService,
     private readonly taskBoardGateway: TaskBoardGateway,
     private readonly userService: UserService,
+    private readonly accessControlService: AccessControlService,
   ) {}
 
   async create(workspaceId: string, userId: string) {
@@ -326,8 +331,21 @@ export class TaskService {
     );
   }
 
-  async moveCard(data: MoveCardDto, userId: string) {
+  async moveCard(data: MoveCardDto, user: IAccessTokenPayload) {
     const { workspaceId, cardId, cardBeforeId, cardAfterId, column } = data;
+
+    if (column === TaskStatus.DONE) {
+      const hasPermission = this.accessControlService.isAuthorizedByRoles(
+        user.role,
+        Role.MANAGER,
+      );
+
+      if (!hasPermission) {
+        throw new ForbiddenException(
+          'Bạn không có quyền di chuyển task vào cột này!',
+        );
+      }
+    }
 
     // Kiểm tra trùng Id
     if (cardBeforeId === cardId || cardAfterId === cardId) {
@@ -369,7 +387,7 @@ export class TaskService {
         data: {
           type: TaskActivityType.MOVE_CARD,
           content: column,
-          userId,
+          userId: user.sub,
           taskId: cardId,
         },
       });
@@ -877,9 +895,6 @@ export class TaskService {
           },
         },
         // monthlySegment: true,
-        taskActivities: true,
-        taskComments: true,
-        taskAttachments: true,
         workspace: true,
       },
     });
@@ -890,6 +905,18 @@ export class TaskService {
 
     return {
       ...task,
+      users: task.users.map((user) => ({
+        id: user.id,
+        fullname: user.fullname,
+        email: user.email,
+        image: user.image,
+        positionId: user.position?.id,
+        positionName: user.position?.name,
+        teamId: user.team?.id,
+        teamName: user.team?.name,
+        genId: user.gen?.id,
+        genName: user.gen?.name,
+      })),
       todoLists: task.todoLists.map((todo) => ({
         ...todo,
         User: undefined,

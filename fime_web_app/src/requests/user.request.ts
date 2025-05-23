@@ -33,4 +33,16 @@ export const UserApiRequests = {
     const formData = objectToFormData(data);
     return http.put(`/users/${userId}`, formData);
   },
+  delete: async (userId: string) => {
+    return http.delete(`/users/${userId}`, {});
+  },
+  resetPassword: async (userId: string) => {
+    return http.post(`/users/${userId}/reset-password`, {});
+  },
+  lock: async (userId: string) => {
+    return http.post(`/users/${userId}/lock`, {});
+  },
+  unlock: async (userId: string) => {
+    return http.post(`/users/${userId}/unlock`, {});
+  },
 };

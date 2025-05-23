@@ -22,8 +22,10 @@ import dayjs from "dayjs";
 import { gensQueryOptions } from "@/queries/gen-query";
 import { GenType } from "@/schemaValidations/gen.schema";
 import GenDeleteButton from "@/app/(admin)/dashboard/gens/_components/gen-delete-button";
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export function GenTable() {
+  const { isAdmin } = useUserRoleStore((state) => state);
   const searchParams = useSearchParams();
 
   const { data: gensPaginated, isError } = useSuspenseQuery(
@@ -41,13 +43,13 @@ export function GenTable() {
           <TableSearch placeholder="Tìm kiếm.." />
         </div>
 
-        <div className="flex flex-row">
+        {isAdmin() && (
           <Link href="/dashboard/gens/create">
             <FimeOutlineButton size="sm" icon={Plus}>
               Thêm Gen mới
             </FimeOutlineButton>
           </Link>
-        </div>
+        )}
       </div>
 
       <Table className="w-full text-center border">
@@ -67,7 +69,9 @@ export function GenTable() {
             >
               Ngày tạo
             </SortableTableHead>
-            <TableHead className="text-center border">Tùy chọn</TableHead>
+            {isAdmin() && (
+              <TableHead className="text-center border">Tùy chọn</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -80,17 +84,19 @@ export function GenTable() {
               <TableCell>{gen.description}</TableCell>
               <TableCell>{gen.usersCount}</TableCell>
               <TableCell>{dayjs(gen.createdAt).format("DD/MM/YYYY")}</TableCell>
-              <TableCell>
-                <div className="flex flex-row h-full justify-center">
-                  <Link href={`/dashboard/gens/edit/${gen.id}`}>
-                    <Button variant="ghost" size="icon">
-                      <FilePenLine size={20} className="text-blue-500" />
-                    </Button>
-                  </Link>
+              {isAdmin() && (
+                <TableCell>
+                  <div className="flex flex-row h-full justify-center">
+                    <Link href={`/dashboard/gens/edit/${gen.id}`}>
+                      <Button variant="ghost" size="icon">
+                        <FilePenLine size={20} className="text-blue-500" />
+                      </Button>
+                    </Link>
 
-                  <GenDeleteButton genId={gen.id} />
-                </div>
-              </TableCell>
+                    <GenDeleteButton genId={gen.id} />
+                  </div>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

@@ -3,7 +3,7 @@ import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { FimeTitle } from "@/components/fime-title";
 import { Suspense } from "react";
 
-export default function Page() {
+export default async function Page() {
   return (
     <div className="flex flex-col mt-2 gap-4 w-full">
       <FimeTitle>

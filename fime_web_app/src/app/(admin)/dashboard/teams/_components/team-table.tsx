@@ -22,8 +22,10 @@ import { teamsQueryOptions } from "@/queries/team-query";
 import { TeamType } from "@/schemaValidations/team.schema";
 import dayjs from "dayjs";
 import TeamDeleteButton from "@/app/(admin)/dashboard/teams/_components/team-delete-button";
+import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export function TeamTable() {
+  const { isAdmin } = useUserRoleStore((state) => state);
   const searchParams = useSearchParams();
 
   const { data: teamsPaginated, isError } = useSuspenseQuery(
@@ -41,13 +43,13 @@ export function TeamTable() {
           <TableSearch placeholder="Tìm kiếm.." />
         </div>
 
-        <div className="flex flex-row">
+        {isAdmin() && (
           <Link href="/dashboard/teams/create">
             <FimeOutlineButton size="sm" icon={Plus}>
               Thêm ban mới
             </FimeOutlineButton>
           </Link>
-        </div>
+        )}
       </div>
 
       <Table className="w-full text-center border">
@@ -67,7 +69,9 @@ export function TeamTable() {
             >
               Ngày tạo
             </SortableTableHead>
-            <TableHead className="text-center border">Tùy chọn</TableHead>
+            {isAdmin() && (
+              <TableHead className="text-center border">Tùy chọn</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -82,17 +86,19 @@ export function TeamTable() {
               <TableCell>
                 {dayjs(team.createdAt).format("DD/MM/YYYY")}
               </TableCell>
-              <TableCell>
-                <div className="flex flex-row h-full justify-center">
-                  <Link href={`/dashboard/teams/edit/${team.id}`}>
-                    <Button variant="ghost" size="icon">
-                      <FilePenLine size={20} className="text-blue-500" />
-                    </Button>
-                  </Link>
+              {isAdmin() && (
+                <TableCell>
+                  <div className="flex flex-row h-full justify-center">
+                    <Link href={`/dashboard/teams/edit/${team.id}`}>
+                      <Button variant="ghost" size="icon">
+                        <FilePenLine size={20} className="text-blue-500" />
+                      </Button>
+                    </Link>
 
-                  <TeamDeleteButton teamId={team.id} />
-                </div>
-              </TableCell>
+                    <TeamDeleteButton teamId={team.id} />
+                  </div>
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

@@ -33,7 +33,7 @@ export function RoleSelector({
       value: "MANAGER",
       label: "Quản lý",
       description:
-        "Quản lý người dùng và dự án, nhưng không có quyền cài đặt hệ thống",
+        "Quản lý công việc và website, không có quyền quản trị nhân sự",
     },
     {
       value: "MEMBER",

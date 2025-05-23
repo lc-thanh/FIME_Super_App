@@ -39,4 +39,13 @@ export class AccessControlService {
       currentPriority >= requiredPriority
     );
   }
+
+  public isAuthorizedByRoles(
+    currentRoles: Role[],
+    requiredRole: Role,
+  ): boolean {
+    return currentRoles.some((currentRole) =>
+      this.isAuthorized({ currentRole, requiredRole }),
+    );
+  }
 }

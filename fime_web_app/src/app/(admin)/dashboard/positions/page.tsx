@@ -1,5 +1,3 @@
-"use client";
-
 import { PositionTable } from "@/app/(admin)/dashboard/positions/_components/position-table";
 import { DataTableSkeleton } from "@/components/data-table/data-table-skeleton";
 import { FimeTitle } from "@/components/fime-title";
@@ -10,7 +8,7 @@ export default function Page() {
     <div className="flex flex-col container px-4 mx-auto mt-2 gap-4 w-full">
       <FimeTitle>
         <h1 className="scroll-m-20 pb-4 text-2xl font-semibold tracking-tight first:mt-0">
-          Quản lý chức vụ
+          Chức vụ trong FIT Media
         </h1>
       </FimeTitle>
 

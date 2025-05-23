@@ -16,12 +16,16 @@ import { TaskPriority, TaskType } from '@prisma/client';
 import { TodoListDto } from '@/modules/task/dto/todo-list.dto';
 import { JsonObject } from '@prisma/client/runtime/library';
 import { TaskActivityFilterType } from '@/modules/task/dto/task-activities-pagination';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { CustomForbiddenMessage } from '@/common/decorators/custom-forbidden-message.decorator';
 
 @Controller('tasks')
 export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   @Post()
+  @Roles('MANAGER')
+  @CustomForbiddenMessage('Bạn không có quyền tạo công việc mới!')
   async create(
     @Body('workspaceId') workspaceId: string,
     @User() user: IAccessTokenPayload,
@@ -58,7 +62,7 @@ export class TaskController {
     @Body() moveCardDto: MoveCardDto,
     @User() user: IAccessTokenPayload,
   ) {
-    return this.taskService.moveCard(moveCardDto, user.sub);
+    return this.taskService.moveCard(moveCardDto, user);
   }
 
   @Post('change-title')
@@ -161,6 +165,8 @@ export class TaskController {
   }
 
   @Delete('soft-delete/:taskId')
+  @Roles('MANAGER')
+  @CustomForbiddenMessage('Bạn không có quyền xóa công việc này!')
   async softDeleteTask(
     @UuidParam('taskId') taskId: string,
     @User() user: IAccessTokenPayload,

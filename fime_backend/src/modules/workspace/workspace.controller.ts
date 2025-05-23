@@ -5,12 +5,15 @@ import { UpdateWorkspaceDto } from './dto/update-workspace.dto';
 import { User } from '@/common/decorators/user.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
+import { Roles } from '@/common/decorators/roles.decorator';
+import { Role } from '@prisma/client';
 
 @Controller('workspaces')
 export class WorkspaceController {
   constructor(private readonly workspaceService: WorkspaceService) {}
 
   @Post()
+  @Roles(Role.ADMIN)
   async create(
     @Body() createWorkspaceDto: CreateWorkspaceDto,
     @User() user: IAccessTokenPayload,
@@ -21,14 +24,9 @@ export class WorkspaceController {
     };
   }
 
-  @Get()
-  findAll() {
-    return this.workspaceService.findAll();
-  }
-
   @Get('my')
   async findAllPersonal(@User() user: IAccessTokenPayload) {
-    return await this.workspaceService.findAllPersonal(user.sub);
+    return await this.workspaceService.findAllPersonal(user);
   }
 
   @Get(':id')
@@ -40,6 +38,7 @@ export class WorkspaceController {
   }
 
   @Patch(':id')
+  @Roles(Role.ADMIN)
   async rename(
     @UuidParam('id') id: string,
     @Body() updateWorkspaceDto: UpdateWorkspaceDto,
@@ -51,6 +50,7 @@ export class WorkspaceController {
   }
 
   @Delete(':workspaceId')
+  @Roles(Role.ADMIN)
   async remove(
     @UuidParam('workspaceId') workspaceId: string,
     @Body('password') password: string,
