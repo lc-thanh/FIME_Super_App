@@ -43,6 +43,16 @@ export class TaskService {
     private readonly accessControlService: AccessControlService,
   ) {}
 
+  setHourAndMinuteToStartDate(date: Date | null): Date | null {
+    if (!date) return null;
+    return dayjs(date).set('hour', 0).set('minute', 0).toDate();
+  }
+
+  setHourAndMinuteToDeadline(date: Date | null): Date | null {
+    if (!date) return null;
+    return dayjs(date).set('hour', 23).set('minute', 59).toDate();
+  }
+
   async create(workspaceId: string, userId: string) {
     const workspace = await this.prismaService.workspace.findFirst({
       where: {
@@ -579,8 +589,9 @@ export class TaskService {
         id: taskId,
       },
       data: {
-        startDate,
-        deadline,
+        // Chuyển đổi ngày để đảm bảo giờ phút là 0:00 cho startDate và 23:59 cho deadline
+        startDate: this.setHourAndMinuteToStartDate(startDate),
+        deadline: this.setHourAndMinuteToDeadline(deadline),
       },
     });
 
@@ -622,8 +633,8 @@ export class TaskService {
             content: todo.content,
             isDone: todo.isDone,
             order: todo.order,
-            startDate: todo.startDate,
-            deadline: todo.deadline,
+            startDate: this.setHourAndMinuteToStartDate(todo.startDate),
+            deadline: this.setHourAndMinuteToDeadline(todo.deadline),
             User: {
               set: todo.userIds.map((userId) => ({ id: userId })),
             },
@@ -633,8 +644,8 @@ export class TaskService {
             content: todo.content,
             isDone: todo.isDone,
             order: todo.order,
-            startDate: todo.startDate,
-            deadline: todo.deadline,
+            startDate: this.setHourAndMinuteToStartDate(todo.startDate),
+            deadline: this.setHourAndMinuteToDeadline(todo.deadline),
             taskId: taskId,
             User: {
               connect: todo.userIds.map((userId) => ({ id: userId })),

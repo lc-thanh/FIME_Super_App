@@ -149,14 +149,13 @@ const seedUsers = async () => {
 const seedTasks = async () => {
   const task1_TODO = await prisma.task.create({
     data: {
-      title:
-        'Chỉnh ảnh lorem ipsum dolor sit amet consectetur adipisicing elit',
+      title: 'Chỉnh ảnh Đại hội',
       position: 1000,
       type: TaskType.TODO,
       status: TaskStatus.TODO,
       priority: TaskPriority.HIGH,
-      startDate: dayjs().add(1, 'day').toDate(),
-      deadline: dayjs().add(3, 'day').toDate(),
+      startDate: dayjs().set('hour', 0).set('minute', 0).toDate(),
+      deadline: dayjs().set('hour', 23).set('minute', 59).toDate(),
       workspace: {
         create: {
           id: 'b01e48e2-495e-4305-8cc8-0b9fb6820d66',
@@ -173,8 +172,16 @@ const seedTasks = async () => {
       type: TaskType.MONTHLY_SEGMENTS,
       status: TaskStatus.TODO,
       priority: TaskPriority.MEDIUM,
-      startDate: dayjs().subtract(2, 'day').toDate(),
-      deadline: dayjs().add(2, 'day').toDate(),
+      startDate: dayjs()
+        .subtract(7, 'day')
+        .set('hour', 0)
+        .set('minute', 0)
+        .toDate(),
+      deadline: dayjs()
+        .subtract(1, 'day')
+        .set('hour', 23)
+        .set('minute', 59)
+        .toDate(),
       workspace: {
         connect: {
           id: task1_TODO.workspaceId,
@@ -190,8 +197,16 @@ const seedTasks = async () => {
       type: TaskType.MONTHLY_SEGMENTS,
       status: TaskStatus.IN_PROGRESS,
       priority: TaskPriority.MEDIUM,
-      startDate: dayjs().subtract(2, 'day').toDate(),
-      deadline: dayjs().add(2, 'day').toDate(),
+      startDate: dayjs()
+        .subtract(2, 'day')
+        .set('hour', 0)
+        .set('minute', 0)
+        .toDate(),
+      deadline: dayjs()
+        .add(2, 'day')
+        .set('hour', 23)
+        .set('minute', 59)
+        .toDate(),
       workspace: {
         connect: {
           id: task1_TODO.workspaceId,
@@ -207,8 +222,16 @@ const seedTasks = async () => {
       type: TaskType.EVENT,
       status: TaskStatus.IN_REVIEW,
       priority: TaskPriority.HIGH,
-      startDate: dayjs().subtract(1, 'day').toDate(),
-      deadline: dayjs().add(1, 'day').toDate(),
+      startDate: dayjs()
+        .subtract(1, 'day')
+        .set('hour', 0)
+        .set('minute', 0)
+        .toDate(),
+      deadline: dayjs()
+        .add(1, 'day')
+        .set('hour', 23)
+        .set('minute', 59)
+        .toDate(),
       workspace: {
         connect: {
           id: task1_TODO.workspaceId,
