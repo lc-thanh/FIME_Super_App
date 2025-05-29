@@ -17,7 +17,7 @@ export default async function Layout({
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar user={user} />
-      <SidebarInset>
+      <SidebarInset className="max-w-full">
         <Header />
         <main className="flex w-full p-4 pt-4">{children}</main>
       </SidebarInset>

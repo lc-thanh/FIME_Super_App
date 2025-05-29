@@ -18,6 +18,7 @@ import { PrismaService } from '@/prisma.service';
 import { extname, join } from 'path';
 import fs from 'fs/promises';
 import { NewestProductViewDto } from '@/modules/newest-product/dto/newest-product-view.dto';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Injectable()
 export class NewestProductService {
@@ -32,6 +33,7 @@ export class NewestProductService {
 
   async create(
     createProductDto: CreateNewestProductDto,
+    manager: IAccessTokenPayload,
     imageToUpload?: Express.Multer.File,
   ) {
     let imageName = '';
@@ -48,6 +50,17 @@ export class NewestProductService {
       data: {
         ...createProductDto,
         image: imageName || null,
+      },
+    });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'ADD_NEWEST_PRODUCT',
+        content: JSON.stringify({
+          id: newProduct.id,
+          title: newProduct.title,
+        }),
+        userId: manager.sub,
       },
     });
 
@@ -179,19 +192,20 @@ export class NewestProductService {
   async update(
     id: string,
     updateProductDto: UpdateNewestProductDto,
+    manager: IAccessTokenPayload,
     imageToUpload?: Express.Multer.File,
   ) {
-    const product = await this.prismaService.newestProducts.findUnique({
+    const productToUpdate = await this.prismaService.newestProducts.findUnique({
       where: { id },
     });
-    if (!product) {
+    if (!productToUpdate) {
       throw new NotFoundException('Sản phẩm không tồn tại!');
     }
 
     let imageName = '';
     if (updateProductDto.isImageChanged || imageToUpload) {
-      if (product.image) {
-        await this.deleteImage(product.image);
+      if (productToUpdate.image) {
+        await this.deleteImage(productToUpdate.image);
       }
       if (imageToUpload) {
         imageName = await this.uploadImage(imageToUpload);
@@ -218,21 +232,43 @@ export class NewestProductService {
       },
     });
 
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'EDIT_NEWEST_PRODUCT',
+        content: JSON.stringify({
+          id: productToUpdate.id,
+          title: productToUpdate.title,
+        }),
+        userId: manager.sub,
+      },
+    });
+
     return updatedProduct;
   }
 
-  async remove(id: string) {
-    const product = await this.prismaService.newestProducts.findUnique({
+  async remove(id: string, manager: IAccessTokenPayload) {
+    const productToDelete = await this.prismaService.newestProducts.findUnique({
       where: { id },
     });
-    if (!product) {
+    if (!productToDelete) {
       throw new NotFoundException('Sản phẩm không tồn tại!');
     }
 
     const deletedProduct = await this.prismaService.newestProducts.delete({
       where: { id },
     });
-    if (product.image) await this.deleteImage(product.image);
+    if (productToDelete.image) await this.deleteImage(productToDelete.image);
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'REMOVE_NEWEST_PRODUCT',
+        content: JSON.stringify({
+          id: deletedProduct.id,
+          title: deletedProduct.title,
+        }),
+        userId: manager.sub,
+      },
+    });
 
     return deletedProduct;
   }

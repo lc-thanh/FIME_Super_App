@@ -17,6 +17,8 @@ import {
 } from '@/modules/gen/dto/gen-pagination';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { User } from '@/common/decorators/user.decorator';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Controller('gens')
 export class GenController {
@@ -24,10 +26,13 @@ export class GenController {
 
   @Post()
   @Roles(Role.ADMIN)
-  async create(@Body() createGenDto: CreateGenDto) {
+  async create(
+    @Body() createGenDto: CreateGenDto,
+    @User() user: IAccessTokenPayload,
+  ) {
     return {
       message: 'Tạo gen mới thành công!',
-      data: await this.genService.create(createGenDto),
+      data: await this.genService.create(createGenDto, user),
     };
   }
 
@@ -54,19 +59,20 @@ export class GenController {
   async update(
     @UuidParam('id') id: string,
     @Body() updateGenDto: UpdateGenDto,
+    @User() user: IAccessTokenPayload,
   ) {
     return {
       message: 'Cập nhật thông tin gen thành công!',
-      data: await this.genService.update(id, updateGenDto),
+      data: await this.genService.update(id, updateGenDto, user),
     };
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async remove(@UuidParam('id') id: string) {
+  async remove(@UuidParam('id') id: string, @User() user: IAccessTokenPayload) {
     return {
       message: 'Xóa gen thành công!',
-      data: await this.genService.remove(id),
+      data: await this.genService.remove(id, user),
     };
   }
 }

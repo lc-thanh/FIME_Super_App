@@ -19,6 +19,7 @@ import { LatestPublicationModule } from './modules/latest-publication/latest-pub
 import { NewestProductModule } from './modules/newest-product/newest-product.module';
 import { RolesGuard } from '@/common/guards/role.guard';
 import { SharedModule } from '@/modules/shared/shared.module';
+import { StatisticModule } from './modules/statistic/statistic.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { SharedModule } from '@/modules/shared/shared.module';
     LatestPublicationModule,
     NewestProductModule,
     SharedModule,
+    StatisticModule,
   ],
   controllers: [AppController],
   providers: [

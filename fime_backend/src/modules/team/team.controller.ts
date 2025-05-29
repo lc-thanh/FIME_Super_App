@@ -17,6 +17,8 @@ import {
 import { UuidParam } from '@/common/decorators/uuid-param.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { User } from '@/common/decorators/user.decorator';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Controller('teams')
 export class TeamController {
@@ -24,10 +26,13 @@ export class TeamController {
 
   @Post()
   @Roles(Role.ADMIN)
-  async create(@Body() createTeamDto: CreateTeamDto) {
+  async create(
+    @Body() createTeamDto: CreateTeamDto,
+    @User() user: IAccessTokenPayload,
+  ) {
     return {
       message: 'Tạo ban mới thành công!',
-      data: await this.teamService.create(createTeamDto),
+      data: await this.teamService.create(createTeamDto, user),
     };
   }
 
@@ -54,19 +59,20 @@ export class TeamController {
   async update(
     @UuidParam('id') id: string,
     @Body() updateTeamDto: UpdateTeamDto,
+    @User() user: IAccessTokenPayload,
   ) {
     return {
       message: 'Cập nhật thông tin ban thành công!',
-      data: await this.teamService.update(id, updateTeamDto),
+      data: await this.teamService.update(id, updateTeamDto, user),
     };
   }
 
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async remove(@UuidParam('id') id: string) {
+  async remove(@UuidParam('id') id: string, @User() user: IAccessTokenPayload) {
     return {
       message: 'Xóa ban thành công!',
-      data: await this.teamService.remove(id),
+      data: await this.teamService.remove(id, user),
     };
   }
 }

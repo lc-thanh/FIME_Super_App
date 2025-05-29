@@ -42,10 +42,11 @@ export class WorkspaceController {
   async rename(
     @UuidParam('id') id: string,
     @Body() updateWorkspaceDto: UpdateWorkspaceDto,
+    @User() user: IAccessTokenPayload,
   ) {
     return {
       message: 'Đổi tên workspace thành công!',
-      data: await this.workspaceService.update(id, updateWorkspaceDto),
+      data: await this.workspaceService.update(id, updateWorkspaceDto, user),
     };
   }
 

@@ -15,9 +15,9 @@ import { Role } from '@prisma/client';
 export class WorkspaceService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  create(createWorkspaceDto: CreateWorkspaceDto, userId: string) {
+  async create(createWorkspaceDto: CreateWorkspaceDto, userId: string) {
     const { name } = createWorkspaceDto;
-    const workspace = this.prismaService.workspace.create({
+    const workspace = await this.prismaService.workspace.create({
       data: {
         name,
         users: {
@@ -27,6 +27,18 @@ export class WorkspaceService {
         },
       },
     });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'ADD_WORKSPACE',
+        content: JSON.stringify({
+          id: workspace.id,
+          name: workspace.name,
+        }),
+        userId,
+      },
+    });
+
     return workspace;
   }
 
@@ -80,13 +92,38 @@ export class WorkspaceService {
     return workspace;
   }
 
-  async update(id: string, updateWorkspaceDto: UpdateWorkspaceDto) {
+  async update(
+    id: string,
+    updateWorkspaceDto: UpdateWorkspaceDto,
+    admin: IAccessTokenPayload,
+  ) {
+    const wsToUpdate = await this.prismaService.workspace.findUnique({
+      where: {
+        id,
+      },
+    });
+    if (!wsToUpdate) {
+      throw new BadRequestException('Workspace không tồn tại');
+    }
+
     const updatedWorkspace = await this.prismaService.workspace.update({
       where: {
         id,
       },
       data: {
         name: updateWorkspaceDto.name,
+      },
+    });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'EDIT_WORKSPACE_NAME',
+        content: JSON.stringify({
+          id: wsToUpdate.id,
+          oldName: wsToUpdate.name,
+          newName: updatedWorkspace.name,
+        }),
+        userId: admin.sub,
       },
     });
 
@@ -119,6 +156,17 @@ export class WorkspaceService {
     const deletedWorkspace = await this.prismaService.workspace.delete({
       where: {
         id: workspaceId,
+      },
+    });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'REMOVE_WORKSPACE',
+        content: JSON.stringify({
+          id: deletedWorkspace.id,
+          name: deletedWorkspace.name,
+        }),
+        userId,
       },
     });
 

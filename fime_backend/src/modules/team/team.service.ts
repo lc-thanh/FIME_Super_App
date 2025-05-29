@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { UpdateTeamDto } from './dto/update-team.dto';
 import { PrismaService } from '@/prisma.service';
@@ -10,16 +10,28 @@ import {
   validSortByFields,
 } from '@/modules/team/dto/team-pagination';
 import { Prisma } from '@prisma/client';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Injectable()
 export class TeamService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createTeamDto: CreateTeamDto) {
+  async create(createTeamDto: CreateTeamDto, admin: IAccessTokenPayload) {
     const newTeam = await this.prismaService.team.create({
       data: {
         name: createTeamDto.name,
         description: createTeamDto.description,
+      },
+    });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'ADD_TEAM',
+        content: JSON.stringify({
+          id: newTeam.id,
+          name: newTeam.name,
+        }),
+        userId: admin.sub,
       },
     });
 
@@ -101,7 +113,18 @@ export class TeamService {
     return team;
   }
 
-  async update(id: string, updateTeamDto: UpdateTeamDto) {
+  async update(
+    id: string,
+    updateTeamDto: UpdateTeamDto,
+    admin: IAccessTokenPayload,
+  ) {
+    const teamToUpdate = await this.prismaService.team.findUnique({
+      where: { id },
+    });
+    if (!teamToUpdate) {
+      throw new BadRequestException('Ban không tồn tại!');
+    }
+
     const team = await this.prismaService.team.update({
       where: { id },
       data: {
@@ -109,13 +132,44 @@ export class TeamService {
         description: updateTeamDto.description || null,
       },
     });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'EDIT_TEAM',
+        content: JSON.stringify({
+          id: teamToUpdate.id,
+          name: teamToUpdate.name,
+        }),
+        userId: admin.sub,
+      },
+    });
+
     return team;
   }
 
-  async remove(id: string) {
+  async remove(id: string, admin: IAccessTokenPayload) {
+    const teamToDelete = await this.prismaService.team.findUnique({
+      where: { id },
+    });
+    if (!teamToDelete) {
+      throw new BadRequestException('Ban không tồn tại!');
+    }
+
     const team = await this.prismaService.team.delete({
       where: { id },
     });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'REMOVE_TEAM',
+        content: JSON.stringify({
+          id: team.id,
+          name: team.name,
+        }),
+        userId: admin.sub,
+      },
+    });
+
     return team;
   }
 }

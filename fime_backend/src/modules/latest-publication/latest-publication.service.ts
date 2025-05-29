@@ -11,17 +11,32 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma.service';
 import { PublicationViewDto } from '@/modules/latest-publication/dto/publication-view.dto';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Injectable()
 export class LatestPublicationService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  create(createLatestPublicationDto: CreateLatestPublicationDto) {
-    const newPublication = this.prismaService.latestPublication.create({
+  async create(
+    createLatestPublicationDto: CreateLatestPublicationDto,
+    manager: IAccessTokenPayload,
+  ) {
+    const newPublication = await this.prismaService.latestPublication.create({
       data: {
         title: createLatestPublicationDto.title,
         note: createLatestPublicationDto.note || null,
         embed_code: createLatestPublicationDto.embed_code,
+      },
+    });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'ADD_LATEST_PUBLICATION',
+        content: JSON.stringify({
+          id: newPublication.id,
+          title: newPublication.title,
+        }),
+        userId: manager.sub,
       },
     });
 
@@ -110,7 +125,16 @@ export class LatestPublicationService {
   async update(
     id: string,
     updateLatestPublicationDto: UpdateLatestPublicationDto,
+    manager: IAccessTokenPayload,
   ) {
+    const publicationToUpdate =
+      await this.prismaService.latestPublication.findUnique({
+        where: { id },
+      });
+    if (!publicationToUpdate) {
+      throw new BadRequestException('Không tìm thấy ấn phẩm để cập nhật');
+    }
+
     const publication = await this.prismaService.latestPublication.update({
       where: { id },
       data: {
@@ -119,10 +143,22 @@ export class LatestPublicationService {
         embed_code: updateLatestPublicationDto.embed_code,
       },
     });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'EDIT_LATEST_PUBLICATION',
+        content: JSON.stringify({
+          id: publicationToUpdate.id,
+          title: publicationToUpdate.title,
+        }),
+        userId: manager.sub,
+      },
+    });
+
     return publication;
   }
 
-  async activePublication(id: string) {
+  async activePublication(id: string, manager: IAccessTokenPayload) {
     const publication = await this.prismaService.latestPublication.findUnique({
       where: { id },
     });
@@ -149,13 +185,45 @@ export class LatestPublicationService {
         data: { isActive: true },
       });
 
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'ACTIVE_LATEST_PUBLICATION',
+        content: JSON.stringify({
+          id: updatedPublication.id,
+          title: updatedPublication.title,
+        }),
+        userId: manager.sub,
+      },
+    });
+
     return updatedPublication;
   }
 
-  async remove(id: string) {
-    const publication = await this.prismaService.latestPublication.delete({
-      where: { id },
+  async remove(id: string, manager: IAccessTokenPayload) {
+    const publicationToDelete =
+      await this.prismaService.latestPublication.findUnique({
+        where: { id },
+      });
+    if (!publicationToDelete) {
+      throw new BadRequestException('Không tìm thấy ấn phẩm để xóa');
+    }
+
+    const deletedPublication =
+      await this.prismaService.latestPublication.delete({
+        where: { id },
+      });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'REMOVE_LATEST_PUBLICATION',
+        content: JSON.stringify({
+          id: deletedPublication.id,
+          title: deletedPublication.title,
+        }),
+        userId: manager.sub,
+      },
     });
-    return publication;
+
+    return deletedPublication;
   }
 }

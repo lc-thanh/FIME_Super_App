@@ -62,11 +62,43 @@ model User {
   updatedAt DateTime @updatedAt
 }
 
+enum UserActionType {
+  ADD_MEMBER // Thêm thành viên
+  REMOVE_MEMBER // Xóa thành viên
+  EDIT_MEMBER // Chỉnh sửa thông tin thành viên
+
+  ADD_TEAM // Thêm ban
+  REMOVE_TEAM // Xóa ban
+  EDIT_TEAM // Chỉnh sửa thông tin ban
+
+  ADD_POSITION // Thêm chức vụ
+  REMOVE_POSITION // Xóa chức vụ
+  EDIT_POSITION // Chỉnh sửa thông tin chức vụ
+
+  ADD_GEN // Thêm gen
+  REMOVE_GEN // Xóa gen
+  EDIT_GEN // Chỉnh sửa thông tin gen
+
+  ADD_WORKSPACE // Thêm không gian làm việc
+  REMOVE_WORKSPACE // Xóa không gian làm việc
+  EDIT_WORKSPACE_NAME // Chỉnh sửa tên không gian làm việc
+
+  ADD_LATEST_PUBLICATION // Thêm ấn phẩm mới
+  ACTIVE_LATEST_PUBLICATION // Kích hoạt ấn phẩm
+  REMOVE_LATEST_PUBLICATION // Xóa ấn phẩm
+  EDIT_LATEST_PUBLICATION // Chỉnh sửa thông tin ấn phẩm
+
+  ADD_NEWEST_PRODUCT // Thêm sản phẩm mới
+  REMOVE_NEWEST_PRODUCT // Xóa sản phẩm
+  EDIT_NEWEST_PRODUCT // Chỉnh sửa thông tin sản phẩm
+}
+
 model UserActions {
-  id        String   @id @default(uuid())
+  id        String         @id @default(uuid())
+  type      UserActionType
   userId    String
-  action    String
-  createdAt DateTime @default(now())
+  content   String
+  createdAt DateTime       @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

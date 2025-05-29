@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  HttpException,
-  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -26,6 +24,7 @@ import { ConfigService } from '@nestjs/config';
 import { extname, join } from 'path';
 import fs from 'fs/promises';
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Injectable()
 export class UserService {
@@ -55,6 +54,7 @@ export class UserService {
 
   async create(
     createUserDto: CreateUserDto,
+    admin: IAccessTokenPayload,
     imageToUpload?: Express.Multer.File,
   ) {
     if (await this.isEmailExist(createUserDto.email)) {
@@ -92,6 +92,17 @@ export class UserService {
         ...createUserDto,
         image: imageName || null,
         password: hashedPassword,
+      },
+    });
+
+    await this.prismaService.userActions.create({
+      data: {
+        userId: admin.sub,
+        type: 'ADD_MEMBER',
+        content: JSON.stringify({
+          id: newUser.id,
+          fullname: newUser.fullname,
+        }),
       },
     });
 
@@ -245,24 +256,25 @@ export class UserService {
   async update(
     id: string,
     updateUserDto: UpdateUserDto,
+    admin: IAccessTokenPayload,
     imageToUpload?: Express.Multer.File,
   ) {
-    const user = await this.prismaService.user.findUnique({
+    const userToUpdate = await this.prismaService.user.findUnique({
       where: { id },
     });
-    if (!user) {
+    if (!userToUpdate) {
       throw new NotFoundException('Người dùng không tồn tại!');
     }
 
     if (
-      updateUserDto.email !== user.email &&
+      updateUserDto.email !== userToUpdate.email &&
       (await this.isEmailExist(updateUserDto.email))
     )
       throw new UnprocessableEntityException([
         { field: 'email', error: 'Đã tồn tại email này!' },
       ]);
     if (
-      updateUserDto.phone !== user.phone &&
+      updateUserDto.phone !== userToUpdate.phone &&
       (await this.isPhoneExist(updateUserDto.phone))
     )
       throw new UnprocessableEntityException([
@@ -271,8 +283,8 @@ export class UserService {
 
     let imageName = '';
     if (updateUserDto.isImageChanged || imageToUpload) {
-      if (user.image) {
-        await this.deleteAvatar(user.image);
+      if (userToUpdate.image) {
+        await this.deleteAvatar(userToUpdate.image);
       }
       if (imageToUpload) {
         imageName = await this.uploadAvatar(imageToUpload);
@@ -302,6 +314,18 @@ export class UserService {
             : undefined,
       },
     });
+
+    await this.prismaService.userActions.create({
+      data: {
+        userId: admin.sub,
+        type: 'EDIT_MEMBER',
+        content: JSON.stringify({
+          id: userToUpdate.id,
+          fullname: userToUpdate.fullname,
+        }),
+      },
+    });
+
     return userUpdate;
   }
 
@@ -362,16 +386,27 @@ export class UserService {
     return updatedUser;
   }
 
-  async remove(id: string) {
-    const user = await this.prismaService.user.findUnique({
+  async remove(id: string, admin: IAccessTokenPayload) {
+    const userToDelete = await this.prismaService.user.findUnique({
       where: { id },
     });
-    if (!user) {
+    if (!userToDelete) {
       throw new NotFoundException('Người dùng không tồn tại!');
     }
 
     const deletedUser = await this.prismaService.user.delete({ where: { id } });
-    if (user.image) await this.deleteAvatar(user.image);
+    if (deletedUser.image) await this.deleteAvatar(deletedUser.image);
+
+    await this.prismaService.userActions.create({
+      data: {
+        userId: admin.sub,
+        type: 'REMOVE_MEMBER',
+        content: JSON.stringify({
+          id: deletedUser.id,
+          fullname: deletedUser.fullname,
+        }),
+      },
+    });
 
     return deletedUser;
   }
