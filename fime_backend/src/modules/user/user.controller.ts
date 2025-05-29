@@ -22,6 +22,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { User } from '@/common/decorators/user.decorator';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Controller('users')
 export class UserController {
@@ -33,10 +35,11 @@ export class UserController {
   async create(
     @Body() createUserDto: CreateUserDto,
     @UploadedFile() file: Express.Multer.File,
+    @User() user: IAccessTokenPayload,
   ) {
     return {
       message: 'Tạo người dùng mới thành công!',
-      data: await this.userService.create(createUserDto, file),
+      data: await this.userService.create(createUserDto, user, file),
     };
   }
 
@@ -78,10 +81,11 @@ export class UserController {
     @UuidParam() id: string,
     @Body() updateUserDto: UpdateUserDto,
     @UploadedFile() file: Express.Multer.File,
+    @User() user: IAccessTokenPayload,
   ) {
     return {
       message: 'Cập nhật người dùng thành công!',
-      data: await this.userService.update(id, updateUserDto, file),
+      data: await this.userService.update(id, updateUserDto, user, file),
     };
   }
 
@@ -114,10 +118,10 @@ export class UserController {
 
   @Delete(':id')
   @Roles(Role.ADMIN)
-  async remove(@UuidParam() id: string) {
+  async remove(@UuidParam() id: string, @User() user: IAccessTokenPayload) {
     return {
       message: 'Xóa người dùng thành công!',
-      data: await this.userService.remove(id),
+      data: await this.userService.remove(id, user),
     };
   }
 

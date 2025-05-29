@@ -1,4 +1,5 @@
-import { TaskPriority, TaskStatus, User } from '@prisma/client';
+import { UserViewDto } from '@/modules/user/dto/user-view.dto';
+import { TaskPriority, TaskStatus, TaskType } from '@prisma/client';
 
 export class TaskCardDto {
   id: string;
@@ -6,7 +7,13 @@ export class TaskCardDto {
   position: number;
   status: TaskStatus;
   priority: TaskPriority;
-  users: Pick<User, 'id' | 'email' | 'fullname' | 'image'>[];
+  startDate: Date | null;
+  deadline: Date | null;
+  type: TaskType;
+  users: Pick<
+    UserViewDto,
+    'id' | 'email' | 'fullname' | 'image' | 'positionName' | 'teamName'
+  >[];
 }
 
 export class TaskColumnDto {

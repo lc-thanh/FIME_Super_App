@@ -4,8 +4,6 @@ import {
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
 import { PrismaService } from '@/prisma.service';
 import { TaskColumnDto } from '@/modules/task/dto/task-card.dto';
 import { MoveCardDto } from '@/modules/task/dto/move-card.dto';
@@ -69,7 +67,7 @@ export class TaskService {
     const newTask = await this.prismaService.task.create({
       data: {
         title: 'Công việc mới',
-        position: (lastTaskOfTodoColumn?.position ?? 0) + 1000,
+        position: Math.round(lastTaskOfTodoColumn?.position ?? 0) + 1000,
         workspaceId,
       },
     });
@@ -114,14 +112,30 @@ export class TaskService {
       where: {
         workspaceId,
       },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        position: true,
+        status: true,
+        priority: true,
+        startDate: true,
+        deadline: true,
+        type: true,
         users: {
-          include: {
+          select: {
+            id: true,
+            fullname: true,
+            email: true,
+            image: true,
             position: {
-              select: { name: true },
+              select: {
+                name: true,
+              },
             },
             team: {
-              select: { name: true },
+              select: {
+                name: true,
+              },
             },
           },
         },
@@ -155,8 +169,8 @@ export class TaskService {
           fullname: user.fullname,
           email: user.email,
           image: user.image,
-          positionName: user.position?.name,
-          teamName: user.team?.name,
+          positionName: user.position?.name || null,
+          teamName: user.team?.name || null,
         })),
       };
 
@@ -1074,10 +1088,6 @@ export class TaskService {
     });
 
     return attachment;
-  }
-
-  update(id: number, updateTaskDto: UpdateTaskDto) {
-    return `This action updates a #${id} task`;
   }
 
   remove(id: number) {

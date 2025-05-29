@@ -105,6 +105,9 @@ export const AssigneesPicker = ({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [TASK_QUERY_KEY, taskId] });
+      queryClient.invalidateQueries({
+        queryKey: [TASK_ACTIVITIES_QUERY_KEY],
+      });
     },
     onError: () => {
       toast.error("Có lỗi xảy ra!");

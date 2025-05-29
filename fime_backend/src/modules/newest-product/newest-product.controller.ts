@@ -23,6 +23,8 @@ import { NewestProductViewDto } from '@/modules/newest-product/dto/newest-produc
 import { Public } from '@/common/decorators/public-route.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
+import { User } from '@/common/decorators/user.decorator';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Controller('newest-products')
 export class NewestProductController {
@@ -34,11 +36,13 @@ export class NewestProductController {
   async create(
     @Body() createNewestProductDto: CreateNewestProductDto,
     @UploadedFile() file: Express.Multer.File,
+    @User() user: IAccessTokenPayload,
   ) {
     return {
       message: 'Tạo sản phẩm mới thành công!',
       data: await this.newestProductService.create(
         createNewestProductDto,
+        user,
         file,
       ),
     };
@@ -69,12 +73,14 @@ export class NewestProductController {
     @UuidParam() id: string,
     @Body() updateNewestProductDto: UpdateNewestProductDto,
     @UploadedFile() file: Express.Multer.File,
+    @User() user: IAccessTokenPayload,
   ) {
     return {
       message: 'Cập nhật sản phẩm thành công!',
       data: await this.newestProductService.update(
         id,
         updateNewestProductDto,
+        user,
         file,
       ),
     };
@@ -82,10 +88,10 @@ export class NewestProductController {
 
   @Delete(':id')
   @Roles(Role.MANAGER)
-  async remove(@UuidParam('id') id: string) {
+  async remove(@UuidParam('id') id: string, @User() user: IAccessTokenPayload) {
     return {
       message: 'Xóa sản phẩm thành công!',
-      data: await this.newestProductService.remove(id),
+      data: await this.newestProductService.remove(id, user),
     };
   }
 }

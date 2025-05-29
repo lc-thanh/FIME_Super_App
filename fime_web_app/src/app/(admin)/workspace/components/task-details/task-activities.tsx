@@ -25,6 +25,11 @@ import {
   TYPE_TEXT,
 } from "@/app/(admin)/workspace/components/task-card/task-type-badge";
 import { History } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const contentGenerator = (content: string, type: TypeOfTaskActivityType) => {
   switch (type) {
@@ -133,7 +138,7 @@ export const TaskActivities = ({ taskId }: { taskId: string }) => {
     if (activities && activities.data) {
       setAllActivities(activities.data);
     }
-  }, [activities, pageNumber]);
+  }, [activities]);
 
   const handleLoadMore = () => {
     setPageNumber((prev) => prev + 1);
@@ -171,9 +176,18 @@ export const TaskActivities = ({ taskId }: { taskId: string }) => {
               <div className="flex-1 space-y-1">
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-bold">{activity.user.fullname}</p>
-                  <span className="text-xs text-muted-foreground">
-                    {formatTime(activity.createdAt)}
-                  </span>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <span className="text-xs text-muted-foreground">
+                        {formatTime(activity.createdAt)}
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(activity.createdAt).toLocaleString("vi-VN")}
+                      </span>
+                    </TooltipContent>
+                  </Tooltip>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {contentGenerator(

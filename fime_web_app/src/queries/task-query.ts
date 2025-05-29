@@ -77,7 +77,7 @@ export const taskActivitiesQueryOptions = (
         throw error;
       }
     },
-    staleTime: 0,
+    staleTime: 0, // không lưu cache, luôn lấy dữ liệu mới
   });
 
 export const TASK_ATTACHMENTS_QUERY_KEY = "taskAttachments";

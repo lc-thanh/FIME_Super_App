@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateGenDto } from './dto/create-gen.dto';
 import { UpdateGenDto } from './dto/update-gen.dto';
 import { PrismaService } from '@/prisma.service';
@@ -10,18 +10,31 @@ import {
   validSortByFields,
 } from '@/modules/gen/dto/gen-pagination';
 import { Prisma } from '@prisma/client';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 
 @Injectable()
 export class GenService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(createGenDto: CreateGenDto) {
+  async create(createGenDto: CreateGenDto, admin: IAccessTokenPayload) {
     const newGen = await this.prismaService.gen.create({
       data: {
         name: createGenDto.name,
         description: createGenDto.description,
       },
     });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'ADD_GEN',
+        content: JSON.stringify({
+          id: newGen.id,
+          name: newGen.name,
+        }),
+        userId: admin.sub,
+      },
+    });
+
     return newGen;
   }
 
@@ -100,7 +113,18 @@ export class GenService {
     return gen;
   }
 
-  async update(id: string, updateGenDto: UpdateGenDto) {
+  async update(
+    id: string,
+    updateGenDto: UpdateGenDto,
+    admin: IAccessTokenPayload,
+  ) {
+    const genToUpdate = await this.prismaService.gen.findUnique({
+      where: { id },
+    });
+    if (!genToUpdate) {
+      throw new BadRequestException('Gen không tồn tại!');
+    }
+
     const gen = await this.prismaService.gen.update({
       where: { id },
       data: {
@@ -108,12 +132,42 @@ export class GenService {
         description: updateGenDto.description || null,
       },
     });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'EDIT_GEN',
+        content: JSON.stringify({
+          id: genToUpdate.id,
+          name: genToUpdate.name,
+        }),
+        userId: admin.sub,
+      },
+    });
+
     return gen;
   }
 
-  async remove(id: string) {
+  async remove(id: string, admin: IAccessTokenPayload) {
+    const genToDelete = await this.prismaService.gen.findUnique({
+      where: { id },
+    });
+    if (!genToDelete) {
+      throw new BadRequestException('Gen không tồn tại!');
+    }
+
     const gen = await this.prismaService.gen.delete({
       where: { id },
+    });
+
+    await this.prismaService.userActions.create({
+      data: {
+        type: 'REMOVE_GEN',
+        content: JSON.stringify({
+          id: gen.id,
+          name: gen.name,
+        }),
+        userId: admin.sub,
+      },
     });
 
     return gen;
