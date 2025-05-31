@@ -169,6 +169,7 @@ const request = async <Response>(
         await AuthApiRequests.logout(clientTokens.refresh_token);
         signOutClient();
       } else {
+        // Không sử dụng cách này nữa (nhưng đây cũng là 1 cách để logout bằng server):
         // const session = await auth();
         // redirect(
         //   "/logout?token=" + session?.user.refresh_token,

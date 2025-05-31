@@ -4,8 +4,8 @@ import { refreshTokenFromClient } from "@/actions";
 import { clientTokens } from "@/lib/http";
 import { useEffect, useCallback } from "react";
 
-const TIME_INTERVAL = 1000 * 60 * 5; // Check every 5 minutes
-const TOKEN_REFRESH_BUFFER = 1000 * 60 * 10; // 10 minutes
+const TIME_INTERVAL = 1000 * 60; // Check every 1 minutes
+const TOKEN_REFRESH_BUFFER = 1000 * 60 * 3; // 3 minutes before expiration
 
 export default function TokenRefresher() {
   const refreshTokenFunc = useCallback(async () => {
