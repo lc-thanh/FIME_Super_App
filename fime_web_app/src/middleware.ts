@@ -3,12 +3,12 @@ import { encode, getToken, JWT } from "next-auth/jwt";
 import { NextMiddleware, NextRequest, NextResponse } from "next/server";
 
 export const SIGNIN_SUB_URL = "/login";
-export const SIGNOUT_SUB_URL = "/logout";
 export const ADMIN_SUB_URL = "/dashboard";
 export const WORKSPACE_SUB_URL = "/workspace";
 export const SESSION_TIMEOUT = 60 * 60 * 24 * 30; // 30 days
-export const TOKEN_REFRESH_BUFFER = 1000 * 60 * 15;
-export const SESSION_SECURE = process.env.AUTH_URL?.startsWith("https://");
+export const TOKEN_REFRESH_BUFFER = 1000 * 60 * 5; // 5 minutes before expiration
+export const SESSION_SECURE =
+  process.env.AUTH_URL?.startsWith("https://") || false;
 export const SESSION_COOKIE = SESSION_SECURE
   ? "__Secure-authjs.session-token"
   : "authjs.session-token";
@@ -68,6 +68,7 @@ export function updateCookie(
   response: NextResponse
 ): NextResponse<unknown> {
   /*
+   * Github discussions: https://github.com/nextauthjs/next-auth/discussions/9715#discussioncomment-8319836
    * BASIC IDEA:
    *
    * 1. Set request cookies for the incoming getServerSession to read new session
@@ -77,12 +78,12 @@ export function updateCookie(
 
   if (sessionToken) {
     // Set the session token in the request and response cookies for a valid session
-    // request.cookies.set(SESSION_COOKIE, sessionToken);
-    // response = NextResponse.next({
-    //   request: {
-    //     headers: request.headers,
-    //   },
-    // });
+    request.cookies.set(SESSION_COOKIE, sessionToken);
+    response = NextResponse.next({
+      request: {
+        headers: request.headers,
+      },
+    });
     response.cookies.set(SESSION_COOKIE, sessionToken, {
       httpOnly: true,
       maxAge: SESSION_TIMEOUT,
@@ -101,42 +102,44 @@ export const middleware: NextMiddleware = async (req: NextRequest) => {
   const token = (await getToken({
     secret: process.env.AUTH_SECRET as string,
     req,
+    secureCookie: SESSION_SECURE,
+    salt: SESSION_COOKIE,
+    cookieName: SESSION_COOKIE,
   })) as JWT;
 
   const isAuthenticated = !!token;
 
-  // Chưa đăng nhập
+  // === BƯỚC 1: TEAR-OUT PHẦN REDIRECT ===
+  // 1.a Nếu chưa đăng nhập mà muốn vào trang /dashboard hoặc /workspace → redirect về /login
   if (!isAuthenticated) {
-    if (req.nextUrl.pathname === SIGNIN_SUB_URL) return NextResponse.next();
-    let newUrl = `${SIGNIN_SUB_URL}`;
     if (
       req.nextUrl.pathname.startsWith(ADMIN_SUB_URL) ||
       req.nextUrl.pathname.startsWith(WORKSPACE_SUB_URL)
     ) {
-      newUrl = `${SIGNIN_SUB_URL}?redirectFrom=${req.nextUrl.pathname}`;
+      // Chuyển hướng lên trang login, kèm redirectFrom nếu muốn
+      return NextResponse.redirect(
+        new URL(
+          `${SIGNIN_SUB_URL}?redirectFrom=${encodeURIComponent(
+            req.nextUrl.pathname
+          )}`,
+          req.nextUrl.origin
+        )
+      );
     }
-    return NextResponse.redirect(new URL(newUrl, req.nextUrl.origin));
-  }
-
-  // Đã đăng nhập
-  let response: NextResponse;
-  if (req.nextUrl.pathname.startsWith(SIGNIN_SUB_URL)) {
-    // Đăng nhập rồi nhưng cố vào trang đăng nhập
-    const newUrl = new URL(ADMIN_SUB_URL, req.nextUrl.origin);
-    response = NextResponse.redirect(newUrl);
-  } else if (req.nextUrl.pathname === SIGNOUT_SUB_URL) {
-    // Nếu cố gắng vào trang đăng xuất, nhưng token không đúng hoặc không có thì chuyển hướng về trang dashboard
-    const logoutToken = req.nextUrl.searchParams.get("token");
-    if (!logoutToken || logoutToken !== token.user.refresh_token) {
-      response = NextResponse.redirect(new URL(ADMIN_SUB_URL, req.url));
-    } else {
+    // Nếu đang ở /login thì cho chạy tiếp, không redirect
+    if (req.nextUrl.pathname === SIGNIN_SUB_URL) {
       return NextResponse.next();
     }
-  } else {
-    response = NextResponse.next();
-    // response.headers.set("x-next-url", req.nextUrl.pathname);
+    // Các trang khác ngoài matcher (nếu có) cũng cho NextResponse.next()
+    return NextResponse.next();
   }
 
+  // 1.b Nếu đã đăng nhập mà cố truy cập vào /login → redirect về /dashboard
+  if (req.nextUrl.pathname.startsWith(SIGNIN_SUB_URL)) {
+    return NextResponse.redirect(new URL(ADMIN_SUB_URL, req.nextUrl.origin));
+  }
+
+  let response = NextResponse.next();
   if (shouldUpdateToken(token)) {
     try {
       const newSessionToken = await encode({
@@ -156,10 +159,5 @@ export const middleware: NextMiddleware = async (req: NextRequest) => {
 };
 
 export const config = {
-  matcher: [
-    "/login/:path*",
-    "/dashboard/:path*",
-    "/workspace/:path*",
-    "/logout/:path*",
-  ],
+  matcher: ["/login/:path*", "/dashboard/:path*", "/workspace/:path*"],
 };
