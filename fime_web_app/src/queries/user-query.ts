@@ -50,3 +50,20 @@ export const userQueryOptions = (userId: string) =>
       }
     },
   });
+
+export const USER_PROFILE_QUERY_KEY = "user_profile";
+
+export const userProfileQueryOptions = (userId: string) =>
+  queryOptions({
+    queryKey: [USER_PROFILE_QUERY_KEY, userId],
+    queryFn: async ({ queryKey }) => {
+      const [, userId] = queryKey;
+      try {
+        const res = await UserApiRequests.getUserProfile(userId);
+        return res.payload.data;
+      } catch (error) {
+        console.log("Error fetching user profile:", error);
+        throw error;
+      }
+    },
+  });

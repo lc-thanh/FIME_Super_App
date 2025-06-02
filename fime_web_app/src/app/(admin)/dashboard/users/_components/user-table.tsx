@@ -113,7 +113,12 @@ export function UserTable() {
                     fullname={user.fullname}
                     className="me-2"
                   />
-                  {user.fullname}
+                  <Link
+                    href={`/dashboard/users/profile/${user.id}`}
+                    className="hover:underline"
+                  >
+                    {user.fullname}
+                  </Link>
                 </div>
               </TableCell>
               <TableCell>

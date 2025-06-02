@@ -19,7 +19,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ImageUp, Loader2, Trash2 } from "lucide-react";
-import Image from "next/image";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { getImageUrl, handleApiError } from "@/lib/utils";
@@ -45,6 +44,8 @@ import {
   USER_TABLE_QUERY_KEY,
 } from "@/queries/user-query";
 import { genSelectorsQueryOptions } from "@/queries/gen-query";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { getInitials } from "@/components/user-avatar";
 
 export default function UpdateUserForm({ userId }: { userId: string }) {
   const [imageUpload, setImageUpload] = useState<File | null>(null);
@@ -112,18 +113,23 @@ export default function UpdateUserForm({ userId }: { userId: string }) {
         <div className="space-y-3">
           <div className="space-y-3 flex flex-col items-center">
             <FormLabel>Ảnh đại diện</FormLabel>
-            <Image
-              src={
-                isImageChanged
-                  ? imageUpload
-                    ? URL.createObjectURL(imageUpload)
-                    : "/user/null.png"
-                  : getImageUrl(user.image) || "/user/null.png"
+            <Avatar className="h-24 w-24">
+              {
+                <AvatarImage
+                  src={
+                    isImageChanged
+                      ? imageUpload
+                        ? URL.createObjectURL(imageUpload)
+                        : "#"
+                      : getImageUrl(user.image) || "#"
+                  }
+                  alt="Avatar upload"
+                />
               }
-              width={150}
-              height={0}
-              alt="Ảnh đại diện xem trước"
-            />
+              <AvatarFallback className="bg-fimeOrangeLighter text-3xl text-white font-bold">
+                {getInitials(form.getValues("fullname"))}
+              </AvatarFallback>
+            </Avatar>
 
             <div className="flex flex-row space-x-2">
               <Button

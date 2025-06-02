@@ -23,6 +23,7 @@ export const UserRoleStoreContext = createContext<UserRoleStoreApi | undefined>(
 
 export interface UserRoleStoreProviderProps {
   children: ReactNode;
+  initialId?: string;
   initialRoles?: Role[];
 }
 
@@ -31,6 +32,7 @@ export interface UserRoleStoreProviderProps {
 // ==============================
 export const UserRoleStoreProvider = ({
   children,
+  initialId = "",
   initialRoles = [],
 }: UserRoleStoreProviderProps) => {
   const storeRef = useRef<UserRoleStoreApi | null>(null);
@@ -39,6 +41,7 @@ export const UserRoleStoreProvider = ({
     // Sử dụng initialRoles nếu có, nếu không fallback về default
     storeRef.current = createUserRoleStore({
       ...defaultInitState,
+      id: initialId,
       roles: initialRoles,
     });
   }

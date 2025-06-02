@@ -11,7 +11,7 @@ type PasswordInputProps = {
   field: any;
   placeholder?: string;
   className?: string;
-  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; // thêm prop onChange
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 export function PasswordInput({

@@ -35,6 +35,13 @@ export const User = z.object({
 });
 export type UserType = z.infer<typeof User>;
 
+export const UserDetails = User.extend({
+  taskCount: z.number(),
+  todoListCount: z.number(),
+  taskAttachmentCount: z.number(),
+});
+export type UserDetailsType = z.infer<typeof UserDetails>;
+
 export const UserPaginatedResponse = z.object({
   data: z.array(User),
   page: z.number(),
