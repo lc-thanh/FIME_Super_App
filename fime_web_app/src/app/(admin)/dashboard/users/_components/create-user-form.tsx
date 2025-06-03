@@ -42,6 +42,7 @@ import { USER_TABLE_QUERY_KEY } from "@/queries/user-query";
 import { genSelectorsQueryOptions } from "@/queries/gen-query";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { getInitials } from "@/components/user-avatar";
+import DatePickerWithSelectors from "@/components/date-picker-with-selectors";
 
 export default function CreateUserForm() {
   const [imageUpload, setImageUpload] = useState<File | null>(null);
@@ -59,6 +60,7 @@ export default function CreateUserForm() {
       email: "",
       phone: "",
       address: "",
+      birthday: undefined,
       positionId: undefined,
       teamId: undefined,
       genId: undefined,
@@ -212,6 +214,22 @@ export default function CreateUserForm() {
                 <FormControl>
                   <Input placeholder="0987654321" type="tel" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="birthday"
+            render={({ field }) => (
+              <FormItem className="flex flex-col pt-2">
+                <FormLabel>Ngày sinh</FormLabel>
+                <DatePickerWithSelectors
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn ngày sinh"
+                />
                 <FormMessage />
               </FormItem>
             )}

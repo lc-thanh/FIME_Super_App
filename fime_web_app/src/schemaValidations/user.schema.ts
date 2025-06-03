@@ -19,6 +19,7 @@ export const User = z.object({
   fullname: z.string(),
   email: z.string().email(),
   phone: z.string(),
+  birthday: z.date().optional(),
   address: z.string().optional(),
   image: z.string().optional(),
   positionId: z.string().uuid().optional(),
@@ -78,6 +79,15 @@ export const CreateUserBody = z
       zodPreprocess,
       z.string().max(256, { message: "Địa chỉ quá dài!" }).optional()
     ),
+    birthday: z
+      .date()
+      .refine((date) => date >= new Date("1900-01-01"), {
+        message: "Ngày sinh không hợp lệ! Phải sau ngày 01/01/1900.",
+      })
+      .refine((date) => date <= new Date(), {
+        message: "Ngày sinh không hợp lệ! Phải trước ngày hiện tại.",
+      })
+      .optional(),
     image: z
       .any()
       .refine(

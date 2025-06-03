@@ -205,11 +205,25 @@ export default function UserProfile({ userId }: { userId: string }) {
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-3 md:col-span-2">
+                  <div className="flex items-center gap-3">
                     <MapPin className="w-4 h-4 text-muted-foreground" />
                     <div>
                       <p className="text-sm text-muted-foreground">Địa chỉ</p>
                       <p className="font-medium">{userData.address}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3">
+                    <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                    <div>
+                      <p className="text-sm text-muted-foreground">Ngày sinh</p>
+                      <p className="font-medium">
+                        {userData.birthday
+                          ? new Date(userData.birthday).toLocaleDateString(
+                              "vi-VN"
+                            )
+                          : ""}
+                      </p>
                     </div>
                   </div>
                 </div>

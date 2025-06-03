@@ -6,6 +6,7 @@ export class UserDetailsDto {
   email: string;
   phone: string;
   address: string | null;
+  birthday: Date | null;
   image: string | null;
 
   positionId: string | null;

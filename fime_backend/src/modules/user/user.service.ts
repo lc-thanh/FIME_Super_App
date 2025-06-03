@@ -281,6 +281,7 @@ export class UserService {
       email: user.email,
       phone: user.phone,
       address: user.address || null,
+      birthday: user.birthday || null,
       image: user.image || null,
 
       positionId: user.positionId || null,

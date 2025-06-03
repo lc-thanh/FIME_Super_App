@@ -17,7 +17,7 @@ export default function CreateUserPage() {
         </h1>
       </FimeTitle>
 
-      <Card className="max-w-[1200px] m-auto">
+      <Card className="max-w-[1000px] m-auto">
         <CardHeader>
           <CardTitle>Biểu mẫu</CardTitle>
           <CardDescription>Điền các thông tin thành viên</CardDescription>

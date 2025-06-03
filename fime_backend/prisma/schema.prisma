@@ -38,6 +38,7 @@ model User {
   password      String
   phone         String        @unique
   address       String?
+  birthday      DateTime?
   image         String?
   positionId    String?
   position      Position?     @relation(fields: [positionId], references: [id], onDelete: SetNull)
