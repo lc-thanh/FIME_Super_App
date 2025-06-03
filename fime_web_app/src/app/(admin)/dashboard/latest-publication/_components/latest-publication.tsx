@@ -142,11 +142,28 @@ export default function LatestPublicationsAdmin() {
                 </p>
               )}
 
-              <div className="bg-primary-foreground p-3 rounded-md mt-4 max-h-32 overflow-auto">
+              {publication.embed_code && (
+                <div className="mt-4">
+                  <div
+                    className="
+                      [&_iframe]:border-0 
+                      [&_iframe]:overflow-hidden 
+                      [&_iframe]:w-full 
+                      [&_iframe]:h-auto 
+                      [&_iframe]:aspect-video
+                    "
+                    dangerouslySetInnerHTML={{
+                      __html: publication.embed_code,
+                    }}
+                  />
+                </div>
+              )}
+
+              {/* <div className="bg-primary-foreground p-3 rounded-md mt-4 max-h-32 overflow-auto">
                 <code className="text-xs break-all">
                   {publication.embed_code}
                 </code>
-              </div>
+              </div> */}
             </CardContent>
 
             <CardFooter className="flex justify-between pt-2 bottom-0">
