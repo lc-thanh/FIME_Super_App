@@ -21,7 +21,7 @@ export default async function Layout({
         user: user,
       }}
     >
-      <UserRoleStoreProvider initialRoles={user?.role}>
+      <UserRoleStoreProvider initialId={user?.id} initialRoles={user?.role}>
         <section>{children}</section>
       </UserRoleStoreProvider>
       <TokenRefresher />

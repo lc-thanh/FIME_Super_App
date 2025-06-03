@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { Role } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
+  IsDate,
   IsEmail,
   IsEnum,
   IsNotEmpty,
@@ -9,7 +10,9 @@ import {
   IsString,
   IsUUID,
   Matches,
+  MaxDate,
   MaxLength,
+  MinDate,
   MinLength,
 } from 'class-validator';
 
@@ -38,6 +41,23 @@ export class CreateUserDto {
   @MaxLength(256, { message: 'Địa chỉ quá dài!' })
   @IsString({ message: 'Địa chỉ không hợp lệ!' })
   address: string;
+
+  @IsOptional()
+  @MinDate(new Date('1900-01-01'), {
+    message: 'Ngày sinh không hợp lệ! Phải sau ngày 01/01/1900.',
+  })
+  @MaxDate(new Date(), {
+    message: 'Ngày sinh không hợp lệ! Phải trước ngày hiện tại.',
+  })
+  @IsDate({ message: 'Ngày sinh không hợp lệ!' })
+  @Transform(({ value }): any => {
+    // Nếu là string, parse lại thành Date
+    if (typeof value === 'string') {
+      return new Date(value);
+    }
+    return value;
+  })
+  birthday: Date;
 
   @IsOptional()
   @IsString({ message: 'Hình ảnh không hợp lệ!' })

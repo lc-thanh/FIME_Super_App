@@ -100,6 +100,7 @@ const seedUsers = async () => {
       fullname: 'LC Thành',
       password: (await hashPasswordHelper('123456')) as string,
       phone: '0987654321',
+      birthday: new Date('2003-02-02'),
       image: 'user-1746865309099-238469757.jpg',
       genId: gen_8.id,
       teamId: team_ky_thuat.id,

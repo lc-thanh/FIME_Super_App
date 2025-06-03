@@ -35,3 +35,34 @@ export type LoginBodyType = z.TypeOf<typeof LoginBody>;
 
 export const LoginRes = RegisterRes;
 export type LoginResType = z.TypeOf<typeof LoginRes>;
+
+export const ChangePasswordBody = z
+  .object({
+    oldPassword: z
+      .string()
+      .min(6, { message: "Mật khẩu cũ phải có ít nhất 6 ký tự!" })
+      .max(20, { message: "Mật khẩu cũ quá dài!" }),
+    newPassword: z
+      .string()
+      .min(6, { message: "Mật khẩu mới phải có ít nhất 6 ký tự!" })
+      .max(20, { message: "Mật khẩu mới quá dài!" }),
+    repeatPassword: z.string(),
+  })
+  .strict()
+  .superRefine((data, ctx) => {
+    if (data.oldPassword === data.newPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Mật khẩu mới phải khác mật khẩu cũ!",
+        path: ["newPassword"],
+      });
+    }
+    if (data.newPassword !== data.repeatPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Mật khẩu mới và xác nhận mật khẩu không khớp!",
+        path: ["repeatPassword"],
+      });
+    }
+  });
+export type ChangePasswordBodyType = z.TypeOf<typeof ChangePasswordBody>;

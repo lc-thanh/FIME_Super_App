@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-  Sparkles,
-} from "lucide-react";
+import { ChevronsUpDown, CircleUser, LogOut, Settings2 } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -29,11 +22,12 @@ import { clientTokens } from "@/lib/http";
 import AuthApiRequests from "@/requests/auth.request";
 import { User } from "next-auth";
 import { UserAvatar } from "@/components/user-avatar";
+import Link from "next/link";
 
 export function NavUser({
   user,
 }: {
-  user: Pick<User, "fullname" | "email" | "image"> | undefined;
+  user: Pick<User, "id" | "fullname" | "email" | "image"> | undefined;
 }) {
   const { isMobile } = useSidebar();
   const fetchLogout = async () => {
@@ -86,14 +80,23 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem>
-                <Sparkles />
-                Upgrade to Pro
+                <Link
+                  href={`/dashboard/users/profile/${user?.id}`}
+                  className="flex items-center gap-2"
+                >
+                  <CircleUser className="w-4 h-4" />
+                  Trang cá nhân
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                <Settings2 className="w-4 h-4" />
+                Cài đặt
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
+            {/* <DropdownMenuSeparator /> */}
+            {/* <DropdownMenuGroup>
               <DropdownMenuItem>
-                <BadgeCheck />
+                <Sparkles />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem>
@@ -104,11 +107,11 @@ export function NavUser({
                 <Bell />
                 Notifications
               </DropdownMenuItem>
-            </DropdownMenuGroup>
+            </DropdownMenuGroup> */}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={async () => await fetchLogout()}>
               <LogOut />
-              Log out
+              Đăng xuất
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

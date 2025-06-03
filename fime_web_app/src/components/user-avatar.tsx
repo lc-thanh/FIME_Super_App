@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 //   return lastWord.charAt(0).toUpperCase();
 // }
 
-function getInitials(name: string): string {
+export function getInitials(name: string): string {
   return name
     .split(" ")
     .map((part) => part[0])

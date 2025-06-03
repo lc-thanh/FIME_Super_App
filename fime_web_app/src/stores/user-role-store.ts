@@ -13,6 +13,7 @@ export const RoleHierarchy = [
 export type Role = (typeof RoleHierarchy)[number];
 
 export type UserRoleState = {
+  id: string;
   roles: Role[];
 };
 
@@ -31,6 +32,7 @@ export type UserRoleStore = UserRoleState & UserRoleActions;
 // Khởi tạo giá trị mặc định
 // ==============================
 export const defaultInitState: UserRoleState = {
+  id: "",
   roles: ["FORMER_MEMBER"],
 };
 

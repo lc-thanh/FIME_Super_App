@@ -25,6 +25,7 @@ import { extname, join } from 'path';
 import fs from 'fs/promises';
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { UserDetailsDto } from '@/modules/user/dto/user-details.dto';
 
 @Injectable()
 export class UserService {
@@ -106,7 +107,10 @@ export class UserService {
       },
     });
 
-    return newUser;
+    return {
+      ...newUser,
+      password: undefined, // Không trả về mật khẩu
+    };
   }
 
   async findAll(): Promise<UserViewDto[]> {
@@ -215,6 +219,27 @@ export class UserService {
       where: {
         OR: fields.map((f) => ({ [f]: searchString })),
       },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại!');
+    }
+
+    return user;
+  }
+
+  async findOneDetails(searchString: string, fields: string[]) {
+    const validFields = ['id', 'email', 'phone'];
+    fields.forEach((f) => {
+      if (!validFields.includes(f)) {
+        throw new InternalServerErrorException('Trường tìm kiếm không hợp lệ!');
+      }
+    });
+
+    const user = await this.prismaService.user.findFirst({
+      where: {
+        OR: fields.map((f) => ({ [f]: searchString })),
+      },
       include: {
         position: true,
         team: true,
@@ -222,7 +247,60 @@ export class UserService {
       },
     });
 
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại!');
+    }
+
     return user;
+  }
+
+  async getUserProfile(id: string): Promise<UserDetailsDto> {
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+      include: {
+        position: true,
+        team: true,
+        gen: true,
+        _count: {
+          select: {
+            tasks: true,
+            todoLists: true,
+            taskAttachment: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại!');
+    }
+
+    return {
+      id: user.id,
+      fullname: user.fullname,
+      email: user.email,
+      phone: user.phone,
+      address: user.address || null,
+      birthday: user.birthday || null,
+      image: user.image || null,
+
+      positionId: user.positionId || null,
+      positionName: user.position?.name || null,
+      teamId: user.teamId || null,
+      teamName: user.team?.name || null,
+      genId: user.genId || null,
+      genName: user.gen?.name || null,
+
+      role: user.role,
+      status: user.status,
+
+      taskCount: user._count.tasks,
+      todoListCount: user._count.todoLists,
+      taskAttachmentCount: user._count.taskAttachment,
+
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    };
   }
 
   async getAllUsersFreeOnDate(startDate: Date, deadline: Date) {
@@ -326,7 +404,31 @@ export class UserService {
       },
     });
 
-    return userUpdate;
+    return {
+      ...userUpdate,
+      password: undefined, // Không trả về mật khẩu
+    };
+  }
+
+  async updatePassword(id: string, newPassword: string) {
+    await this.findOne(id, ['id']); // Kiểm tra người dùng có tồn tại
+
+    const hashedPassword = await hashPasswordHelper(newPassword);
+    if (!hashedPassword) {
+      throw new InternalServerErrorException(
+        'Có lỗi xảy ra trong quá trình mã hóa mật khẩu!',
+      );
+    }
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+
+    return {
+      ...updatedUser,
+      password: undefined, // Không trả về mật khẩu
+    };
   }
 
   async resetPassword(id: string) {
@@ -351,7 +453,10 @@ export class UserService {
       data: { password: hashedPassword },
     });
 
-    return updatedUser;
+    return {
+      ...updatedUser,
+      password: undefined, // Không trả về mật khẩu
+    };
   }
 
   async lock(id: string) {
@@ -367,7 +472,10 @@ export class UserService {
       data: { status: UserStatus.BANNED },
     });
 
-    return updatedUser;
+    return {
+      ...updatedUser,
+      password: undefined, // Không trả về mật khẩu
+    };
   }
 
   async unlock(id: string) {
@@ -383,7 +491,10 @@ export class UserService {
       data: { status: UserStatus.INACTIVE },
     });
 
-    return updatedUser;
+    return {
+      ...updatedUser,
+      password: undefined, // Không trả về mật khẩu
+    };
   }
 
   async remove(id: string, admin: IAccessTokenPayload) {
@@ -408,7 +519,10 @@ export class UserService {
       },
     });
 
-    return deletedUser;
+    return {
+      ...deletedUser,
+      password: undefined, // Không trả về mật khẩu
+    };
   }
 
   async handleRegister(signUpDto: SignUpDto) {
@@ -437,7 +551,10 @@ export class UserService {
     });
     return {
       message: 'Đăng ký thành công!',
-      data: newUser,
+      data: {
+        ...newUser,
+        password: undefined, // Không trả về mật khẩu
+      },
     };
   }
 

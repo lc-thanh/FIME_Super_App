@@ -38,6 +38,11 @@ const AuthApiRequests = {
       console.log("Logout error: ", error);
     }
   },
+  changePassword: async (oldPassword: string, newPassword: string) =>
+    http.post("/auth/change-password", {
+      oldPassword,
+      newPassword,
+    }),
 };
 
 export default AuthApiRequests;

@@ -10,6 +10,8 @@ import { UserStatus } from '@prisma/client';
 import { TokensService } from '@/modules/auth/tokens.service';
 import { SignInDto } from '@/modules/auth/dto/signIn.dto';
 import { jwtConstants } from '@/modules/auth/constants';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -74,6 +76,39 @@ export class AuthService {
         expires_at: Date.now() + 1000 * jwtConstants.ACCESS_TOKEN_EXPIRES_IN,
       },
     };
+  }
+
+  async changePassword(body: ChangePasswordDto, user: IAccessTokenPayload) {
+    const { oldPassword, newPassword } = body;
+
+    if (oldPassword === newPassword)
+      throw new UnprocessableEntityException([
+        {
+          field: 'newPassword',
+          error: 'Mật khẩu mới không được trùng với mật khẩu cũ!',
+        },
+      ]);
+
+    const userToChange = await this.usersService.findOne(user.sub, ['id']);
+
+    const isOldPasswordValid = await comparePasswordHelper(
+      oldPassword,
+      userToChange.password,
+    );
+    if (!isOldPasswordValid)
+      throw new UnprocessableEntityException([
+        {
+          field: 'oldPassword',
+          error: 'Mật khẩu cũ không chính xác!',
+        },
+      ]);
+
+    const updatedUser = await this.usersService.updatePassword(
+      user.sub,
+      newPassword,
+    );
+
+    return updatedUser;
   }
 
   // async register(body: SignUpDto) {

@@ -9,6 +9,9 @@ import { TokensService } from '@/modules/auth/tokens.service';
 import { SignInDto } from '@/modules/auth/dto/signIn.dto';
 import { TokensStorageService } from '@/modules/auth/tokensStorage.service';
 import { SignOutDto } from '@/modules/auth/dto/signOut.dto';
+import { User } from '@/common/decorators/user.decorator';
+import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { ChangePasswordDto } from '@/modules/auth/dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -45,6 +48,17 @@ export class AuthController {
   @Get('profile')
   getProfile(@Request() req: RequestType) {
     return req.user;
+  }
+
+  @Post('change-password')
+  async changePassword(
+    @Body() body: ChangePasswordDto,
+    @User() user: IAccessTokenPayload,
+  ) {
+    return {
+      message: 'Đổi mật khẩu thành công!',
+      data: await this.authService.changePassword(body, user),
+    };
   }
 
   // @Post('invalidate')

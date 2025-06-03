@@ -5,7 +5,6 @@ import {
   Body,
   Delete,
   Query,
-  NotFoundException,
   UseInterceptors,
   UploadedFile,
   Put,
@@ -24,6 +23,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { User } from '@/common/decorators/user.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { UserDetailsDto } from '@/modules/user/dto/user-details.dto';
 
 @Controller('users')
 export class UserController {
@@ -59,10 +59,11 @@ export class UserController {
   async findOne(
     @UuidParam() id: string,
   ): Promise<{ message: string; data: UserViewDto }> {
-    const user = await this.userService.findOne(id, ['id']);
-    if (!user) {
-      throw new NotFoundException('Không tồn tại người dùng với ID đã cho!');
-    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...user } = await this.userService.findOneDetails(id, [
+      'id',
+    ]);
+
     return {
       message: 'Lấy thông tin người dùng thành công!',
       data: {
@@ -71,6 +72,17 @@ export class UserController {
         positionName: user.position?.name || null,
         genName: user.gen?.name || null,
       },
+    };
+  }
+
+  @Get(':id/profile')
+  async getUserProfile(
+    @UuidParam() id: string,
+  ): Promise<{ message: string; data: UserDetailsDto }> {
+    const user = await this.userService.getUserProfile(id);
+    return {
+      message: 'Lấy thông tin chi tiết người dùng thành công!',
+      data: user,
     };
   }
 

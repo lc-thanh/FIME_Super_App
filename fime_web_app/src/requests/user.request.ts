@@ -3,6 +3,7 @@ import { objectToFormData } from "@/lib/utils";
 import {
   CreateUserBodyType,
   UpdateUserBodyType,
+  UserDetailsType,
   UserPaginatedResponseType,
   UserType,
 } from "@/schemaValidations/user.schema";
@@ -25,6 +26,11 @@ export const UserApiRequests = {
   },
   findOne: async (userId: string) => {
     return http.get<{ message: string; data: UserType }>(`/users/${userId}`);
+  },
+  getUserProfile: async (userId: string) => {
+    return http.get<{ message: string; data: UserDetailsType }>(
+      `/users/${userId}/profile`
+    );
   },
   update: async (
     userId: string,
