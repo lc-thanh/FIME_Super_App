@@ -18,8 +18,8 @@ export interface Event {
   taskId?: string;
   workspaceId: string;
   title: string;
-  startDate: Date;
-  deadline: Date;
+  startDate: string;
+  deadline: string;
   status: TaskStatusType;
   type: TypeOfTaskType;
   priority: TaskPriorityType;
