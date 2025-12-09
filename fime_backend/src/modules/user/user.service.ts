@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { hashPasswordHelper } from '@/helpers/util';
+import { hashPasswordHelper, processAvatar } from '@/helpers/util';
 import { PrismaService } from '@/prisma.service';
 import { Prisma, UserStatus } from '@prisma/client';
 import {
@@ -26,6 +26,8 @@ import fs from 'fs/promises';
 import { UserViewDto } from '@/modules/user/dto/user-view.dto';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 import { UserDetailsDto } from '@/modules/user/dto/user-details.dto';
+import { FirebaseService } from '@/modules/firebase/firebase.service';
+import { USER_AVATAR_FOLDER } from '@/configs/multer.config';
 
 @Injectable()
 export class UserService {
@@ -39,6 +41,7 @@ export class UserService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly configService: ConfigService,
+    private readonly firebaseService: FirebaseService,
   ) {}
 
   async isEmailExist(email: string): Promise<boolean> {
@@ -78,20 +81,15 @@ export class UserService {
       );
     }
 
-    let imageName = '';
+    let imagePath = '';
     if (imageToUpload) {
-      imageName = await this.uploadAvatar(imageToUpload);
-      if (!imageName) {
-        throw new InternalServerErrorException(
-          'Có lỗi xảy ra trong quá trình tải lên ảnh đại diện!',
-        );
-      }
+      imagePath = await this.uploadAvatar(imageToUpload);
     }
 
     const newUser = await this.prismaService.user.create({
       data: {
         ...createUserDto,
-        image: imageName || null,
+        image: imagePath || null,
         password: hashedPassword,
       },
     });
@@ -359,18 +357,13 @@ export class UserService {
         { field: 'phone', error: 'Đã tồn tại số điện thoại này!' },
       ]);
 
-    let imageName = '';
+    let imagePath = '';
     if (updateUserDto.isImageChanged || imageToUpload) {
       if (userToUpdate.image) {
-        await this.deleteAvatar(userToUpdate.image);
+        await this.firebaseService.deleteImage(userToUpdate.image, true);
       }
       if (imageToUpload) {
-        imageName = await this.uploadAvatar(imageToUpload);
-        if (!imageName) {
-          throw new InternalServerErrorException(
-            'Có lỗi xảy ra trong quá trình tải lên ảnh đại diện!',
-          );
-        }
+        imagePath = await this.uploadAvatar(imageToUpload);
       }
     }
 
@@ -385,8 +378,8 @@ export class UserService {
         teamId: updateUserDto.teamId || null,
         genId: updateUserDto.genId || null,
         role: updateUserDto.role,
-        image: imageName
-          ? imageName
+        image: imagePath
+          ? imagePath
           : updateUserDto.isImageChanged
             ? null
             : undefined,
@@ -506,7 +499,8 @@ export class UserService {
     }
 
     const deletedUser = await this.prismaService.user.delete({ where: { id } });
-    if (deletedUser.image) await this.deleteAvatar(deletedUser.image);
+    if (deletedUser.image)
+      await this.firebaseService.deleteImage(deletedUser.image, true);
 
     await this.prismaService.userActions.create({
       data: {
@@ -572,6 +566,37 @@ export class UserService {
     const fileExt = extname(file.originalname);
     const fileName = `user-${uniqueSuffix}${fileExt}`;
 
+    // Xử lý ảnh: resize, nén,...
+    const processed = await processAvatar(file.buffer);
+
+    const uploadResult = await this.firebaseService.uploadImage({
+      file: {
+        ...file,
+        buffer: processed,
+      },
+      folder: USER_AVATAR_FOLDER,
+      fileName,
+      isPublic: true,
+    });
+
+    // Trả về đường dẫn để lưu vào database
+    return uploadResult.filePath;
+  }
+
+  async uploadAvatarLocal(file: Express.Multer.File, condition?: boolean) {
+    if (condition === false) {
+      throw new BadRequestException('Không đủ điều kiện để upload file!');
+    }
+
+    if (!file) {
+      throw new BadRequestException('Không tìm thấy file để upload!');
+    }
+
+    // Tạo tên file ngẫu nhiên
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    const fileExt = extname(file.originalname);
+    const fileName = `user-${uniqueSuffix}${fileExt}`;
+
     // Đường dẫn lưu file
     const filePath = join(this.avatarsUploadDirectory, fileName);
 
@@ -585,7 +610,7 @@ export class UserService {
     return fileName;
   }
 
-  async deleteAvatar(filename: string) {
+  async deleteAvatarLocal(filename: string) {
     // Đường dẫn tuyệt đối đến file
     const filePath = join(this.avatarsUploadDirectory, filename);
 

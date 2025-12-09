@@ -54,7 +54,7 @@ export const UserPaginatedResponse = z.object({
 });
 export type UserPaginatedResponseType = z.infer<typeof UserPaginatedResponse>;
 
-const MAX_FILE_SIZE = 5000000;
+const MAX_FILE_SIZE_MB = 5;
 const ACCEPTED_IMAGE_TYPES = [
   "image/jpeg",
   "image/jpg",
@@ -91,8 +91,8 @@ export const CreateUserBody = z
     image: z
       .any()
       .refine(
-        (file) => file?.size <= MAX_FILE_SIZE || !file,
-        `Dung lượng file tối đa là 5MB!`
+        (file) => file?.size <= MAX_FILE_SIZE_MB * 1024 * 1024 || !file,
+        `Dung lượng file tối đa là ${MAX_FILE_SIZE_MB}MB!`
       )
       .refine(
         (file) => ACCEPTED_IMAGE_TYPES.includes(file?.type),

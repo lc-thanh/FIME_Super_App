@@ -23,7 +23,7 @@ import { StatisticModule } from './modules/statistic/statistic.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ isGlobal: true, cache: true }),
     UserModule,
     AuthModule,
     MailerModule.forRootAsync({

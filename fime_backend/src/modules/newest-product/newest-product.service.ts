@@ -19,6 +19,10 @@ import { extname, join } from 'path';
 import fs from 'fs/promises';
 import { NewestProductViewDto } from '@/modules/newest-product/dto/newest-product-view.dto';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import { FirebaseService } from '@/modules/firebase/firebase.service';
+import { processCover } from '@/helpers/util';
+import { FileWithMeta } from '@/common/pipes/validate-image.pipe';
+import { NEWEST_PRODUCT_IMAGE_FOLDER } from '@/configs/multer.config';
 
 @Injectable()
 export class NewestProductService {
@@ -29,7 +33,10 @@ export class NewestProductService {
     'images',
   );
 
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly firebaseService: FirebaseService,
+  ) {}
 
   async create(
     createProductDto: CreateNewestProductDto,
@@ -155,34 +162,22 @@ export class NewestProductService {
     const fileExt = extname(file.originalname);
     const fileName = `newest-product-${uniqueSuffix}${fileExt}`;
 
-    // Đường dẫn lưu file
-    const filePath = join(this.imagesUploadDirectory, fileName);
+    const meta = (file as FileWithMeta).__imageMeta;
+    // Xử lý ảnh: resize, nén,...
+    const processed = await processCover(file.buffer, meta);
 
-    // Tạo thư mục nếu chưa tồn tại
-    await fs.mkdir(this.imagesUploadDirectory, { recursive: true });
-
-    // Lưu file vào thư mục
-    await fs.writeFile(filePath, file.buffer);
+    const uploadResult = await this.firebaseService.uploadImage({
+      file: {
+        ...file,
+        buffer: processed,
+      },
+      folder: NEWEST_PRODUCT_IMAGE_FOLDER,
+      fileName,
+      isPublic: true,
+    });
 
     // Trả về đường dẫn để truy cập
-    return fileName;
-  }
-
-  async deleteImage(filename: string) {
-    // Đường dẫn tuyệt đối đến file
-    const filePath = join(this.imagesUploadDirectory, filename);
-
-    try {
-      // Kiểm tra xem file có tồn tại không
-      await fs.stat(filePath);
-      // Xóa file
-      await fs.unlink(filePath);
-      return true;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (error) {
-      // Nếu không tồn tại hoặc lỗi khác
-      return false;
-    }
+    return uploadResult.filePath;
   }
 
   findOne(id: number) {
@@ -205,7 +200,7 @@ export class NewestProductService {
     let imageName = '';
     if (updateProductDto.isImageChanged || imageToUpload) {
       if (productToUpdate.image) {
-        await this.deleteImage(productToUpdate.image);
+        await this.firebaseService.deleteImage(productToUpdate.image, true);
       }
       if (imageToUpload) {
         imageName = await this.uploadImage(imageToUpload);
@@ -257,7 +252,8 @@ export class NewestProductService {
     const deletedProduct = await this.prismaService.newestProducts.delete({
       where: { id },
     });
-    if (productToDelete.image) await this.deleteImage(productToDelete.image);
+    if (productToDelete.image)
+      await this.firebaseService.deleteImage(productToDelete.image, true);
 
     await this.prismaService.userActions.create({
       data: {

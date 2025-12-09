@@ -24,7 +24,7 @@ import NewestProductFormDialog from "@/app/(admin)/dashboard/newest-products/_co
 import { NewestProductType } from "@/schemaValidations/newest-product.schema";
 import MyPagination from "@/components/data-table/my-pagination";
 import DeleteConfirmationDialog from "@/app/(admin)/dashboard/newest-products/_components/delete-dialog";
-import { getProductImageUrl } from "@/lib/utils";
+import { getImageUrl } from "@/lib/utils";
 import { useUserRoleStore } from "@/providers/user-role-provider";
 
 export default function NewestProductsAdmin() {
@@ -119,7 +119,7 @@ export default function NewestProductsAdmin() {
               >
                 <Image
                   src={
-                    getProductImageUrl(product?.image || "") ||
+                    getImageUrl(product?.image || "") ||
                     "/newest-product/newest-product_cover.jpg"
                   }
                   alt={product.title}

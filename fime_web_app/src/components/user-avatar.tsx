@@ -1,6 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import envConfig from "@/config";
-import { cn } from "@/lib/utils";
+import { cn, getImageUrl } from "@/lib/utils";
 
 // function getFirstLetterOfLastName(fullName: string) {
 //   if (!fullName) return "";
@@ -36,16 +35,11 @@ export const UserAvatar = ({
   };
 
   const avatarSize = sizeClasses[size];
+  console.log(">>> image: ", image);
 
   return (
     <Avatar className={cn(avatarSize, className)}>
-      <AvatarImage
-        src={
-          `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/users/avatars/${image}` ||
-          ""
-        }
-        alt={`${fullname}'s avatar`}
-      />
+      <AvatarImage src={getImageUrl(image)} alt={`${fullname}'s avatar`} />
       <AvatarFallback className="bg-fimeOrangeLighter text-white">
         {getInitials(fullname)}
       </AvatarFallback>

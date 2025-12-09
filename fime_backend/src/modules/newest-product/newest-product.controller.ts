@@ -25,17 +25,42 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { User } from '@/common/decorators/user.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
+import {
+  imageFileFilter,
+  memoryStorage,
+  NEWEST_PRODUCT_IMAGE_MAX_SIZE,
+  VALID_IMAGE_MIME_TYPES,
+} from '@/configs/multer.config';
+import {
+  ValidateImageOptions,
+  ValidateImagePipe,
+} from '@/common/pipes/validate-image.pipe';
 
 @Controller('newest-products')
 export class NewestProductController {
   constructor(private readonly newestProductService: NewestProductService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: memoryStorage,
+      limits: {
+        fileSize: NEWEST_PRODUCT_IMAGE_MAX_SIZE,
+      },
+      fileFilter: imageFileFilter,
+    }),
+  )
   @Roles(Role.MANAGER)
   async create(
     @Body() createNewestProductDto: CreateNewestProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ValidateImagePipe({
+        maxBytes: NEWEST_PRODUCT_IMAGE_MAX_SIZE,
+        allowedMimes: VALID_IMAGE_MIME_TYPES,
+        allowNullFile: true,
+      } as ValidateImageOptions),
+    )
+    file: Express.Multer.File,
     @User() user: IAccessTokenPayload,
   ) {
     return {
@@ -67,12 +92,27 @@ export class NewestProductController {
   }
 
   @Put(':id')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: memoryStorage,
+      limits: {
+        fileSize: NEWEST_PRODUCT_IMAGE_MAX_SIZE,
+      },
+      fileFilter: imageFileFilter,
+    }),
+  )
   @Roles(Role.MANAGER)
   async update(
     @UuidParam() id: string,
     @Body() updateNewestProductDto: UpdateNewestProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ValidateImagePipe({
+        maxBytes: NEWEST_PRODUCT_IMAGE_MAX_SIZE,
+        allowedMimes: VALID_IMAGE_MIME_TYPES,
+        allowNullFile: true,
+      } as ValidateImageOptions),
+    )
+    file: Express.Multer.File,
     @User() user: IAccessTokenPayload,
   ) {
     return {

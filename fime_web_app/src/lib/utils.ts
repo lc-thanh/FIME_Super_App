@@ -132,17 +132,14 @@ export function objectToFormData<T extends Record<string, any>>(
   return formData;
 }
 
-export const getImageUrl = (filename?: string) => {
-  if (!filename) return undefined;
-  return `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/users/avatars/${filename}`;
-};
-
-export const getProductImageUrl = (image?: string) => {
-  if (!image) return undefined;
-  if (image.startsWith("http")) {
-    return image;
+export const getImageUrl = (filePath?: string | null) => {
+  if (!filePath) return undefined;
+  if (filePath.startsWith("http")) {
+    return filePath;
   }
-  return `${envConfig.NEXT_PUBLIC_STATIC_ENDPOINT}/newest-products/images/${image}`;
+  return `https://storage.googleapis.com/${
+    envConfig.NEXT_PUBLIC_FBS_BUCKET_NAME
+  }/${encodeURIComponent(filePath)}`;
 };
 
 export const getClientRole = () => {

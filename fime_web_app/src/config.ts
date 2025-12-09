@@ -3,19 +3,19 @@ import { z } from "zod";
 const configSchema = z.object({
   NEXT_PUBLIC_API_ENDPOINT: z.string(),
   NEXT_PUBLIC_SOCKET_URL: z.string(),
-  NEXT_PUBLIC_STATIC_ENDPOINT: z.string(),
   NEXT_PUBLIC_USER_DEFAULT_PASSWORD: z.string(),
   NEXT_PUBLIC_CLOUDFLARE_API_TOKEN: z.string(),
+  NEXT_PUBLIC_FBS_BUCKET_NAME: z.string(),
 });
 
 const configProject = configSchema.safeParse({
   NEXT_PUBLIC_API_ENDPOINT: process.env.NEXT_PUBLIC_API_ENDPOINT,
   NEXT_PUBLIC_SOCKET_URL: process.env.NEXT_PUBLIC_SOCKET_URL,
-  NEXT_PUBLIC_STATIC_ENDPOINT: process.env.NEXT_PUBLIC_STATIC_ENDPOINT,
   NEXT_PUBLIC_USER_DEFAULT_PASSWORD:
     process.env.NEXT_PUBLIC_USER_DEFAULT_PASSWORD,
   NEXT_PUBLIC_CLOUDFLARE_API_TOKEN:
     process.env.NEXT_PUBLIC_CLOUDFLARE_API_TOKEN,
+  NEXT_PUBLIC_FBS_BUCKET_NAME: process.env.NEXT_PUBLIC_FBS_BUCKET_NAME,
 });
 
 if (!configProject.success) {

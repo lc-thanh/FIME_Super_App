@@ -24,17 +24,42 @@ import { Role } from '@prisma/client';
 import { User } from '@/common/decorators/user.decorator';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 import { UserDetailsDto } from '@/modules/user/dto/user-details.dto';
+import {
+  VALID_IMAGE_MIME_TYPES,
+  imageFileFilter,
+  memoryStorage,
+  USER_AVATAR_MAX_SIZE,
+} from '@/configs/multer.config';
+import {
+  ValidateImageOptions,
+  ValidateImagePipe,
+} from '@/common/pipes/validate-image.pipe';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: memoryStorage,
+      limits: {
+        fileSize: USER_AVATAR_MAX_SIZE,
+      },
+      fileFilter: imageFileFilter,
+    }),
+  )
   @Roles(Role.ADMIN)
   async create(
     @Body() createUserDto: CreateUserDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ValidateImagePipe({
+        maxBytes: USER_AVATAR_MAX_SIZE,
+        allowedMimes: VALID_IMAGE_MIME_TYPES,
+        allowNullFile: true,
+      } as ValidateImageOptions),
+    )
+    file: Express.Multer.File,
     @User() user: IAccessTokenPayload,
   ) {
     return {
@@ -87,12 +112,27 @@ export class UserController {
   }
 
   @Put(':id')
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(
+    FileInterceptor('image', {
+      storage: memoryStorage,
+      limits: {
+        fileSize: USER_AVATAR_MAX_SIZE,
+      },
+      fileFilter: imageFileFilter,
+    }),
+  )
   @Roles(Role.ADMIN)
   async update(
     @UuidParam() id: string,
     @Body() updateUserDto: UpdateUserDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      new ValidateImagePipe({
+        maxBytes: USER_AVATAR_MAX_SIZE,
+        allowedMimes: VALID_IMAGE_MIME_TYPES,
+        allowNullFile: true,
+      } as ValidateImageOptions),
+    )
+    file: Express.Multer.File,
     @User() user: IAccessTokenPayload,
   ) {
     return {

@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Calendar, ImageUp, Loader2, Trash2 } from "lucide-react";
 import { useForm } from "react-hook-form";
-import { getProductImageUrl, handleApiError } from "@/lib/utils";
+import { getImageUrl, handleApiError } from "@/lib/utils";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -173,7 +173,7 @@ export default function NewestProductFormDialog({
                         ? imageUpload
                           ? URL.createObjectURL(imageUpload)
                           : "/login_page_cover.jpg"
-                        : getProductImageUrl(product?.image as string) ||
+                        : getImageUrl(product?.image as string) ||
                           "/login_page_cover.jpg"
                     }
                     alt="Hình ảnh xem trước"
