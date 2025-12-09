@@ -1,0 +1,72 @@
+# -----------------------------------------
+# Node / NestJS / pnpm
+# -----------------------------------------
+node_modules
+dist
+build
+.cache
+.nx
+.tmp
+temp
+
+# pnpm
+.pnpm-store
+pnpm-debug.log
+
+# prisma client output (được build lại trong Docker)
+prisma/generated
+prisma/client
+
+# -----------------------------------------
+# Environment files
+# -----------------------------------------
+.env
+.env.*
+!.env.example
+
+# -----------------------------------------
+# Logs
+# -----------------------------------------
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# -----------------------------------------
+# System / editor trash
+# -----------------------------------------
+.DS_Store
+Thumbs.db
+.vscode
+.idea
+*.swp
+*.swo
+
+# -----------------------------------------
+# Git files
+# -----------------------------------------
+.git
+.gitignore
+.gitattributes
+
+# -----------------------------------------
+# Docker
+# -----------------------------------------
+Dockerfile
+docker-compose.yml
+
+# -----------------------------------------
+# OS / temp / misc
+# -----------------------------------------
+*.out
+*.tmp
+*.temp
+*.pid
+
+# Test / coverage
+coverage
+__tests__
+test
+*.spec.ts
+*.test.ts

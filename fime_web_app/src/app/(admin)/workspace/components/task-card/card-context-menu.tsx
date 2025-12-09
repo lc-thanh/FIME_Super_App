@@ -21,8 +21,6 @@ const CardContextMenu = () => {
   const [transferCard, setTransferCard] = useState<string | null>(null);
   const [deleteCard, setDeleteCard] = useState<string | null>(null);
 
-  console.log("selectedCard", transferCard);
-
   return (
     <>
       <Popover open={!!selectedCard} onOpenChange={clearContextMenu}>

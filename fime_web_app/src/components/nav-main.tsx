@@ -11,7 +11,6 @@ import { usePathname } from "next/navigation";
 
 export function NavMain({ items }: { items: SidebarData["navMain"] }) {
   const pathname = usePathname();
-  console.log("pathname", pathname);
 
   return (
     <SidebarGroup>

@@ -35,7 +35,6 @@ export const UserAvatar = ({
   };
 
   const avatarSize = sizeClasses[size];
-  console.log(">>> image: ", image);
 
   return (
     <Avatar className={cn(avatarSize, className)}>

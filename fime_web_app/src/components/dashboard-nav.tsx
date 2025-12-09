@@ -33,7 +33,6 @@ export function DashboardNav({
   }[];
 }) {
   const pathname = usePathname();
-  console.log("pathname", pathname);
 
   return (
     <SidebarGroup>
