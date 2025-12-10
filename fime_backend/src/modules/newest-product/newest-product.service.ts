@@ -16,7 +16,6 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@/prisma.service';
 import { extname, join } from 'path';
-import fs from 'fs/promises';
 import { NewestProductViewDto } from '@/modules/newest-product/dto/newest-product-view.dto';
 import { IAccessTokenPayload } from '@/interfaces/access-token-payload.interface';
 import { FirebaseService } from '@/modules/firebase/firebase.service';
